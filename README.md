@@ -1,7 +1,7 @@
-kfs
+# kfs
 
 # Compilation
-Flages:
+Flags:
 
 	-fno-builtin			: disables the optimization that replaces standard C library function calls with specialized inline code
 	-fno-exceptions		 	: disables C++ exception handling support

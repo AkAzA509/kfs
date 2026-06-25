@@ -1,25 +1,24 @@
 # Global part
 ISO_NAME	:= kfs.iso
 BIN_NAME	:= bin/kernel
-ASM_NAME	:= bin/bootload
 BIN			:= bin/
 
 OBJDIR		:= objs/
 
 # C part
-CXX			:= gcc
+CXX			:= $(TARGET)-gcc
 CXXFLGS		:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs
-DBGFLGS		:= -g3 -fsanitize=address,leak
+DBGFLGS		:= -g3
 
-CSRC		:= sources/test_c.c
+CSRC		:= sources/kernel.c
 
 OBJC		:= $(CSRC:%.c=$(OBJDIR)%.o)
 
 # ASM part
 ASMXX		:= nasm
-ASMFLGS		:= -f elf64 -g
+ASMFLGS		:= -f elf32 -g
 LDXX		:= ld
-LDFLGS		:= -m elf_x86_64
+LDFLGS		:= -m elf_i386 -T linker.ld
 
 ASMSRC		:= bootloader/bootloader.s
 
@@ -31,8 +30,7 @@ all: $(ISO_NAME)
 $(ISO_NAME): $(OBJASM) $(OBJC)
 	mkdir -p $(BIN)
 # 	$(LDXX) $(LDFLGS) $(OBJASM) -o $(ASM_NAME) segfault car appeler directement en tant que runtime, link avec gcc = lancer depuis un runtime et ret ne segfault pas
-	$(CXX) $(OBJASM) -o $(ASM_NAME)
-	$(CXX) $(DBGFLGS) $(OBJC) -o $(BIN_NAME)
+	$(CXX) $(CXXFLGS) $(OBJASM) $(OBJC) -o $(BIN_NAME)
 
 $(OBJDIR)%.o: %.s
 	@mkdir -p $(dir $@)

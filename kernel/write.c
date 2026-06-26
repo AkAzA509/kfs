@@ -47,7 +47,7 @@ void	kwrite(const void* data, size_t size)
 	for (size_t i = 0; i < size; i++) {
 		if (tmp >= 15)
 			tmp = 0;
-		set_term_color(vga_entry_color( VGA_COLOR_BLACK, VGA_COLOR_WHITE));
+		// set_term_color(vga_entry_color( VGA_COLOR_BLACK, VGA_COLOR_WHITE));
 		// set_term_color(vga_entry_color(i % VGA_COLOR_END, VGA_COLOR_BLACK));
 		kputchar(str[i]);
 		tmp++;

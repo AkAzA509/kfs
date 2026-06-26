@@ -15,6 +15,7 @@ DBGFLGS		:= -g3
 CSRC		:= kernel/vga_color.c \
 			   kernel/kernel.c \
 			   kernel/write.c \
+			   kernel/drivers/keyboard.c \
 			   helpers/kprint/kprint.c \
 			   helpers/kprint/utils.c \
 			   helpers/kprint/convert_format.c \

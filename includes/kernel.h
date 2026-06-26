@@ -5,6 +5,8 @@
 #include "stdint.h"
 #include "../helpers/kprint/kprint.h"
 
+void	keyborad_handler();
+
 void	kwrite(const void* data, size_t size);
 void	kputchar(char c);
 void	set_term_color(u8_t color);

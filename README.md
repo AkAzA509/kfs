@@ -88,3 +88,4 @@ The kernel build uses the following compiler and linker flags:
 - `-fno-rtti`: disables Run-Time Type Information generation for classes with virtual functions.
 - `-nostdlib`: prevents the use of standard startup files and libraries during linking.
 - `-nodefaultlibs`: prevents automatic linking against the default system libraries.
+- `-T linker.ld` : The own kernel linking indication

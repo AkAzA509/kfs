@@ -57,4 +57,4 @@ dkms.conf
 *.dwo
 
 # Bootable images
-*.iso
+iso/

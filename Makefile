@@ -1,7 +1,9 @@
 # Global part
-ISO_NAME	:= kfs.iso
-BIN_NAME	:= bin/kernel
-BIN			:= bin/
+BIN			:= bin
+ISO_ROOT	:= iso
+ISO_NAME	:= $(BIN)/kfs.iso
+BIN_NAME	:= $(BIN)/kernel
+UP_DIR		:= $(BIN)/boot/grub
 
 OBJDIR		:= objs/
 
@@ -10,7 +12,15 @@ CXX			:= $(TARGET)-gcc
 CXXFLGS		:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs
 DBGFLGS		:= -g3
 
-CSRC		:= sources/kernel.c
+CSRC		:= kernel/vga_color.c \
+			   kernel/kernel.c \
+			   kernel/write.c \
+			   helpers/kprint/kprint.c \
+			   helpers/kprint/utils.c \
+			   helpers/kprint/convert_format.c \
+			   helpers/memcpy.c \
+			   helpers/memset.c \
+			   helpers/strlen.c
 
 OBJC		:= $(CSRC:%.c=$(OBJDIR)%.o)
 
@@ -18,7 +28,7 @@ OBJC		:= $(CSRC:%.c=$(OBJDIR)%.o)
 ASMXX		:= nasm
 ASMFLGS		:= -f elf32 -g
 LDXX		:= ld
-LDFLGS		:= -m elf_i386 -T linker.ld
+LDFLGS		:= -m elf_i386
 
 ASMSRC		:= bootloader/bootloader.s
 
@@ -28,9 +38,13 @@ OBJASM		:= $(ASMSRC:%.s=$(OBJDIR)%.o)
 all: $(ISO_NAME)
 
 $(ISO_NAME): $(OBJASM) $(OBJC)
-	mkdir -p $(BIN)
-# 	$(LDXX) $(LDFLGS) $(OBJASM) -o $(ASM_NAME) segfault car appeler directement en tant que runtime, link avec gcc = lancer depuis un runtime et ret ne segfault pas
-	$(CXX) $(CXXFLGS) $(OBJASM) $(OBJC) -o $(BIN_NAME)
+	@mkdir -p $(BIN)
+	$(CXX) -T linker.ld -o $(BIN_NAME) $(CXXFLGS) $(OBJASM) $(OBJC)
+	@if grub-file --is-x86-multiboot $(BIN_NAME); then \
+		echo "\033[92mmultiboot confirmed\033[0m"; \
+	else \
+		echo "\033[91mthe file is not multiboot\033[0m"; \
+	fi
 
 $(OBJDIR)%.o: %.s
 	@mkdir -p $(dir $@)
@@ -38,14 +52,28 @@ $(OBJDIR)%.o: %.s
 
 $(OBJDIR)%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CXX) $(DBGFLGS) -c $< -o $@
+	$(CXX) $(CXXFLGS) -c $< -o $@
+
+prepare_iso: all
+	@rm -rf $(ISO_ROOT)
+	@mkdir -p $(ISO_ROOT)/boot/grub
+	@cp $(BIN_NAME) $(ISO_ROOT)/boot/kernel
+	@cp grub.cfg $(ISO_ROOT)/boot/grub/grub.cfg
+	@grub-mkrescue -o $(ISO_NAME) $(ISO_ROOT)
+
+up: prepare_iso
+	@qemu-system-i386 -cdrom $(ISO_NAME)
+	
+
+dev: prepare_iso
+	@qemu-system-i386 -kernel $(ISO_ROOT)/boot/kernel
 
 clean:
 	rm -rf $(OBJDIR)
 
 fclean: clean
-	rm -rf $(BIN)
+	rm -rf $(BIN) $(ISO_ROOT)
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all up clean fclean re

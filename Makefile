@@ -1,6 +1,6 @@
 # Global part
 BIN			:= bin
-ISO_ROOT	:= iso
+BUILD_DIR	:= iso
 ISO_NAME	:= $(BIN)/kfs.iso
 BIN_NAME	:= $(BIN)/kernel
 UP_DIR		:= $(BIN)/boot/grub
@@ -14,7 +14,7 @@ DBGFLGS		:= -g3
 
 CSRC		:= kernel/vga_color.c \
 			   kernel/kernel.c \
-			   kernel/write.c \
+			   kernel/kwrite.c \
 			   kernel/drivers/keyboard.c \
 			   helpers/kprint/kprint.c \
 			   helpers/kprint/utils.c \
@@ -56,24 +56,24 @@ $(OBJDIR)%.o: %.c
 	$(CXX) $(CXXFLGS) -c $< -o $@
 
 prepare_iso: all
-	@rm -rf $(ISO_ROOT)
-	@mkdir -p $(ISO_ROOT)/boot/grub
-	@cp $(BIN_NAME) $(ISO_ROOT)/boot/kernel
-	@cp grub.cfg $(ISO_ROOT)/boot/grub/grub.cfg
-	@grub-mkrescue -o $(ISO_NAME) $(ISO_ROOT)
+	@rm -rf $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)/boot/grub
+	@cp $(BIN_NAME) $(BUILD_DIR)/boot/kernel
+	@cp grub.cfg $(BUILD_DIR)/boot/grub/grub.cfg
+	@grub-mkrescue -o $(ISO_NAME) $(BUILD_DIR)
 
 up: prepare_iso
-	@qemu-system-i386 -cdrom $(ISO_NAME)
+	@qemu-system-i386 -cdrom $(BUILD_DIR)
 	
 
 dev: prepare_iso
-	@qemu-system-i386 -kernel $(ISO_ROOT)/boot/kernel
+	@qemu-system-i386 -kernel $(BUILD_DIR)/boot/kernel
 
 clean:
 	rm -rf $(OBJDIR)
 
 fclean: clean
-	rm -rf $(BIN) $(ISO_ROOT)
+	rm -rf $(BIN) $(BUILD_DIR)
 
 re: fclean all
 

@@ -3,7 +3,7 @@
 
 void set_term_color(u8_t color)
 {
-	terminal_color = color;
+	t_color = color;
 }
 
 // Put the background color into the 4 upper bits and the font color into the 4 lower bits

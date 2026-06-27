@@ -16,10 +16,12 @@ static inline u8_t inb(u16_t port)
 	return val;
 }
 
+// duplicate function into ../kwrite.c need to factorize the code
 // write 1 byte in the port
 static inline void outb(u16_t port, u8_t val)
 {
-	// outb = write from a hardware port
+	// outb = write into a hardware port
+	// place the input 'a' into val, send to 'Nd'=port
 	__asm__ volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
 }
 
@@ -51,7 +53,7 @@ static void	handle_scancode(u8_t code)
 	kputchar(val);
 }
 
-void	keyborad_handler()
+void	keyboard_handler()
 {
 	while (1)
 	{

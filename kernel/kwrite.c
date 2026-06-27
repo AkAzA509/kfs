@@ -1,14 +1,18 @@
 #include "../includes/stddef.h"
 #include "kernel_internal.h"
 
+// duplicate function into drivers/keyboard.c need to factorize the code
+// write 1 byte in the port
 static inline void outb(u16_t port, u8_t val)
 {
+	// outb = write into a hardware port
+	// place the input 'a' into val, send to 'Nd'=port
 	__asm__ volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
 }
 
 void set_cursor(int x, int y)
 {
-	u16_t pos = y * 80 + x;  // 80 colonnes par ligne
+	u16_t pos = y * VGA_WIDTH + x;
 
 	outb(0x3D4, 0x0F);
 	outb(0x3D5, (u8_t)(pos & 0xFF));
@@ -16,27 +20,27 @@ void set_cursor(int x, int y)
 	outb(0x3D5, (u8_t)((pos >> 8) & 0xFF));
 }
 
-static void	terminal_putentryat(char c, u8_t color, size_t x, size_t y)
+void	send_char_to_vga(char c, u8_t color, size_t x, size_t y)
 {
 	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = vga_entry(c, color);
+	t_buffer[index] = vga_entry(c, color);
 }
 
 void	kputchar(char c)
 {
 	if (c == '\n') {
-		terminal_row++;
-		terminal_column = 0;
+		t_row++;
+		t_column = 0;
 	}
 	else {
-		terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-		if (++terminal_column == VGA_WIDTH) {
-			terminal_column = 0;
-			if (++terminal_row == VGA_HEIGHT)
-				terminal_row = 0;
+		send_char_to_vga(c, t_color, t_column, t_row);
+		if (++t_column == VGA_WIDTH) {
+			t_column = 0;
+			if (++t_row == VGA_HEIGHT)
+				t_row = 0;
 		}
 	}
-	set_cursor(terminal_column, terminal_row);
+	set_cursor(t_column, t_row);
 }
 
 void	kwrite(const void* data, size_t size)

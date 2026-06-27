@@ -74,11 +74,12 @@ static int	kprint_internal(int fd, const char *str, va_list *ap)
 
 int	kprint(const char *str, ...)
 {
-	va_list	ap;
 	int		total_len;
+	va_list	ap;
 
 	va_start(ap, str);
 	total_len = kprint_internal(1, str, &ap);
 	va_end(ap);
+
 	return total_len;
 }

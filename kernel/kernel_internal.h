@@ -14,7 +14,7 @@ extern size_t	t_column;
 extern u8_t		t_color;
 extern u16_t*	t_buffer;
 
-/* Hardware text mode color constants. */
+// Hardware text mode color constants
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE = 1,

@@ -89,3 +89,13 @@ The kernel build uses the following compiler and linker flags:
 - `-nostdlib`: prevents the use of standard startup files and libraries during linking.
 - `-nodefaultlibs`: prevents automatic linking against the default system libraries.
 - `-T linker.ld` : The own kernel linking indication
+
+## Documentations and ressources
+- Fundamental Concepts and Structure of the Linux Kernel (old version v2.4.20) [here](https://www.irif.fr/~carton/Enseignement/Architecture/Cours/Virtual/linux.pdf)
+- Some real linux kernel docs [here](https://www.kernel.org/)
+- The OSdev documentations and guide [here](https://wiki.osdev.org/Expanded_Main_Page)
+- Writing a Tiny x86 Bootloader in assembly [here](https://www.joe-bergeron.com/posts/Writing%20a%20Tiny%20x86%20Bootloader/)
+- Operating Systems: From 0 to 1 by tuhdo [here](https://github.com/tuhdo/os01/tree/master)
+- The little book about OS development by Erik Helin, Adam Renberg [here](https://littleosbook.github.io/)
+- Kernels 101 – Let’s write a Kernel by Arjun Sreedharan [here](https://arjunsreedharan.org/post/82710718100/kernels-101-lets-write-a-kernel)
+- Kernels 201 - Let’s write a Kernel with keyboard and screen support [here](https://arjunsreedharan.org/post/99370248137/kernels-201-lets-write-a-kernel-with-keyboard)

@@ -1,7 +1,8 @@
-#include "../../includes/stdint.h"
+#include "../includes/stdint.h"
+#include "kernel_internal.h"
 
 // read 1 byte from port
-static inline u8_t inb(u16_t port)
+inline u8_t inb(u16_t port)
 {
 	u8_t val;
 
@@ -12,7 +13,7 @@ static inline u8_t inb(u16_t port)
 }
 
 // write 1 byte in port
-static inline void outb(u16_t port, u8_t val)
+inline void outb(u16_t port, u8_t val)
 {
 	// outb = write into a hardware port
 	// place the input 'a' into val, send to 'Nd'=port

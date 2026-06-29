@@ -3,6 +3,7 @@
 
 #include "stddef.h"
 #include "stdint.h"
+#include "../helpers/helpers.h"
 
 void	keyboard_handler();
 

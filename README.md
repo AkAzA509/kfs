@@ -90,6 +90,38 @@ The kernel build uses the following compiler and linker flags:
 - `-nodefaultlibs`: prevents automatic linking against the default system libraries.
 - `-T linker.ld` : The own kernel linking indication
 
+## Multiboot
+
+C'est quoi un header multiboot ?
+Quand GRUB cherche ton kernel sur le disque, il lit les premiers 8Ko du fichier et cherche le nombre magique 0x1BADB002 for (multiboot 1). Quand il le trouve, il sait que c'est un kernel multiboot et il lit les 3 fields de 32-bit qui suivent :
+```text
+field 1 : le magic number  (pour que GRUB reconnaisse le kernel)
+field 2 : les flags        (pour dire à GRUB ce qu'on veut)
+field 3 : le checksum      (pour vérifier que c'est pas corrompu)
+```
+
+C'est quoi les flags ?
+C'est un entier 32-bit où chaque bit est un interrupteur on/off :
+```text
+bit 0 = 1  →  aligne les modules sur des pages mémoire
+bit 1 = 1  →  donne nous la memory map
+bit 2 = 1  →  on veut choisir le mode vidéo (framebuffer !)
+...
+```
+Quand le bit 2 est à 1
+GRUB dit "ah il veut choisir le mode vidéo — donc juste après le checksum dans le header il doit y avoir des infos supplémentaires". Il s'attend à lire 8 fields de 32-bit supplémentaires dans l'ordre :
+```text
+field 4 : header_addr   (adresse du header, on met 0)
+field 5 : load_addr     (où charger le kernel, on met 0)
+field 6 : load_end_addr (fin du kernel, on met 0)
+field 7 : bss_end_addr  (fin du bss, on met 0)
+field 8 : entry_addr    (point d'entrée, on met 0)
+field 9 : mode_type     (0=palette, 1=RGB, 2=texte)
+field 10: width         (largeur en pixels)
+field 11: height        (hauteur en pixels)
+field 12: depth         (bits par pixel)
+```
+
 ## Documentations and ressources
 - Fundamental Concepts and Structure of the Linux Kernel (old version v2.4.20) [here](https://www.irif.fr/~carton/Enseignement/Architecture/Cours/Virtual/linux.pdf)
 - Some real linux kernel docs [here](https://www.kernel.org/)

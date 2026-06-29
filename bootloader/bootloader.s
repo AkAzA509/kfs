@@ -1,10 +1,11 @@
 ; Declare constants for the multiboot header.
-MBALIGN  equ  1 << 0									; align loaded modules on page boundaries
-MEMINFO  equ  1 << 1									; provide memory map
-MBFLAGS  equ  MBALIGN | MEMINFO 						; this is the Multiboot 'flag' field
-MAGIC    equ  0x1BADB002								; 'magic number' lets bootloader find the header
-CHECKSUM equ -(MAGIC + MBFLAGS) 						; checksum of above, to prove we are multiboot
-														; CHECKSUM + MAGIC + MBFLAGS should be Zero (0)
+MBALIGN		equ 1 << 0						; align loaded modules on page boundaries
+MEMINFO		equ 1 << 1						; provide memory map
+VIDMOD		equ 1 << 2						; Flag to ask for a framebuffer (0=vga, 1=framebuffer)
+MBFLAGS		equ MBALIGN | MEMINFO | VIDMOD	; this is the Multiboot 'flag' field
+MAGIC		equ 0x1BADB002					; 'magic number' lets bootloader find the header
+CHECKSUM	equ -(MAGIC + MBFLAGS) 			; checksum of above, to prove we are multiboot
+											; CHECKSUM + MAGIC + MBFLAGS should be Zero (0)
 
 ; Declare a multiboot header that marks the program as a kernel. These are magic
 ; values that are documented in the multiboot standard. The bootloader will
@@ -16,6 +17,15 @@ align 4
 	dd MAGIC
 	dd MBFLAGS
 	dd CHECKSUM
+	dd 0									; framebuffer_field 4 header_addr
+	dd 0									; framebuffer_field 5 load_addr
+	dd 0									; framebuffer_field 6 load_end_addr
+	dd 0									; framebuffer_field 7 bss_end_addr
+	dd 0									; framebuffer_field 8 entry_addr
+	dd 1									; framebuffer_field 9 mode_type = RGB direct
+	dd 800									; framebuffer_field 10 width
+	dd 600									; framebuffer_field 11 height
+	dd 32									; framebuffer_field 12 depth = 32 bits par pixel
 
 ; The multiboot standard does not define the value of the stack pointer register
 ; (esp) and it is up to the kernel to provide a stack. This allocates room for a
@@ -30,8 +40,15 @@ align 4
 section .bss
 align 16
 stack_bottom:
-resb 16384												; 16 KiB is reserved for stack
+resb 16384									; 16 KiB is reserved for stack
 stack_top:
+
+; This section load the font file for the framebuffer and the glyphs
+section .rodata
+global font_data
+font_data:
+	incbin "fonts/Lat15-VGA16.psf"			; add the binairie into the kernel blob with
+											; the font_data name, that we can retreive in the c
 
 ; The linker script specifies _start as the entry point to the kernel and the
 ; bootloader will jump to this position once the kernel has been loaded. It
@@ -65,6 +82,9 @@ _start:
 	; C++ features such as global constructors and exceptions will require
 	; runtime support to work as well.
 
+	push 0									; send 0 in the stack
+	popf									; put the 0 into the eflags register to clean it
+
 	; Enter the high-level kernel. The ABI requires the stack is 16-byte
 	; aligned at the time of the call instruction (which afterwards pushes
 	; the return pointer of size 4 bytes). The stack was originally 16-byte
@@ -72,6 +92,9 @@ _start:
 	; stack since (pushed 0 bytes so far) and the alignment is thus
 	; preserved and the call is well defined.
 	; note, that if you are building on Windows, C functions may have "_" prefix in assembly: _kernel_main
+	push ebx								; framebuffer ptr
+	push eax								; magic number useless just for comprehension
+	
 	extern kernel_main
 	call kernel_main
 

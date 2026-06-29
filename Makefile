@@ -15,6 +15,7 @@ DBGFLGS		:= -g3
 CSRC		:= kernel/vga_color.c \
 			   kernel/kernel.c \
 			   kernel/kwrite.c \
+			   kernel/io.c \
 			   kernel/drivers/keyboard.c \
 			   helpers/kprint/kprint.c \
 			   helpers/kprint/utils.c \
@@ -63,7 +64,7 @@ prepare_iso: all
 	@grub-mkrescue -o $(ISO_NAME) $(BUILD_DIR)
 
 up: prepare_iso
-	@qemu-system-i386 -cdrom $(BUILD_DIR)
+	@qemu-system-i386 -cdrom $(ISO_NAME)
 	
 
 dev: prepare_iso

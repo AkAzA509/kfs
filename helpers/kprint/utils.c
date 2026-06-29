@@ -1,5 +1,12 @@
 #include "../../includes/kernel.h"
 
+int	ft_putchar(int fd, char c)
+{
+	(void)fd;
+	kputchar(c);
+	return 1;
+}
+
 int	convert_hexa(int fd, unsigned long nb, char format)
 {
 	int	i = 0;
@@ -15,11 +22,4 @@ int	convert_hexa(int fd, unsigned long nb, char format)
 			i += ft_putchar(fd, "0123456789abcdef"[nb % 16]);
 	}
 	return i;
-}
-
-int	ft_putchar(int fd, char c)
-{
-	(void)fd;
-	kputchar(c);
-	return 1;
 }

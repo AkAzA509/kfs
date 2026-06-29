@@ -35,9 +35,16 @@ enum vga_color {
 	VGA_COLOR_END
 };
 
+// Buffer and color
+
 u8_t	vga_entry_color(enum vga_color fg, enum vga_color bg);
 void	send_char_to_vga(char c, u8_t color, size_t x, size_t y);
 u16_t	vga_entry(unsigned char uc, u8_t color);
 void	set_term_color(u8_t color);
+
+// I/O
+
+void outb(u16_t port, u8_t val);
+u8_t inb(u16_t port);
 
 #endif // KERNEL_INTERNAL_H

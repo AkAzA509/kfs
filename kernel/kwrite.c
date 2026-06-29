@@ -1,15 +1,6 @@
 #include "../includes/stddef.h"
 #include "kernel_internal.h"
 
-// duplicate function into drivers/keyboard.c need to factorize the code
-// write 1 byte in the port
-static inline void outb(u16_t port, u8_t val)
-{
-	// outb = write into a hardware port
-	// place the input 'a' into val, send to 'Nd'=port
-	__asm__ volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
-}
-
 void set_cursor(int x, int y)
 {
 	u16_t pos = y * VGA_WIDTH + x;

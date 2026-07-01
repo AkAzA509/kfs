@@ -58,3 +58,4 @@ dkms.conf
 
 # Bootable images
 iso/
+iso_debug/

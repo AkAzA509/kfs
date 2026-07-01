@@ -53,7 +53,7 @@ make install
 - `--with-sysroot` enables sysroot support and points the toolchain to an empty default root for target files.
 - `--disable-nls` disables native language support, which reduces dependencies and keeps diagnostics in English.
 - `--disable-werror` prevents warnings from being treated as errors during the build.
-- `--enable-default-execstack=no` disables executable stacks by default for the generated objects and binaries.
+- `--enable-default-execstack=no` disables executable stacks by default for the generated objects and binary.
 
 ### GCC
 ```bash

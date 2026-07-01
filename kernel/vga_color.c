@@ -1,12 +1,12 @@
 #include "../includes/stdint.h"
-#include "kernel_internal.h"
+#include "display.h"
 
 void set_term_color(u8_t color)
 {
-	t_color = color;
+	g_display.color = color;
 }
 
-// Put the background color into the 4 upper bits and the font color into the 4 lower bits
+// Put the background color into the 4 upper bits and the foreground color into the 4 lower bits
 inline u8_t vga_entry_color(enum vga_color fg, enum vga_color bg)
 {
 	return fg | bg << 4;

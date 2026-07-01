@@ -17,14 +17,14 @@ align 4
 	dd MAGIC
 	dd MBFLAGS
 	dd CHECKSUM
-	dd 0									; framebuffer_field 4 header_addr
-	dd 0									; framebuffer_field 5 load_addr
-	dd 0									; framebuffer_field 6 load_end_addr
-	dd 0									; framebuffer_field 7 bss_end_addr
-	dd 0									; framebuffer_field 8 entry_addr
-	dd 0									; framebuffer_field 9 mode_type = RGB direct
-	dd 800									; framebuffer_field 10 width
-	dd 600									; framebuffer_field 11 height
+	dd 0									; 4 header_addr
+	dd 0									; 5 load_addr
+	dd 0									; 6 load_end_addr
+	dd 0									; 7 bss_end_addr
+	dd 0									; 8 entry_addr
+	dd 1									; 9 wish mode 0=framebuffer 1=VGA
+	dd 1680									; framebuffer_field 10 width
+	dd 1000									; framebuffer_field 11 height
 	dd 32									; framebuffer_field 12 depth = 32 bits par pixel
 
 ; The multiboot standard does not define the value of the stack pointer register
@@ -47,7 +47,7 @@ stack_top:
 section .rodata
 global font_data
 font_data:
-	incbin "fonts/Lat15-VGA16.psf"			; add the binairie into the kernel blob with
+	incbin "fonts/Lat15-VGA16.psf"			; add the binary into the kernel blob with
 											; the font_data name, that we can retreive in the c
 
 ; The linker script specifies _start as the entry point to the kernel and the

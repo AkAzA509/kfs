@@ -1,5 +1,5 @@
 #include "../includes/stdint.h"
-#include "kernel_internal.h"
+#include "kernel.h"
 
 // read 1 byte from port
 inline u8_t inb(u16_t port)

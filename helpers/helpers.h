@@ -3,7 +3,6 @@
 
 #include "../includes/stddef.h"
 
-int		kprint(const char *format, ...);
 size_t	strlen(const char* str);
 void	*memset(void *ptr, int c, size_t len);
 void	*memcpy(void *dst, const void *src, size_t len);

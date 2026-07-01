@@ -1,8 +1,8 @@
-#include "../includes/stddef.h"
-// #include "../includes/kernel.h"
-#include "../includes/fonts.h"
+#include "../helpers/kprint/kprint.h"
+#include "drivers/keyboard.h"
 #include "multiboot.h"
-#include "kernel_internal.h"
+#include "display.h"
+#include "terminal.h"
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -16,57 +16,36 @@
 
 #define CHECK_FLAG(flags, bit)	((flags) & (1 << (bit)))
 
-size_t	t_row;
-size_t	t_column;
-u8_t	t_color;
-volatile u32_t*	t_buffer;
+t_display g_display;
 
-void init_term(void)
+static void	init_ctx(multiboot_info *mbi, unsigned long magic)
 {
-	t_row = 0;
-	t_column = 0;
-	
-	PSF1_Header font_header = {
-		.characterSize = font_data[3],
-		.fontMode = font_data[2],
-		.magic = (font_data[1] << 8) | font_data[0]
-	};
-	
-	if (font_header.characterSize != 16)
+	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+		kprint("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);
 		return ;
+	}
 
-	// t_color = vga_entry_color(VGA_COLOR_GREEN, VGA_COLOR_BLACK);
-	
-	// for (size_t y = 0; y < VGA_HEIGHT; y++) {
-		// for (size_t x = 0; x < VGA_WIDTH; x++) {
-			// t_color = vga_entry_color(y % VGA_COLOR_END, (x + y) % VGA_COLOR_END);
-			// const size_t index = y * VGA_WIDTH + x;
-			// t_buffer[index] = vga_entry(' ', t_color);
-			// send_char_to_vga(' ', t_color, x, y);
-		// }
-	// }
-	// set_cursor(0, 0);
-	for (size_t i = 0; i < MAX_COL * MAX_LINE * 2; ++i)
-		*(t_buffer + i) = 0;
+	init_display(mbi);
+	init_term();
 }
 
 void kernel_main(unsigned long magic, unsigned long addr)
 {
 	multiboot_info	*mbi = (multiboot_info *)addr;
-	
-	t_buffer = (volatile u32_t *)(u32_t)mbi->framebuffer_addr;
 
+	init_ctx(mbi, magic);
+	#ifdef DEBUG
+		debug_diplay();
+	#endif
 
-	// outb(0x3F8, '0' + mbi->framebuffer_type);
-	// kprint("vbe_mode type %x\n", mbi->vbe_mode);
-	// kprint("type  %d\n", mbi->framebuffer_type);
-	// kprint("height  %d\n", mbi->framebuffer_height);
-	// kprint("width  %d\n", mbi->framebuffer_width);
-	// kprint("bpp  %d\n", mbi->framebuffer_bpp);
-	// kprint("pitch  %d\n", mbi->framebuffer_pitch);
-	// kprint("addr  %p\n", mbi->framebuffer_addr);
-	// init_term();
+	// kprint("size int: %zu, size u32_t:%zu\n", sizeof(int), sizeof(u32_t));
 	
+	if (g_display.mode == DISPLAY_VGA)
+		keyboard_handler();
+}
+
+// void multibootfunctest()
+// {
 	// if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
 	// 	kprint("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);
 	// 	return ;
@@ -206,6 +185,4 @@ void kernel_main(unsigned long magic, unsigned long addr)
 	// 		}
 	// 	}
 	// }
-	
-	// keyboard_handler();
-}
+// }

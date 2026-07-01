@@ -1,5 +1,5 @@
 #include "../includes/stddef.h"
-#include "../includes/kernel.h"
+// #include "../includes/kernel.h"
 #include "../includes/fonts.h"
 #include "multiboot.h"
 #include "kernel_internal.h"
@@ -19,7 +19,7 @@
 size_t	t_row;
 size_t	t_column;
 u8_t	t_color;
-volatile u8_t*	t_buffer = (u8_t *)SCREEN;
+volatile u32_t*	t_buffer;
 
 void init_term(void)
 {
@@ -54,14 +54,18 @@ void kernel_main(unsigned long magic, unsigned long addr)
 {
 	multiboot_info	*mbi = (multiboot_info *)addr;
 	
-	init_term();
-	kprint("vbe_mode type %x\n", mbi->vbe_mode);
-	kprint("type  %d\n", mbi->framebuffer_type);
-	kprint("height  %d\n", mbi->framebuffer_height);
-	kprint("width  %d\n", mbi->framebuffer_width);
-	kprint("bpp  %d\n", mbi->framebuffer_bpp);
-	kprint("pitch  %d\n", mbi->framebuffer_pitch);
-	kprint("addr  %p\n", mbi->framebuffer_addr);
+	t_buffer = (volatile u32_t *)(u32_t)mbi->framebuffer_addr;
+
+
+	// outb(0x3F8, '0' + mbi->framebuffer_type);
+	// kprint("vbe_mode type %x\n", mbi->vbe_mode);
+	// kprint("type  %d\n", mbi->framebuffer_type);
+	// kprint("height  %d\n", mbi->framebuffer_height);
+	// kprint("width  %d\n", mbi->framebuffer_width);
+	// kprint("bpp  %d\n", mbi->framebuffer_bpp);
+	// kprint("pitch  %d\n", mbi->framebuffer_pitch);
+	// kprint("addr  %p\n", mbi->framebuffer_addr);
+	// init_term();
 	
 	// if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
 	// 	kprint("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);

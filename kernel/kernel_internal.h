@@ -13,7 +13,7 @@
 extern size_t	t_row;
 extern size_t	t_column;
 extern u8_t		t_color;
-extern volatile u8_t*	t_buffer;
+extern volatile u32_t*	t_buffer;
 
 // Hardware text mode color constants
 enum vga_color {

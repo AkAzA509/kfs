@@ -22,7 +22,7 @@ align 4
 	dd 0									; framebuffer_field 6 load_end_addr
 	dd 0									; framebuffer_field 7 bss_end_addr
 	dd 0									; framebuffer_field 8 entry_addr
-	dd 1									; framebuffer_field 9 mode_type = RGB direct
+	dd 0									; framebuffer_field 9 mode_type = RGB direct
 	dd 800									; framebuffer_field 10 width
 	dd 600									; framebuffer_field 11 height
 	dd 32									; framebuffer_field 12 depth = 32 bits par pixel

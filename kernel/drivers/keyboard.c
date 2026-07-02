@@ -1,7 +1,7 @@
-#include "keyboard.h"
-#include "../kernel.h"
-#include "../terminal.h"
 #include "../../includes/stdbool.h"
+#include "../../helpers/helpers.h"
+#include "../kernel.h"
+#include "keyboard.h"
 
 static const u8_t RELEASE_MSK = 0x80;
 static const u8_t LEFT_SHIFT = 0x2A;
@@ -64,10 +64,10 @@ void	keyboard_handler()
 {
 	while (1)
 	{
-		// 0x64 register the status of the port (ready or not, busy ...)
+		// 0x64 register give the port's status (ready or not, busy ...)
 		if (inb(0x64) & 0x01)
 		{
-			u8_t scancode = inb(0x60);
+			u8_t scancode = inb(0x60); // 0x60 register give the data (key press)
 			handle_scancode(scancode);
 		}
 	}

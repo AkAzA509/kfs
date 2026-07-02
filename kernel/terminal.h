@@ -3,7 +3,6 @@
 
 #include "../includes/stddef.h"
 
-void	kwrite(const void *data, size_t size);
-void	kputchar(char c);
+void	update_cursor();
 
 #endif // TERMINAL_H

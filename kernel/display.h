@@ -43,12 +43,19 @@ typedef struct {
 
 #define PSF_FONT_MAGIC 0x864ab572
 
+#define FB_MAX_WIDTH 1680
+#define FB_MAX_HEIGHT 1000
+#define FB_BACK_BUFFER_PIXELS (FB_MAX_WIDTH * FB_MAX_HEIGHT)
+
 #if VIDEO_MODE == MODE_FRAMEBUFFER
 extern PSF1_Header font_header;
 #endif
 typedef struct s_display {
-	volatile u16_t	*vga_buf;
-	volatile u32_t	*fb_buf;
+	union {
+		volatile u16_t	*vga_buf;
+		volatile u32_t	*fb_buf;
+	} buf;
+	u32_t			*back_buf;
 	size_t			col;
 	size_t			row;
 	int				mode;
@@ -60,7 +67,6 @@ typedef struct s_display {
 }					t_display;
 
 extern t_display	g_display;
-
 #define DISPLAY_VGA	0
 #define DISPLAY_FB	1
 

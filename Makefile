@@ -16,10 +16,10 @@ CXX					:= $(TARGET)-gcc
 CXXFLAGS			:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Iinclude
 DBGFLAGS			:= -DDEBUG=1
 
-CSRC				:= kernel/vga_color.c kernel/kernel.c kernel/kwrite.c kernel/io.c kernel/display.c \
+CSRC				:= kernel/vga_color.c kernel/kernel.c kernel/printer.c kernel/io.c kernel/display.c \
 					   kernel/drivers/keyboard.c \
 					   helpers/kprint/kprint.c helpers/kprint/utils.c helpers/kprint/convert_format.c \
-					   helpers/memcpy.c helpers/memset.c helpers/strlen.c
+					   helpers/memcpy.c helpers/memset.c helpers/strlen.c helpers/kputchar.c helpers/kwrite.c
 
 OBJC				:= $(CSRC:%.c=$(OBJDIR)%.o)
 DEBUG_OBJC			:= $(CSRC:%.c=$(DEBUG_OBJDIR)%.o)

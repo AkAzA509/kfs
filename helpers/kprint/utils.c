@@ -1,4 +1,4 @@
-#include "../../kernel/terminal.h"
+#include "../helpers.h"
 
 int	ft_putchar(int fd, char c)
 {

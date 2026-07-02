@@ -1,10 +1,24 @@
-#include "../includes/fonts.h"
 #include "../includes/config.h"
+#include "../helpers/helpers.h"
 #include "terminal.h"
 #include "kernel.h"
 #include "display.h"
 
+// Put the background color into the 4 upper bits and the foreground color into the 4 lower bits
+inline u8_t vga_entry_color(enum vga_color fg, enum vga_color bg)
+{
+	return fg | bg << 4;
+}
+
+// add the char and the color bytes prepared by vga_entry_color()
+inline u16_t vga_entry(unsigned char uc, u8_t color)
+{
+	return (u16_t) uc | (u16_t) color << 8;
+}
+
+// ===== VGA mode ===== //
 #if VIDEO_MODE == MODE_VGA
+
 void set_cursor(int x, int y)
 {
 	u16_t pos = y * g_display.width + x;
@@ -18,7 +32,7 @@ void set_cursor(int x, int y)
 static void	send_char_to_vga(char c, u8_t color, size_t x, size_t y)
 {
 	const size_t index = y * g_display.width + x;
-	g_display.vga_buf[index] = vga_entry(c, color);
+	g_display.buf.vga_buf[index] = vga_entry(c, color);
 }
 
 void putchar_vga(char c)
@@ -41,7 +55,21 @@ void putchar_vga(char c)
 }
 #endif
 
+// ===== Framebuffer mode, glyph drawing ===== //
 #if VIDEO_MODE == MODE_FRAMEBUFFER
+
+static void swap_rect(u32_t x, u32_t y, u32_t width, u32_t height)
+{
+	u32_t *front = (u32_t *)(u32_t)g_display.buf.fb_buf;
+	u32_t *back = g_display.back_buf;
+	const size_t front_stride = g_display.pitch / sizeof(u32_t);
+
+	for (u32_t row = 0; row < height; ++row) {
+		u32_t *dst = front + (y + row) * front_stride + x;
+		u32_t *src = back + (y + row) * g_display.width + x;
+		memcpy(dst, src, width * sizeof(u32_t));
+	}
+}
 
 static u32_t	vga_color_to_rgb(enum vga_color color)
 {
@@ -55,6 +83,14 @@ static u32_t	vga_color_to_rgb(enum vga_color color)
 	return palette[(u8_t)color & 0x0F];
 }
 
+static void draw_cursor(int cx, int cy, u32_t color)
+{
+	// dessine un rectangle de 8x2 pixels en bas du caractère
+	for (int x = cx * 8; x < cx * 8 + 8; x++)
+		for (int y = cy * 16 + 14; y < cy * 16 + 16; y++)
+			((u32_t*)(u32_t)g_display.buf.fb_buf)[y * g_display.pitch / 4 + x] = color;
+}
+
 #define pixel u32_t
 
 static void draw_glyph(const u32_t font_width, const u32_t font_height, const u32_t cols, const u32_t rows, u32_t fg, u32_t bg, char c)
@@ -62,7 +98,9 @@ static void draw_glyph(const u32_t font_width, const u32_t font_height, const u3
 	const u32_t	bytes_per_glyph = font_height;
 	u32_t	glyph_index;
 	u8_t	*glyph;
-	u8_t	*fb;
+	u32_t	*fb;
+	const u32_t origin_x = g_display.col * font_width;
+	const u32_t origin_y = g_display.row * font_height;
 	if (fg == 0 || bg == 0) {
 		fg = vga_color_to_rgb((enum vga_color)(g_display.color & 0x0F));
 		bg = vga_color_to_rgb((enum vga_color)((g_display.color >> 4) & 0x0F));
@@ -72,12 +110,11 @@ static void draw_glyph(const u32_t font_width, const u32_t font_height, const u3
 	if (!(font_header.mode & 1) && glyph_index > 255)
 		glyph_index = 0;
 
-	glyph = font_data + 4 + glyph_index * bytes_per_glyph; // rse positione au 1er bit du char a dessiner start + 4 (header) index * (16 * 8)(le nombre de bit du char)
-	fb = (u8_t *)g_display.fb_buf;
+	glyph = font_data + 4 + glyph_index * bytes_per_glyph; // se positione au 1er bit du char a dessiner start + 4 (header) index * (16 * 8)(le nombre de bit du char)
+	fb = g_display.back_buf;
 	for (u32_t y = 0; y < font_height; ++y) {
 		u8_t bits = glyph[y];
-		u32_t *dst = (u32_t *)(fb + ((g_display.row * font_height + y) * g_display.pitch)
-				+ (g_display.col * font_width * sizeof(u32_t)));
+		u32_t *dst = fb + ((origin_y + y) * g_display.width) + origin_x;
 		for (u32_t x = 0; x < font_width; ++x)
 			dst[x] = (bits & (0x80 >> x)) ? fg : bg;
 	}
@@ -86,6 +123,7 @@ static void draw_glyph(const u32_t font_width, const u32_t font_height, const u3
 		if (++g_display.row >= rows)
 			g_display.row = 0;
 	}
+	swap_rect(origin_x, origin_y, font_width, font_height);
 }
 
 void	putchar_framebuffer(char c, u32_t fg, u32_t bg)
@@ -101,6 +139,7 @@ void	putchar_framebuffer(char c, u32_t fg, u32_t bg)
 		g_display.col = 0;
 		if (++g_display.row >= rows)
 			g_display.row = 0;
+		draw_cursor(g_display.col, g_display.row, 0xFFFFFF);
 		return ;
 	}
 	if (c == '\t') {
@@ -110,32 +149,20 @@ void	putchar_framebuffer(char c, u32_t fg, u32_t bg)
 			if (++g_display.row >= rows)
 				g_display.row = 0;
 		}
+		draw_cursor(g_display.col, g_display.row, 0xFFFFFF);
 		return ;
 	}
 	draw_glyph(font_width, font_height, cols, rows, fg, bg, c);
+	draw_cursor(g_display.col, g_display.row, 0xFFFFFF);
 }
 #endif
 
-void	kputchar(char c)
+// ===== Public API ===== //
+void	update_cursor()
 {
-#if VIDEO_MODE == MODE_FRAMEBUFFER
-	putchar_framebuffer(c, 0, 0);
-#else
-	putchar_vga(c);
-#endif
-}
-
-void	kwrite(const void* data, size_t size)
-{
-	int tmp = 0;
-	const char *str = data;
-
-	for (size_t i = 0; i < size; i++) {
-		if (tmp >= 15)
-			tmp = 0;
-		// set_term_color(vga_entry_color( VGA_COLOR_BLACK, VGA_COLOR_WHITE));
-		// set_term_color(vga_entry_color(i % VGA_COLOR_END, VGA_COLOR_BLACK));
-		kputchar(str[i]);
-		tmp++;
-	}
+	#if VIDEO_MODE == MODE_FRAMEBUFFER
+		draw_cursor(g_display.col, g_display.row, 0xFFFFFF);
+	#else
+		set_cursor(g_display.col, g_display.row);
+	#endif
 }

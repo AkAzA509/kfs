@@ -67,7 +67,7 @@ static void swap_rect(u32_t x, u32_t y, u32_t width, u32_t height)
 	for (u32_t row = 0; row < height; ++row) {
 		u32_t *dst = front + (y + row) * front_stride + x;
 		u32_t *src = back + (y + row) * g_display.width + x;
-		memcpy(dst, src, width * sizeof(u32_t));
+		memcpy(dst, src, width * sizeof(u32_t)); // todo remove this function 
 	}
 }
 

@@ -1,39 +1,43 @@
 # Global part
-BIN			:= bin
-BUILD_DIR	:= iso
-ISO_NAME	:= $(BIN)/kfs.iso
-BIN_NAME	:= $(BIN)/kernel
-DEBUG_NAME	:= $(BIN)/kernel_debug
-DEBUG_BUILD_DIR	:= iso_debug
-DEBUG_ISO_NAME	:= $(BIN)/kfs_debug.iso
-UP_DIR		:= $(BIN)/boot/grub
+BIN					:= bin
+BUILD_DIR			:= iso
+ISO_NAME			:= $(BIN)/kfs.iso
+BIN_NAME			:= $(BIN)/kernel
+DEBUG_NAME			:= $(BIN)/kernel_debug
+DEBUG_BUILD_DIR		:= iso_debug
+DEBUG_ISO_NAME		:= $(BIN)/kfs_debug.iso
+UP_DIR				:= $(BIN)/boot/grub
 
-OBJDIR		:= objs/
-DEBUG_OBJDIR	:= objs_debug/
+OBJDIR				:= objs/
+DEBUG_OBJDIR		:= objs_debug/
 
 # C part
-CXX			:= $(TARGET)-gcc
-CXXFLAGS	:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs
-DBGFLAGS	:= -DDEBUG=1
+CXX					:= $(TARGET)-gcc
+CXXFLAGS			:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Iinclude
+DBGFLAGS			:= -DDEBUG=1
 
-CSRC		:= kernel/vga_color.c kernel/kernel.c kernel/kwrite.c kernel/io.c kernel/display.c \
-			   kernel/drivers/keyboard.c \
-			   helpers/kprint/kprint.c helpers/kprint/utils.c helpers/kprint/convert_format.c \
-			   helpers/memcpy.c helpers/memset.c helpers/strlen.c
+CSRC				:= kernel/vga_color.c kernel/kernel.c kernel/kwrite.c kernel/io.c kernel/display.c \
+					   kernel/drivers/keyboard.c \
+					   helpers/kprint/kprint.c helpers/kprint/utils.c helpers/kprint/convert_format.c \
+					   helpers/memcpy.c helpers/memset.c helpers/strlen.c
 
-OBJC		:= $(CSRC:%.c=$(OBJDIR)%.o)
-DEBUG_OBJC	:= $(CSRC:%.c=$(DEBUG_OBJDIR)%.o)
+OBJC				:= $(CSRC:%.c=$(OBJDIR)%.o)
+DEBUG_OBJC			:= $(CSRC:%.c=$(DEBUG_OBJDIR)%.o)
 
 # ASM part
-ASMXX		:= nasm
-ASMFLGS		:= -f elf32 -g
-LDXX		:= ld
-LDFLGS		:= -m elf_i386
+ASMXX				:= nasm
+ASMFLGS				:= -f elf32 -g
+LDXX				:= ld
+LDFLGS				:= -m elf_i386
 
-ASMSRC		:= bootloader/bootloader.s
+ASMSRC				:= bootloader/bootloader.s
 
-OBJASM		:= $(ASMSRC:%.s=$(OBJDIR)%.o)
-DEBUG_OBJASM	:= $(ASMSRC:%.s=$(DEBUG_OBJDIR)%.o)
+OBJASM				:= $(ASMSRC:%.s=$(OBJDIR)%.o)
+DEBUG_OBJASM		:= $(ASMSRC:%.s=$(DEBUG_OBJDIR)%.o)
+
+CONFIG_H			:= includes/config.h
+CONFIG_INC			:= $(OBJDIR)config.inc
+DEBUG_CONFIG_INC	:= $(DEBUG_OBJDIR)config.inc
 
 # Rules
 # base rule, build the kernel binary
@@ -64,21 +68,32 @@ $(DEBUG_NAME): $(DEBUG_OBJASM) $(DEBUG_OBJC) linker.ld
 		echo "\033[91mthe file is not multiboot\033[0m"; \
 	fi
 
-# create the bin objects
-$(OBJDIR)%.o: %.s
+# generate config.inc (nasm syntax) from config.h (C syntax), single source of truth = config.h
+$(CONFIG_INC): $(CONFIG_H)
 	@mkdir -p $(dir $@)
-	$(ASMXX) $(ASMFLGS) $< -o $@
+	@grep -E '^\s*#define\s+(VIDEO_MODE|MODE_VGA|MODE_FRAMEBUFFER)\b' $(CONFIG_H) \
+		| sed -E 's/^\s*#define\s+([A-Z_]+)\s+([A-Za-z0-9_]+).*$$/%define \1 \2/' > $@
 
-$(OBJDIR)%.o: %.c
+$(DEBUG_CONFIG_INC): $(CONFIG_H)
+	@mkdir -p $(dir $@)
+	@grep -E '^\s*#define\s+(VIDEO_MODE|MODE_VGA|MODE_FRAMEBUFFER)\b' $(CONFIG_H) \
+		| sed -E 's/^\s*#define\s+([A-Z_]+)\s+([A-Za-z0-9_]+).*$$/%define \1 \2/' > $@
+
+# create the bin objects
+$(OBJDIR)%.o: %.s $(CONFIG_INC)
+	@mkdir -p $(dir $@)
+	$(ASMXX) $(ASMFLGS) -I$(OBJDIR) $< -o $@
+
+$(OBJDIR)%.o: %.c $(CONFIG_H)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # create the debug objects
-$(DEBUG_OBJDIR)%.o: %.s
+$(DEBUG_OBJDIR)%.o: %.s $(DEBUG_CONFIG_INC)
 	@mkdir -p $(dir $@)
-	$(ASMXX) $(ASMFLGS) $< -o $@
+	$(ASMXX) $(ASMFLGS) -I$(DEBUG_OBJDIR) $< -o $@
 
-$(DEBUG_OBJDIR)%.o: %.c
+$(DEBUG_OBJDIR)%.o: %.c $(CONFIG_H)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 

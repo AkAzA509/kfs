@@ -3,6 +3,5 @@
 
 #include "stdint.h"
 
-extern unsigned char font_data[];
 
 #endif // FONTS_H

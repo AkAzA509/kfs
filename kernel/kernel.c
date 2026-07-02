@@ -2,16 +2,16 @@
 #include "drivers/keyboard.h"
 #include "multiboot.h"
 #include "display.h"
-#include "terminal.h"
+// #include "terminal.h"
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
-#error "You are not using a cross-compiler, you will most certainly run into trouble"
+	#error "You are not using a cross-compiler, you will most certainly run into trouble"
 #endif
 
 /* Check for the 32-bit ix86 targets. */
 #if !defined(__i386__)
-#error "This code needs to be compiled with a ix86-elf compiler"
+	#error "This code needs to be compiled with a ix86-elf compiler"
 #endif
 
 #define CHECK_FLAG(flags, bit)	((flags) & (1 << (bit)))
@@ -26,7 +26,12 @@ static void	init_ctx(multiboot_info *mbi, unsigned long magic)
 	}
 
 	init_display(mbi);
+
 	init_term();
+
+	#ifdef DEBUG
+		debug_diplay();
+	#endif
 }
 
 void kernel_main(unsigned long magic, unsigned long addr)
@@ -34,14 +39,8 @@ void kernel_main(unsigned long magic, unsigned long addr)
 	multiboot_info	*mbi = (multiboot_info *)addr;
 
 	init_ctx(mbi, magic);
-	#ifdef DEBUG
-		debug_diplay();
-	#endif
 
-	// kprint("size int: %zu, size u32_t:%zu\n", sizeof(int), sizeof(u32_t));
-	
-	if (g_display.mode == DISPLAY_VGA)
-		keyboard_handler();
+	keyboard_handler();
 }
 
 // void multibootfunctest()

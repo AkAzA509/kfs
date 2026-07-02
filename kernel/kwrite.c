@@ -1,20 +1,10 @@
 #include "../includes/fonts.h"
+#include "../includes/config.h"
 #include "terminal.h"
 #include "kernel.h"
 #include "display.h"
 
-static u32_t	vga_color_to_rgb(enum vga_color color)
-{
-	static const u32_t palette[16] = {
-		0x000000, 0x0000AA, 0x00AA00, 0x00AAAA,
-		0xAA0000, 0xAA00AA, 0xAA5500, 0xAAAAAA,
-		0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
-		0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF
-	};
-
-	return palette[(u8_t)color & 0x0F];
-}
-
+#if VIDEO_MODE == MODE_VGA
 void set_cursor(int x, int y)
 {
 	u16_t pos = y * g_display.width + x;
@@ -48,6 +38,21 @@ void putchar_vga(char c)
 		}
 	}
 	set_cursor(g_display.col, g_display.row);
+}
+#endif
+
+#if VIDEO_MODE == MODE_FRAMEBUFFER
+
+static u32_t	vga_color_to_rgb(enum vga_color color)
+{
+	static const u32_t palette[16] = {
+		0x000000, 0x0000AA, 0x00AA00, 0x00AAAA,
+		0xAA0000, 0xAA00AA, 0xAA5500, 0xAAAAAA,
+		0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
+		0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF
+	};
+
+	return palette[(u8_t)color & 0x0F];
 }
 
 #define pixel u32_t
@@ -109,13 +114,15 @@ void	putchar_framebuffer(char c, u32_t fg, u32_t bg)
 	}
 	draw_glyph(font_width, font_height, cols, rows, fg, bg, c);
 }
+#endif
 
 void	kputchar(char c)
 {
-	if (g_display.mode == DISPLAY_FB)
-		putchar_framebuffer(c, 0, 0);
-	else
-		putchar_vga(c);
+#if VIDEO_MODE == MODE_FRAMEBUFFER
+	putchar_framebuffer(c, 0, 0);
+#else
+	putchar_vga(c);
+#endif
 }
 
 void	kwrite(const void* data, size_t size)

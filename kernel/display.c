@@ -1,6 +1,7 @@
 #include "../helpers/kprint/kprint.h"
 #include "../includes/stdint.h"
 #include "../includes/fonts.h"
+#include "../includes/config.h"
 #include "multiboot.h"
 #include "display.h"
 #include "kernel.h"
@@ -24,6 +25,7 @@ void	debug_diplay()
 }
 #endif
 
+#if VIDEO_MODE == MODE_VGA
 static void	init_vga(void)
 {
 	u16_t	line = g_display.height;
@@ -36,7 +38,9 @@ static void	init_vga(void)
 	g_display.col = 0;
 	set_cursor(0, 0);
 }
+#endif
 
+#if VIDEO_MODE == MODE_FRAMEBUFFER
 PSF1_Header font_header;
 
 static void	init_frambuffer(void)
@@ -66,13 +70,15 @@ static void	init_frambuffer(void)
 	g_display.row = 0;
 	g_display.col = 0;
 }
+#endif
 
 void init_term(void)
 {
-	if (g_display.mode == DISPLAY_FB)
-		init_frambuffer();
-	else
-		init_vga();
+#if VIDEO_MODE == MODE_FRAMEBUFFER
+	init_frambuffer();
+#else
+	init_vga();
+#endif
 }
 
 void serial_print_hex(u32_t val)
@@ -80,30 +86,26 @@ void serial_print_hex(u32_t val)
 	char hex[] = "0123456789abcdef";
 	outb(0x3F8, '0');
 	outb(0x3F8, 'x');
-	for (int i = 7; i >= 0; i--)
+	for (int i = 7; i >=0; i--)
 		outb(0x3F8, hex[(val >> (i * 4)) & 0xF]);
 	outb(0x3F8, '\n');
 }
 
 void init_display(multiboot_info *mbi)
 {
-	if (mbi->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_RGB) {
-		g_display.mode		= DISPLAY_FB;
-		g_display.fb_buf	= (volatile u32_t *)(u32_t)mbi->framebuffer_addr;
-		g_display.width		= mbi->framebuffer_width;
-		g_display.height	= mbi->framebuffer_height;
-		g_display.pitch		= mbi->framebuffer_pitch;
-		g_display.bpp		= mbi->framebuffer_bpp;
-		#ifdef DEBUG
-			serial_print_hex((u32_t)mbi->framebuffer_addr);
-		#endif
-	}
-	else {
-		g_display.mode		= DISPLAY_VGA;
-		g_display.vga_buf	= (volatile u16_t *)0xB8000;
-		g_display.width		= 80;
-		g_display.height	= 25;
-	}
+#if VIDEO_MODE == MODE_FRAMEBUFFER
+	g_display.mode		= DISPLAY_FB;
+	g_display.fb_buf	= (volatile u32_t *)(u32_t)mbi->framebuffer_addr;
+	g_display.width		= mbi->framebuffer_width;
+	g_display.height	= mbi->framebuffer_height;
+	g_display.pitch		= mbi->framebuffer_pitch;
+	g_display.bpp		= mbi->framebuffer_bpp;
+#else
+	g_display.mode		= DISPLAY_VGA;
+	g_display.vga_buf	= (volatile u16_t *)0xB8000;
+	g_display.width		= 80;
+	g_display.height	= 25;
+#endif
 	g_display.col	= 0;
 	g_display.row	= 0;
 	g_display.color	= vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK);

@@ -3,7 +3,10 @@
 
 #include "../includes/stdint.h"
 #include "../includes/stddef.h"
+#include "../includes/config.h"
 #include "multiboot.h"
+
+extern unsigned char font_data[];
 
 // Hardware text mode color constants
 enum vga_color {
@@ -38,10 +41,11 @@ typedef struct {
 	u8_t	charsize;
 }			PSF1_Header;
 
-extern PSF1_Header font_header;
-
 #define PSF_FONT_MAGIC 0x864ab572
 
+#if VIDEO_MODE == MODE_FRAMEBUFFER
+extern PSF1_Header font_header;
+#endif
 typedef struct s_display {
 	volatile u16_t	*vga_buf;
 	volatile u32_t	*fb_buf;
@@ -72,8 +76,12 @@ u8_t	vga_entry_color(enum vga_color fg, enum vga_color bg);
 u16_t	vga_entry(unsigned char uc, u8_t color);
 void	set_term_color(u8_t color);
 void	set_cursor(int x, int y);
+#if VIDEO_MODE == MODE_VGA
 void	putchar_vga(char c);
+#endif
+#if VIDEO_MODE == MODE_FRAMEBUFFER
 void	putchar_framebuffer(char c, u32_t fg, u32_t bg);
+#endif
 
 
 #endif // DISPLAY_H

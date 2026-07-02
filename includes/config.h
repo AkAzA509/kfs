@@ -1,0 +1,14 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define MODE_FRAMEBUFFER	0
+#define MODE_VGA			1
+
+#define VIDEO_MODE MODE_FRAMEBUFFER
+
+#if VIDEO_MODE != MODE_VGA && VIDEO_MODE != MODE_FRAMEBUFFER \
+	|| MODE_FRAMEBUFFER != 0 || MODE_VGA != 1
+	#error "VIDEO_MODE invalide (0 = VGA, 1 = FRAMEBUFFER)"
+#endif
+
+#endif // CONFIG_H

@@ -30,8 +30,8 @@
 ; 	dd 0									; 8 entry_addr
 ; %if VIDEO_MODE
 ; 	dd 0											; 9 wish mode 0=framebuffer 1=VGA
-; 	dd 1680										; framebuffer_field 10 width
-; 	dd 1000										; framebuffer_field 11 height
+; 	dd 800										; framebuffer_field 10 width
+; 	dd 400										; framebuffer_field 11 height
 ; 	dd 32											; framebuffer_field 12 depth = 32 bits par pixel
 ; %endif
 

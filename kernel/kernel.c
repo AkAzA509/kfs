@@ -1,7 +1,9 @@
 #include "../helpers/kprint/kprint.h"
+#include "../helpers/helpers.h"
 #include "drivers/keyboard.h"
 #include "multiboot.h"
 #include "display.h"
+#include <stddef.h>
 // #include "terminal.h"
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
@@ -40,6 +42,15 @@ void kernel_main(unsigned long magic, unsigned long addr)
 
 	init_ctx(mbi, magic);
 
+	for (size_t i = 0;; ++i) {
+		if (i % 2 == 0)
+			kprint("ewfefef\n");
+		else
+			kprint("drfihbwifuerbgfrg\n");
+	}
+
+	// kprint("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	// kprint("ocucou");
 	keyboard_handler();
 }
 

@@ -1,4 +1,5 @@
 #include "../includes/stddef.h"
+#include "../kernel/terminal.h"
 #include "helpers.h"
 
 void	kwrite(const void* data, size_t size)
@@ -12,4 +13,5 @@ void	kwrite(const void* data, size_t size)
 		kputchar(str[i]);
 		tmp++;
 	}
+	flush();
 }

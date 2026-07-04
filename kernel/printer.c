@@ -1,8 +1,10 @@
 #include "../includes/config.h"
 #include "../helpers/helpers.h"
+#include "../helpers/kprint/kprint.h"
 #include "terminal.h"
 #include "kernel.h"
 #include "display.h"
+#include <stddef.h>
 
 // Put the background color into the 4 upper bits and the foreground color into the 4 lower bits
 inline u8_t vga_entry_color(enum vga_color fg, enum vga_color bg)
@@ -35,6 +37,20 @@ static void	send_char_to_vga(char c, u8_t color, size_t x, size_t y)
 	g_display.buf.vga_buf[index] = vga_entry(c, color);
 }
 
+static void	scroll_vga()
+{
+	for (size_t y = 1; y < g_display.height; ++y) {
+		for (size_t x = 0; x < g_display.width; ++x)
+			send_char_to_vga(g_display.buf.vga_buf[y * g_display.width + x], g_display.color, x, y - 1);
+	}
+
+	for (size_t x = 0; x < g_display.width; ++x) {
+		send_char_to_vga(' ', g_display.color, x, g_display.height - 1);
+	}
+
+	g_display.row = g_display.height - 1;
+}
+
 void putchar_vga(char c)
 {
 	if (c == '\n') {
@@ -47,11 +63,11 @@ void putchar_vga(char c)
 		send_char_to_vga(c, g_display.color, g_display.col, g_display.row);
 		if (++g_display.col == g_display.width) {
 			g_display.col = 0;
-			if (++g_display.row == g_display.height)
-				g_display.row = 0;
+			// if (++g_display.row == g_display.height)
+				g_display.row++;
 		}
 	}
-	set_cursor(g_display.col, g_display.row);
+	// set_cursor(g_display.col, g_display.row);
 }
 #endif
 
@@ -67,7 +83,7 @@ static void swap_rect(u32_t x, u32_t y, u32_t width, u32_t height)
 	for (u32_t row = 0; row < height; ++row) {
 		u32_t *dst = front + (y + row) * front_stride + x;
 		u32_t *src = back + (y + row) * g_display.width + x;
-		memcpy(dst, src, width * sizeof(u32_t)); // todo remove this function 
+		memcpy(dst, src, width * sizeof(u32_t));
 	}
 }
 
@@ -85,7 +101,6 @@ static u32_t	vga_color_to_rgb(enum vga_color color)
 
 static void draw_cursor(int cx, int cy, u32_t color)
 {
-	// dessine un rectangle de 8x2 pixels en bas du caractère
 	for (int x = cx * 8; x < cx * 8 + 8; x++)
 		for (int y = cy * 16 + 14; y < cy * 16 + 16; y++)
 			((u32_t*)(u32_t)g_display.buf.fb_buf)[y * g_display.pitch / 4 + x] = color;
@@ -120,13 +135,11 @@ static void draw_glyph(const u32_t font_width, const u32_t font_height, const u3
 	}
 	if (++g_display.col >= cols) {
 		g_display.col = 0;
-		if (++g_display.row >= rows)
-			g_display.row = 0;
+		g_display.row++;
 	}
-	swap_rect(origin_x, origin_y, font_width, font_height);
 }
 
-void	putchar_framebuffer(char c, u32_t fg, u32_t bg)
+	void	putchar_framebuffer(char c, u32_t fg, u32_t bg)
 {
 	const u32_t	font_width = 8;
 	const u32_t	font_height = font_header.charsize;
@@ -137,23 +150,36 @@ void	putchar_framebuffer(char c, u32_t fg, u32_t bg)
 		return ;
 	if (c == '\n') {
 		g_display.col = 0;
-		if (++g_display.row >= rows)
-			g_display.row = 0;
-		draw_cursor(g_display.col, g_display.row, 0xFFFFFF);
-		return ;
+		g_display.row++;
 	}
-	if (c == '\t') {
+	else if (c == '\t') {
 		g_display.col = (g_display.col + 8) & ~7U;
 		if (g_display.col >= cols) {
 			g_display.col = 0;
-			if (++g_display.row >= rows)
-				g_display.row = 0;
+			g_display.row++;
 		}
-		draw_cursor(g_display.col, g_display.row, 0xFFFFFF);
-		return ;
 	}
-	draw_glyph(font_width, font_height, cols, rows, fg, bg, c);
-	draw_cursor(g_display.col, g_display.row, 0xFFFFFF);
+	else
+		draw_glyph(font_width, font_height, cols, rows, fg, bg, c);
+}
+
+static void	scroll_fb()
+{
+	const u32_t font_height	= font_header.charsize;
+	const u32_t line_size	= g_display.width * font_height; // nb of pixel in a line (offset)
+
+	// move the buffer to 1 line up
+	memmove(g_display.back_buf,
+		g_display.back_buf + line_size,
+		g_display.width * (g_display.height - font_height) * sizeof(u32_t));
+
+	// empty the last line
+	memset(g_display.back_buf + g_display.width * (g_display.height - font_height),
+		0,
+		line_size * sizeof(u32_t));
+
+	const u32_t rows = g_display.height / font_header.charsize;
+	g_display.row = rows - 1;
 }
 #endif
 
@@ -165,4 +191,22 @@ void	update_cursor()
 	#else
 		set_cursor(g_display.col, g_display.row);
 	#endif
+}
+
+void flush(void)
+{
+	#if VIDEO_MODE == MODE_FRAMEBUFFER
+		swap_rect(0, 0, g_display.width, g_display.height);
+	#endif
+	update_cursor();
+}
+
+void	scroll()
+{
+	#if VIDEO_MODE == MODE_FRAMEBUFFER
+		scroll_fb();
+	#else
+		scroll_vga();
+	#endif
+	flush();
 }

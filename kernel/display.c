@@ -12,9 +12,9 @@ void	debug_diplay()
 	kprint("g_display debug:\n");
 	kprint("\tmode    : %s\n", g_display.mode == DISPLAY_FB ? "framebuffer" : "vga");
 	if (g_display.mode == DISPLAY_FB)
-		kprint("\tbuf addr: %p\n", g_display.fb_buf);
+		kprint("\tbuf addr: %p\n", g_display.buf.fb_buf);
 	else
-		kprint("\tbuf addr: %p\n", g_display.vga_buf);
+		kprint("\tbuf addr: %p\n", g_display.buf.vga_buf);
 	kprint("\twidth   : %d\n", g_display.width);
 	kprint("\theight  : %d\n", g_display.height);
 	kprint("\tpitch   : %d\n", g_display.pitch);

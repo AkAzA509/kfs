@@ -1,6 +1,7 @@
 #include "../../includes/stdbool.h"
 #include "../../helpers/helpers.h"
 #include "../kernel.h"
+#include "../terminal.h"
 #include "keyboard.h"
 
 static const u8_t RELEASE_MSK = 0x80;
@@ -58,6 +59,7 @@ static void	handle_scancode(u8_t code)
 		val = keycode_shift[code];
 
 	kputchar(val);
+	flush();
 }
 
 void	keyboard_handler()

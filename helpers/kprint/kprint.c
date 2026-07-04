@@ -1,3 +1,4 @@
+#include "../../kernel/terminal.h"
 #include "kprint.h"
 
 static void	len_calc(int *total_len, int len)
@@ -80,6 +81,7 @@ int	kprint(const char *str, ...)
 	va_start(ap, str);
 	total_len = kprint_internal(1, str, &ap);
 	va_end(ap);
+	flush();
 
 	return total_len;
 }

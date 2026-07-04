@@ -67,6 +67,7 @@ typedef struct s_display {
 }					t_display;
 
 extern t_display	g_display;
+
 #define DISPLAY_VGA	0
 #define DISPLAY_FB	1
 

@@ -1,5 +1,4 @@
 #include "../../includes/stdbool.h"
-#include "../../helpers/helpers.h"
 #include "../kernel.h"
 #include "../terminal.h"
 #include "keyboard.h"
@@ -58,8 +57,7 @@ static void	handle_scancode(u8_t code)
 			(caps_lock && !shift && val >= 'a' && val <= 'z'))
 		val = keycode_shift[code];
 
-	kputchar(val);
-	flush();
+	putchar(val);
 }
 
 void	keyboard_handler()

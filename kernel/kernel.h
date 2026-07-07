@@ -4,11 +4,8 @@
 #include "../includes/stdint.h"
 #include "../includes/stddef.h"
 
-#define ATTRIBUTE	7
-
-// I/O
-
-void outb(u16_t port, u8_t val);
-u8_t inb(u16_t port);
+void	outb(u16_t port, u8_t val);
+u8_t	inb(u16_t port);
+void	serial_print_hex(u32_t val);
 
 #endif // KERNEL_H

@@ -2,13 +2,9 @@
 
 ; MBALIGN		equ 1 << 0							; align loaded modules on page boundaries
 ; MEMINFO		equ 1 << 1							; provide memory map
-; VIDEO_MODE	equ 0								; 0=vga, 1=framebuffer
-; %if VIDEO_MODE
-; VIDMOD		equ 1 << 2							; Flag to ask for a framebuffer
-; MBFLAGS		equ MBALIGN | MEMINFO | VIDMOD	; this is the Multiboot 'flag' field
-; %else
-; MBFLAGS		equ MBALIGN | MEMINFO				; this is the Multiboot 'flag' field
-; %endif
+; VIDEO_MODE	equ 1 << 2							; 0=vga, 1=framebuffer
+
+; MBFLAGS		equ MBALIGN | MEMINFO | VIDMOD		; this is the Multiboot 'flag' field
 ; MAGIC		equ 0x1BADB002					; 'magic number' lets bootloader find the header
 ; CHECKSUM	equ -(MAGIC + MBFLAGS) 			; checksum of above, to prove we are multiboot
 ; 											; CHECKSUM + MAGIC + MBFLAGS should be Zero (0)
@@ -28,12 +24,10 @@
 ; 	dd 0									; 6 load_end_addr
 ; 	dd 0									; 7 bss_end_addr
 ; 	dd 0									; 8 entry_addr
-; %if VIDEO_MODE
-; 	dd 0											; 9 wish mode 0=framebuffer 1=VGA
-; 	dd 800										; framebuffer_field 10 width
-; 	dd 400										; framebuffer_field 11 height
-; 	dd 32											; framebuffer_field 12 depth = 32 bits par pixel
-; %endif
+; 	dd 0									; 9 wish mode 0=framebuffer 1=VGA
+; 	dd 800									; framebuffer_field 10 width
+; 	dd 400									; framebuffer_field 11 height
+; 	dd 32									; framebuffer_field 12 depth = 32 bits par pixel
 
 ; ; The multiboot standard does not define the value of the stack pointer register
 ; ; (esp) and it is up to the kernel to provide a stack. This allocates room for a
@@ -127,15 +121,9 @@
 
 MBALIGN		equ 1 << 0						; align loaded modules on page boundaries
 MEMINFO		equ 1 << 1						; provide memory map
-
-%include "config.inc"						; defines VIDEO_MODE / MODE_FRAMEBUFFER / MODE_VGA, generated from include/config.h
-
-%if VIDEO_MODE == MODE_FRAMEBUFFER
 VIDMOD		equ 1 << 2						; Flag to ask for a framebuffer
+
 MBFLAGS		equ MBALIGN | MEMINFO | VIDMOD	; this is the Multiboot 'flag' field
-%else
-MBFLAGS		equ MBALIGN | MEMINFO			; this is the Multiboot 'flag' field
-%endif
 MAGIC		equ 0x1BADB002					; 'magic number' lets bootloader find the header
 CHECKSUM	equ -(MAGIC + MBFLAGS) 			; checksum of above, to prove we are multiboot
 											; CHECKSUM + MAGIC + MBFLAGS should be Zero (0)
@@ -155,12 +143,10 @@ align 4
 	dd 0									; 6 load_end_addr
 	dd 0									; 7 bss_end_addr
 	dd 0									; 8 entry_addr
-%if VIDEO_MODE == MODE_FRAMEBUFFER
 	dd 0									; 9 wish mode 0=framebuffer 1=VGA
 	dd 1680									; framebuffer_field 10 width
 	dd 1000									; framebuffer_field 11 height
 	dd 32									; framebuffer_field 12 depth = 32 bits par pixel
-%endif
 
 ; The multiboot standard does not define the value of the stack pointer register
 ; (esp) and it is up to the kernel to provide a stack. This allocates room for a
@@ -178,14 +164,12 @@ stack_bottom:
 resb 16384									; 16 KiB is reserved for stack
 stack_top:
 
-%if VIDEO_MODE == MODE_FRAMEBUFFER
 ; This section load the font file for the framebuffer and the glyphs
 section .rodata
 global font_data
 font_data:
 	incbin "fonts/Lat15-VGA16.psf"			; add the binary into the kernel blob with
 											; the font_data name, that we can retreive in the c
-%endif
 
 ; The linker script specifies _start as the entry point to the kernel and the
 ; bootloader will jump to this position once the kernel has been loaded. It

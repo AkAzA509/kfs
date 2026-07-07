@@ -1,9 +1,8 @@
 #include "../helpers/kprint/kprint.h"
-#include "../helpers/helpers.h"
 #include "drivers/keyboard.h"
 #include "multiboot.h"
-#include "display.h"
-#include <stddef.h>
+#include "init.h"
+#include "kernel.h"
 // #include "terminal.h"
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
@@ -18,7 +17,15 @@
 
 #define CHECK_FLAG(flags, bit)	((flags) & (1 << (bit)))
 
-t_display g_display;
+void serial_print_hex(u32_t val)
+{
+	char hex[] = "0123456789abcdef";
+	outb(0x3F8, '0');
+	outb(0x3F8, 'x');
+	for (int i = 7; i >=0; i--)
+		outb(0x3F8, hex[(val >> (i * 4)) & 0xF]);
+	outb(0x3F8, '\n');
+}
 
 static void	init_ctx(multiboot_info *mbi, unsigned long magic)
 {
@@ -42,15 +49,15 @@ void kernel_main(unsigned long magic, unsigned long addr)
 
 	init_ctx(mbi, magic);
 
-	for (size_t i = 0;; ++i) {
-		if (i % 2 == 0)
-			kprint("ewfefef\n");
-		else
-			kprint("drfihbwifuerbgfrg\n");
-	}
+	// for (size_t i = 0;; ++i) {
+	// 	if (i % 2 == 0)
+	// 		kprint("ewfefef\n");
+	// 	else
+	// 		kprint("drfihbwifuerbgfrg\n");
+	// }
 
-	// kprint("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-	// kprint("ocucou");
+	kprint("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	kprint("coucou");
 	keyboard_handler();
 }
 

@@ -1,17 +1,11 @@
 #include "../includes/stddef.h"
-#include "../kernel/terminal.h"
 #include "helpers.h"
 
 void	kwrite(const void* data, size_t size)
 {
-	int tmp = 0;
-	const char *str = data;
+	const char	*str = data;
+	int	tmp = 0;
 
-	for (size_t i = 0; i < size; i++) {
-		if (tmp >= 15)
-			tmp = 0;
+	for (size_t i = 0; i < size; i++)
 		kputchar(str[i]);
-		tmp++;
-	}
-	flush();
 }

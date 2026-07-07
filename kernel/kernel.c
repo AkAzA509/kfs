@@ -3,7 +3,6 @@
 #include "multiboot.h"
 #include "init.h"
 #include "terminal.h"
-#include <stddef.h>
 #include "kernel.h"
 // #include "terminal.h"
 

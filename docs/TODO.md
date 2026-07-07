@@ -23,4 +23,9 @@ corresponding `<module>.md` file for context on why each item matters.
 
 ## Toolchain
 
-- [ ] _Not documented yet._
+- [ ] Move the toolchain methode and creation from the root readme to is file in
+      docs/toolchain.md
+
+## ROOT readme
+
+- [ ] Remove the toolchain part and update/folow the new config and handled case

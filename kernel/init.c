@@ -1,3 +1,4 @@
+#include "../helpers/kprint/kprint.h"
 #include "./drivers/framebuffer.h"
 #include "../includes/stdint.h"
 #include "./drivers/vga.h"

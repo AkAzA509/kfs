@@ -21,8 +21,11 @@ void draw_cursor(int cx, int cy, u32_t color)
 	const int start_x = cx * 8;
 	const int start_y = cy * 16 + 14;
 
+	if (cx == g_screen.cursor_col && cy == g_screen.cursor_row)
+		return ;
+
 	if (g_screen.cursor_col >= 0)
-		swap_rect(g_screen.cursor_col * 8, g_screen.cursor_row * 16, 8, 16);
+		swap_rect(g_screen.cursor_col * 8, g_screen.cursor_row * 16 + 14, 8, 16);
 
 	if (start_x < 0 || start_y < 0 ||
 		(u32_t)(start_x + 8) > g_screen.width || (u32_t)(start_y + 2) > g_screen.height) {

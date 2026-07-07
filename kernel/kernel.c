@@ -2,6 +2,8 @@
 #include "drivers/keyboard.h"
 #include "multiboot.h"
 #include "init.h"
+#include "terminal.h"
+#include <stddef.h>
 #include "kernel.h"
 // #include "terminal.h"
 
@@ -37,6 +39,11 @@ static void	init_ctx(multiboot_info *mbi, unsigned long magic)
 	init_display(mbi);
 
 	init_term();
+	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
+	kprint(BOOT_LOG "terminal initialized\n");
+	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
+
+	current_driver->clear();
 
 	#ifdef DEBUG
 		debug_diplay();
@@ -56,9 +63,9 @@ void kernel_main(unsigned long magic, unsigned long addr)
 	// 		kprint("drfihbwifuerbgfrg\n");
 	// }
 
-	kprint("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	// kprint("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 	kprint("coucou");
-	keyboard_handler();
+	// keyboard_handler();
 }
 
 // void multibootfunctest()

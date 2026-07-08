@@ -23,9 +23,13 @@ corresponding `<module>.md` file for context on why each item matters.
 
 ## Toolchain
 
-- [ ] Move the toolchain methode and creation from the root readme to is file in
+- [x] Move the toolchain methode and creation from the root readme to is file in
       docs/toolchain.md
 
 ## ROOT readme
 
-- [ ] Remove the toolchain part and update/folow the new config and handled case
+- [x] Remove the toolchain part and update/folow the new config and handled case
+
+## Misc
+
+- [x] Create a bootloader.md doc

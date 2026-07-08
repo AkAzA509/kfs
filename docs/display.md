@@ -106,12 +106,7 @@ packed into a single byte — exactly the format VGA text mode expects
 natively.
 
 ```c
-typedef enum e_color {
-	COLOR_BLACK,
-	COLOR_BLUE,
-	...,
-	COLOR_WHITE
-}	t_color;
+typedef enum e_color { COLOR_BLACK, COLOR_BLUE, ..., COLOR_WHITE } t_color;
 
 u8_t  make_color(t_color fg, t_color bg);   // fg | (bg << 4)
 u32_t color_to_rgb(t_color color);          // palette lookup, FB only
@@ -125,7 +120,7 @@ u32_t color_to_rgb(t_color color);          // palette lookup, FB only
 This intentionally caps the framebuffer to the same 16 colors as VGA, even
 though the hardware could display millions. That's a deliberate simplicity
 trade-off for the current stage of the project — see
-[TODO.md](TODO.md).
+[Future work](#future-work).
 
 ## Rendering pipeline
 
@@ -184,6 +179,95 @@ position becomes meaningless after a full repaint.
 
 ## Screen switching
 
+The three layers involved don't all live at the same "depth", and data
+moves between them in **two distinct flows**, not a single simple pipe:
+
+- **(a) Typing a character** — writes fan out from the incoming char to
+  *two* places at once: the visible buffer (drawn immediately) and the
+  matching `g_screens[current_screen]` cell (mirrored, so it survives a
+  future switch away and back).
+- **(b) Switching screens** — the flow reverses: the newly selected
+  screen's saved cells are read back out of `g_screens[new_id]` and
+  rasterized into the shared back buffer, cell by cell.
+
+### Framebuffer mode
+
+```
+                            CURSOR (draw_cursor)
+                       writes directly, bypasses back_buf
+                                     │
+                                     ▼
+              ┌────────────────────────────────────────┐
+              │              FRONT BUFFER              │  ← physical
+              │   physical pixels (g_screen.buf)       │    framebuffer,
+              └─────────────────▲──────────────────────┘   what's visible
+                                │  swap_rect()
+                                │  copy: back_buf -> front
+                                │  (this also erases the old cursor)
+              ┌────────────────┴────────────────────────┐
+              │               BACK BUFFER               │  ← single shared
+              │    clean pixels (g_screen.back_buf)     │    instance, never
+              └─────────────────▲───────────────────────┘    contains the cursor
+                                │
+                     (a) putpixel_fb(c, color, col, row)
+                         one cell, drawn as it's typed
+                                │▲
+                                │└── (b) screen_switch(): rasterizes
+                                │        every cell of the newly
+                                │        selected screen, in a loop
+                                ▼
+       ┌─────────────────────────────────────────────────────┐
+       │  (a) putchar_fb() ALSO mirrors the same char here,  │
+       │      in parallel with drawing it above              │
+       ▼                                                     │
+ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+ │ screens[0]  │ │ screens[1]  │ │ screens[2]  │ │ screens[3]  │
+ │ text_buf    │ │ text_buf    │ │ text_buf    │ │ text_buf    │
+ │ color_buf   │ │ color_buf   │ │ color_buf   │ │ color_buf   │
+ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
+                        ▲
+                current_screen selects exactly one of these:
+                the target of (a)'s mirror, the source of (b)'s rasterize
+```
+
+### VGA mode
+
+No back buffer exists in this mode — `g_screen.buf` points straight at the
+physical VGA memory (`0xB8000`), so "drawing" and "being visible" are the
+same write. The hardware cursor (`set_cursor`) is a CRTC register, not a
+pixel, so there's no draw/erase dance to do.
+
+```
+              ┌────────────────────────────────────────┐
+              │              FRONT BUFFER              │  ← 0xB8000, IS the
+              │        g_screen.buf == 0xB8000         │    visible output
+              └─────────────────▲──────────────────────┘
+                                │
+                     (a) putpixel_vga(c, color, x, y)
+                         one cell, written directly, no back buffer step
+                                │▲
+                                │└── (b) screen_switch(): rewrites every
+                                │        cell of the newly selected screen
+                                ▼
+       ┌─────────────────────────────────────────────────────┐
+       │  (a) putchar_vga() ALSO mirrors the same char here  │
+       ▼                                                     │
+ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+ │ screens[0]  │ │ screens[1]  │ │ screens[2]  │ │ screens[3]  │
+ │ text_buf    │ │ text_buf    │ │ text_buf    │ │ text_buf    │
+ │ color_buf   │ │ color_buf   │ │ color_buf   │ │ color_buf   │
+ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
+```
+
+Only one of these two panels is active at runtime, chosen once in
+`init_display()` — never both, and never switched mid-boot.
+
+Only the screen matching `current_screen` ever gets rasterized into the
+shared back buffer (or, in VGA mode, straight into `0xB8000`); the other
+three stay dormant as plain character grids until selected. This is what
+keeps memory cost low: 4 compact grids (~4 KB each) instead of 4 full pixel
+buffers (~1.25 MB each).
+
 `screen_switch(new_id)` (in `terminal.c`) makes a virtual screen visible:
 
 1. Update `current_screen`.
@@ -199,8 +283,6 @@ Every `putchar_*` call also mirrors the character it just wrote into
 `g_screens[current_screen]`, so the compact per-screen state always stays
 in sync with what's on screen — no separate synchronization step is needed
 outside of `screen_switch`.
-
-![illustration](switch_screen_ilu.svg)
 
 ## Boot-time setup
 
@@ -239,4 +321,8 @@ if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type == 1) 
 Nothing outside `terminal.c` should call `current_driver->putchar` (or
 `putchar_vga`/`putchar_fb`) directly — always go through `putchar()`.
 
+## Future work
 
+See [TODO.md](TODO.md) for the current list of planned improvements to this
+module (RGB color support, dynamic screen allocation, IRQ-driven keyboard
+input).

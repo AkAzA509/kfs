@@ -10,7 +10,7 @@ static const u8_t CAPS_LOCK = 0x3A;
 
 static const char keycode[] = {
 	0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0,	// 0x00-0x0E (0x01 = escape)
-	0, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', 0,		// 0x0F-0x1C
+	0, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',	// 0x0F-0x1C
 	0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',			// 0x1D-0x29
 	0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0,			// 0x2A-0x36
 	'*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,							// 0x37-0x44 (* numpad, left alt, space, capslock, f1 to f10)
@@ -20,7 +20,7 @@ static const char keycode[] = {
 
 static const char keycode_shift[] = {
 	0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0,	// 0x00-0x0E
-	0, 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 0,		// 0x0F-0x1C
+	0, 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',	// 0x0F-0x1C
 	0, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~',			// 0x1D-0x29
 	0, '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', 0,			// 0x2A-0x36
 	'*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,							// 0x37-0x44 (* numpad, left alt, space, capslock, f1 to f10)
@@ -46,6 +46,26 @@ static void	handle_scancode(u8_t code)
 	}
 	if (code == CAPS_LOCK)
 		caps_lock = !caps_lock;
+	switch (code) {
+		case 0x3b:
+			screen_switch(0);
+			return ;
+
+		case 0x3c:
+			screen_switch(1);
+			return ;
+
+		case 0x3d:
+			screen_switch(2);
+			return ;
+
+		case 0x3e:
+			screen_switch(3);
+		default:
+			break ;
+	}
+
+	// serial_print_hex(code);
 
 	char val = keycode[code];
 	if (!val)

@@ -21,6 +21,7 @@ void	putpixel_fb(char c, u8_t color, size_t col, size_t row);
 void	putchar_fb(char c);
 void	scroll_fb(void);
 void	clear_fb(void);
+void	clear_physical_fb(void);
 void	draw_cursor(int cx, int cy, u32_t color);
 
 #endif // FRAMEBUFFER_H

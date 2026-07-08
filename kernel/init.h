@@ -31,12 +31,11 @@ extern unsigned char	font_data[];
 extern int				current_screen;
 
 #define MAX_SCREENS		4
-#define FB_MAX_WIDTH	800
-#define FB_MAX_HEIGHT	400
-#define SCREEN_COLS		80
-#define SCREEN_ROWS		25
+#define FB_MAX_WIDTH	1680
+#define FB_MAX_HEIGHT	1000
+#define SCREEN_COLS		210
+#define SCREEN_ROWS		63
 
-// Contenu LÉGER de chaque écran (x4, coût mémoire négligeable)
 typedef struct s_screen_data {
 	char	text_buf[SCREEN_COLS * SCREEN_ROWS];
 	u8_t	color_buf[SCREEN_COLS * SCREEN_ROWS];
@@ -45,10 +44,9 @@ typedef struct s_screen_data {
 	u8_t	color;
 }			t_screen_data;
 
-// État de rendu PHYSIQUE actif (un seul, jamais x4)
 typedef struct s_screen {
-	void	*buf;		// adresse mémoire physique : 0xB8000 (vga) ou framebuffer_addr (fb)
-	u32_t	*back_buf;	// buffer pixel intermédiaire, UN SEUL, utilisé seulement en mode fb
+	void	*buf;
+	u32_t	*back_buf;
 	size_t	col;
 	size_t	row;
 	int		cursor_col;

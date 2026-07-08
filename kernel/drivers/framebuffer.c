@@ -78,7 +78,7 @@ static void draw_glyph(const u32_t cols, char c)
 {
 	putpixel_fb(c, g_screen.color, g_screen.col, g_screen.row);
 
-	size_t idx = g_screen.row * cols + g_screen.col;
+	size_t idx = g_screen.row * SCREEN_COLS + g_screen.col;
 	g_screens[current_screen].text_buf[idx] = c;
 	g_screens[current_screen].color_buf[idx] = g_screen.color;
 
@@ -119,31 +119,83 @@ void	putchar_fb(char c)
 	g_screens[current_screen].row = g_screen.row;
 }
 
+// void	scroll_fb(void)
+// {
+// 	const u32_t font_height = font_header.charsize;
+// 	const u32_t line_size = g_screen.width * font_height;
+// 	u32_t *back = g_screen.back_buf;
+
+// 	if (font_height == 0)
+// 		return ;
+
+// 	memmove(back,
+// 		back + line_size,
+// 		g_screen.width * (g_screen.height - font_height) * sizeof(u32_t));
+
+// 	memset(back + g_screen.width * (g_screen.height - font_height),
+// 		0,
+// 		line_size * sizeof(u32_t));
+
+// 	const u32_t rows = g_screen.height / font_header.charsize;
+// 	g_screen.row = rows - 1;
+// 	swap_rect(0, 0, g_screen.width, g_screen.height);
+// 	g_screen.cursor_col = -1;
+// 	g_screen.cursor_row = -1;
+// }
+
 void	scroll_fb(void)
 {
-	const u32_t font_height = font_header.charsize;
-	const u32_t line_size = g_screen.width * font_height;
-	u32_t *back = g_screen.back_buf;
+	const	u32_t font_height = font_header.charsize;
+	const	u32_t line_size = g_screen.width * font_height;
+	const	u32_t cols = g_screen.width / 8;
+	const	u32_t rows = g_screen.height / font_height;
+	u32_t	*back = g_screen.back_buf;
 
 	if (font_height == 0)
 		return ;
 
-	memmove(back,
-		back + line_size,
+	memmove(back, back + line_size,
 		g_screen.width * (g_screen.height - font_height) * sizeof(u32_t));
-
-	memset(back + g_screen.width * (g_screen.height - font_height),
-		0,
+	memset(back + g_screen.width * (g_screen.height - font_height), 0,
 		line_size * sizeof(u32_t));
 
-	const u32_t rows = g_screen.height / font_header.charsize;
+	t_screen_data *d = &g_screens[current_screen];
+	for (u32_t r = 0; r < rows - 1; r++) {
+		for (u32_t c = 0; c < cols; c++) {
+			size_t dst = r * SCREEN_COLS + c;
+			size_t src = (r + 1) * SCREEN_COLS + c;
+			d->text_buf[dst] = d->text_buf[src];
+			d->color_buf[dst] = d->color_buf[src];
+		}
+	}
+	for (u32_t c = 0; c < cols; ++c) {
+		size_t idx = (rows - 1) * SCREEN_COLS + c;
+		d->text_buf[idx] = ' ';
+		d->color_buf[idx] = g_screen.color;
+	}
+
 	g_screen.row = rows - 1;
 	swap_rect(0, 0, g_screen.width, g_screen.height);
 	g_screen.cursor_col = -1;
 	g_screen.cursor_row = -1;
 }
 
-void	clear_fb(void)
+// void	clear_fb(void)
+// {
+// 	u32_t *back = g_screen.back_buf;
+// 	const u32_t total_pixels = g_screen.width * g_screen.height;
+
+// 	for (u32_t i = 0; i < total_pixels; ++i)
+// 		back[i] = 0x000000;
+
+// 	swap_rect(0, 0, g_screen.width, g_screen.height);
+// 	g_screen.col = 0;
+// 	g_screen.row = 0;
+// 	g_screen.cursor_col = -1;
+// 	g_screen.cursor_row = -1;
+// }
+
+void	clear_physical_fb(void)
 {
 	u32_t *back = g_screen.back_buf;
 	const u32_t total_pixels = g_screen.width * g_screen.height;
@@ -156,4 +208,22 @@ void	clear_fb(void)
 	g_screen.row = 0;
 	g_screen.cursor_col = -1;
 	g_screen.cursor_row = -1;
+}
+
+// Clear "complet" (vtable) : physique + données logiques de l'écran actif
+void	clear_fb(void)
+{
+	clear_physical_fb();
+
+	const u32_t cols = g_screen.width / 8;
+	const u32_t rows = g_screen.height / font_header.charsize;
+	t_screen_data *d = &g_screens[current_screen];
+
+	for (u32_t r = 0; r < rows; r++) {
+		for (u32_t c = 0; c < cols; c++) {
+			size_t idx = r * SCREEN_COLS + c;
+			d->text_buf[idx] = ' ';
+			d->color_buf[idx] = g_screen.color;
+		}
+	}
 }

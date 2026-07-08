@@ -16,15 +16,16 @@ static u32_t	g_fb_back_buffer[FB_MAX_WIDTH * FB_MAX_HEIGHT];
 void	debug_diplay()
 {
 	kprint("g_screen debug:\n");
-	kprint("\tmode    : %s\n", g_screen.mode == 1 ? "vga" : "framebuffer");
-	kprint("\tbuf addr: %p\n", g_screen.buf);
-	kprint("\twidth   : %d\n", g_screen.width);
-	kprint("\theight  : %d\n", g_screen.height);
-	kprint("\tpitch   : %d\n", g_screen.pitch);
-	kprint("\tbpp     : %d\n", g_screen.bpp);
-	kprint("\tcol pos : %zu\n", g_screen.col);
-	kprint("\trow pos : %zu\n", g_screen.row);
-	kprint("\tcolor   : %d\n", g_screen.color);
+	kprint("\tmode     : %s\n", g_screen.mode == 1 ? "vga" : "framebuffer");
+	kprint("\tbuf addr : %p\n", g_screen.buf);
+	kprint("\tback addr: %p\n", g_screen.back_buf);
+	kprint("\twidth    : %d\n", g_screen.width);
+	kprint("\theight   : %d\n", g_screen.height);
+	kprint("\tpitch    : %d\n", g_screen.pitch);
+	kprint("\tbpp      : %d\n", g_screen.bpp);
+	kprint("\tcol pos  : %zu\n", g_screen.col);
+	kprint("\trow pos  : %zu\n", g_screen.row);
+	kprint("\tcolor    : %d\n", g_screen.color);
 }
 #endif // DEBUG
 

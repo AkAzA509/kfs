@@ -63,10 +63,11 @@ void kernel_main(unsigned long magic, unsigned long addr)
 	// }
 
 	// kprint("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-	kprint("address de buf: %p\n", &g_screen.buf);
-	kprint("address de fb: %p\n", mbi->framebuffer_addr);
+	// kprint("address de buf: %p\n", &g_screen.buf);
+	// kprint("address de fb: %p\n", mbi->framebuffer_addr);
 	kprint("coucou");
-	// keyboard_handler();
+	// debug_diplay();
+	keyboard_handler();
 }
 
 // void multibootfunctest()

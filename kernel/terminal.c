@@ -54,10 +54,23 @@ void	screen_switch(int new_id)
 	t_screen_data *d = &g_screens[new_id];
 
 	current_screen = new_id;
-	current_driver->clear();
+	if (g_screen.mode == 1)
+		clear_physical_vga();
+	else
+		clear_physical_fb();
 
-	for (size_t r = 0; r < SCREEN_ROWS; r++) {
-		for (size_t c = 0; c < SCREEN_COLS; c++) {
+	size_t active_cols, active_rows;
+	if (g_screen.mode == 1) {				// VGA
+		active_cols = g_screen.width;
+		active_rows = g_screen.height;
+	}
+	else {
+		active_cols = g_screen.width / 8;
+		active_rows = g_screen.height / font_header.charsize;
+	}
+
+	for (size_t r = 0; r < active_rows; r++) {
+		for (size_t c = 0; c < active_cols; c++) {
 			size_t idx = r * SCREEN_COLS + c;
 			if (d->text_buf[idx] == '\0')
 				continue ;

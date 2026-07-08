@@ -11,5 +11,6 @@ void	putpixel_vga(char c, u8_t color, size_t x, size_t y);
 void	putchar_vga(char c);
 void	scroll_vga(void);
 void	clear_vga(void);
+void	clear_physical_vga(void);
 
 #endif // VGA_H

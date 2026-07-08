@@ -1,4 +1,5 @@
 #include "../../helpers/helpers.h"
+#include "../../helpers/kprint/kprint.h"
 #include "../kernel.h"
 #include "../init.h"
 #include <stddef.h>

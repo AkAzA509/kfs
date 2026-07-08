@@ -3,6 +3,7 @@
 
 #include "../includes/stdint.h"
 #include "../includes/stddef.h"
+#include "../includes/stdbool.h"
 
 typedef enum e_color {
 	COLOR_BLACK = 0,
@@ -72,7 +73,7 @@ extern t_display_driver		*current_driver;
 typedef struct t_multiboot_info multiboot_info;
 
 void	debug_diplay();
-void	init_term(void);
+bool	init_term(void);
 void	init_display(multiboot_info *mbi);
 void	screen_switch(int new_id);
 

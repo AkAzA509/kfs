@@ -23,5 +23,6 @@ void	scroll_fb(void);
 void	clear_fb(void);
 void	clear_physical_fb(void);
 void	draw_cursor(int cx, int cy, u32_t color);
+void	update_screens(char c);
 
 #endif // FRAMEBUFFER_H

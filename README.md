@@ -46,3 +46,5 @@ Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) li
 - The little book about OS development by Erik Helin, Adam Renberg [here](https://littleosbook.github.io/)
 - Kernels 101 – Let’s write a Kernel by Arjun Sreedharan [here](https://arjunsreedharan.org/post/82710718100/kernels-101-lets-write-a-kernel)
 - Kernels 201 - Let’s write a Kernel with keyboard and screen support [here](https://arjunsreedharan.org/post/99370248137/kernels-201-lets-write-a-kernel-with-keyboard)
+- Writing My Own OS by Frank Rosner [here](https://dev.to/frosnerd/series/9585)
+- NyanOS repo [here](https://github.com/yunusemreduran388-ux/NyanOS-v1)

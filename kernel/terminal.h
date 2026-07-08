@@ -16,5 +16,6 @@ void	putchar(char c);
 void	scroll(void);
 void	update_cursor(void);
 void	screen_switch(int new_id);
+void	backspace(void);
 
 #endif // TERMINAL_H

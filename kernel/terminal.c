@@ -28,8 +28,10 @@ u32_t	color_to_rgb(t_color color)
 
 void	update_cursor(void)
 {
-	if (g_screen.mode == 0)
-		draw_cursor(g_screen.col, g_screen.row, 0xFFFFFF);
+	if (g_screen.mode == 0) {
+		u8_t bg_color = g_screen.color >> 4;
+		draw_cursor(g_screen.col, g_screen.row, ~bg_color);
+	}
 	else
 		set_cursor(g_screen.col, g_screen.row);
 }
@@ -84,5 +86,30 @@ void	screen_switch(int new_id)
 	g_screen.col = d->col;
 	g_screen.row = d->row;
 	g_screen.color = d->color;
+	update_cursor();
+}
+
+void	backspace(void)
+{
+	if (g_screen.col == 0 && g_screen.row == 0)
+		return ;
+
+	if (g_screen.col == 0) {
+		g_screen.row--;
+		g_screen.col = (g_screen.mode == 1 ? g_screen.width : g_screen.width / 8) - 1;
+	}
+	else {
+		g_screen.col--;
+	}
+
+	if (g_screen.mode == 0) {
+		putpixel_fb(' ', g_screen.color, g_screen.col, g_screen.row);
+		update_screens(' ');
+	}
+	else
+		putpixel_vga(' ', g_screen.color, g_screen.col, g_screen.row);
+
+	g_screens[current_screen].col = g_screen.col;
+	g_screens[current_screen].row = g_screen.row;
 	update_cursor();
 }

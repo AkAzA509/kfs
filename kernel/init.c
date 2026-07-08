@@ -1,6 +1,7 @@
 #include "../helpers/kprint/kprint.h"
 #include "./drivers/framebuffer.h"
 #include "../includes/stdint.h"
+#include "../includes/stdbool.h"
 #include "./drivers/vga.h"
 #include "multiboot.h"
 #include "terminal.h"
@@ -44,16 +45,16 @@ static void	ini_vga(void)
 
 PSF1_Header	font_header;
 
-static void	init_frambuffer(void)
+static bool	init_frambuffer(void)
 {
 	font_header.charsize = font_data[3];
 	font_header.mode = font_data[2];
 	font_header.magic = (font_data[1] << 8) | font_data[0];
 
 	if (font_header.charsize != 16 || font_header.magic != PSF1_FONT_MAGIC)
-		return ;
+		return false;
 	if (g_screen.width > FB_MAX_WIDTH || g_screen.height > FB_MAX_HEIGHT)
-		return ;
+		return false;
 
 	current_driver->clear();
 
@@ -64,14 +65,18 @@ static void	init_frambuffer(void)
 	g_screen.row = 0;
 	g_screen.col = 0;
 	update_cursor();
+	return true;
 }
 
-void init_term(void)
+bool init_term(void)
 {
-	if (g_screen.mode == 0)
-		init_frambuffer();
+	if (g_screen.mode == 0) {
+		if (!init_frambuffer())
+			return false;
+	}
 	else
 		ini_vga();
+	return true;
 }
 
 t_display_driver *current_driver;

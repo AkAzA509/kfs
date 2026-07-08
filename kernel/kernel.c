@@ -1,8 +1,10 @@
 #include "../helpers/kprint/kprint.h"
+#include "../includes/stdbool.h"
 #include "drivers/keyboard.h"
 #include "multiboot.h"
 #include "init.h"
 #include "terminal.h"
+#include <stddef.h>
 #include "kernel.h"
 // #include "terminal.h"
 
@@ -28,16 +30,18 @@ void serial_print_hex(u32_t val)
 	outb(0x3F8, '\n');
 }
 
-static void	init_ctx(multiboot_info *mbi, unsigned long magic)
+static bool	init_ctx(multiboot_info *mbi, unsigned long magic)
 {
 	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
 		kprint("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);
-		return ;
+		return false;
 	}
 
 	init_display(mbi);
 
-	init_term();
+	if (!init_term())
+		return false;
+
 	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
 	kprint(BOOT_LOG "terminal initialized\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
@@ -47,26 +51,59 @@ static void	init_ctx(multiboot_info *mbi, unsigned long magic)
 	#ifdef DEBUG
 		debug_diplay();
 	#endif
+	return true;
 }
+
+#define DEBUG
+
+#ifdef DEBUG
+#include "./drivers/framebuffer.h"
+void screen_test()
+{
+	kprint("Test screen 0\n\n");
+
+	screen_switch(1);
+	char buffer[100] = "012345678910111213141516171819202122232425\0";
+	kprint("test screen 1 %s\n\n", buffer);
+
+	screen_switch(2);
+	kprint("Test backspace screen 3\n il ne dois rien y avaoir apres ca :%s", buffer);
+	for (size_t i = 0; buffer[i]; ++i) {
+		backspace();
+	}
+	screen_switch(3);
+	debug_diplay();
+	kprint("coucou after display\n\n\n\n\n\n\nplus bas");
+	backspace();
+	backspace();
+	backspace();
+	backspace();
+	backspace();
+	backspace();
+	backspace();
+	backspace();
+
+	screen_switch(0);
+	const u32_t	cols = g_screen.width / 8;
+	const u32_t	rows = g_screen.height / font_header.charsize;
+	set_term_color(make_color(COLOR_CYAN, COLOR_WHITE));
+	for (size_t i = 0; i < cols * rows - 1; ++i)
+		kprint("0");
+	// set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
+}
+#endif // DEBUG
 
 void kernel_main(unsigned long magic, unsigned long addr)
 {
 	multiboot_info	*mbi = (multiboot_info *)addr;
 
-	init_ctx(mbi, magic);
+	if (!init_ctx(mbi, magic))
+		return ;
 
-	// for (size_t i = 0;; ++i) {
-	// 	if (i % 2 == 0)
-	// 		kprint("ewfefef\n");
-	// 	else
-	// 		kprint("drfihbwifuerbgfrg\n");
-	// }
+	#ifdef DEBUG
+	screen_test();
+	#endif // DEBUG
 
-	// kprint("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-	// kprint("address de buf: %p\n", &g_screen.buf);
-	// kprint("address de fb: %p\n", mbi->framebuffer_addr);
-	kprint("coucou");
-	// debug_diplay();
 	keyboard_handler();
 }
 

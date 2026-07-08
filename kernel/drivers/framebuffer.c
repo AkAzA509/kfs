@@ -1,7 +1,10 @@
 #include "../../helpers/helpers.h"
+#include "../../includes/stdbool.h"
+#include "../../helpers/kprint/kprint.h"
 #include "framebuffer.h"
 #include "../terminal.h"
 #include "../init.h"
+#include "../kernel.h"
 
 static void swap_rect(u32_t x, u32_t y, u32_t width, u32_t height)
 {
@@ -74,13 +77,18 @@ void	putpixel_fb(char c, u8_t color, size_t col, size_t row)
 	swap_rect(origin_x, origin_y, font_width, font_height);
 }
 
+void	update_screens(char c)
+{
+	size_t idx = g_screen.row * SCREEN_COLS + g_screen.col;
+	g_screens[current_screen].text_buf[idx] = c;
+	g_screens[current_screen].color_buf[idx] = g_screen.color;
+}
+
 static void draw_glyph(const u32_t cols, char c)
 {
 	putpixel_fb(c, g_screen.color, g_screen.col, g_screen.row);
 
-	size_t idx = g_screen.row * SCREEN_COLS + g_screen.col;
-	g_screens[current_screen].text_buf[idx] = c;
-	g_screens[current_screen].color_buf[idx] = g_screen.color;
+	update_screens(c);
 
 	if (++g_screen.col >= cols) {
 		g_screen.col = 0;
@@ -119,30 +127,6 @@ void	putchar_fb(char c)
 	g_screens[current_screen].row = g_screen.row;
 }
 
-// void	scroll_fb(void)
-// {
-// 	const u32_t font_height = font_header.charsize;
-// 	const u32_t line_size = g_screen.width * font_height;
-// 	u32_t *back = g_screen.back_buf;
-
-// 	if (font_height == 0)
-// 		return ;
-
-// 	memmove(back,
-// 		back + line_size,
-// 		g_screen.width * (g_screen.height - font_height) * sizeof(u32_t));
-
-// 	memset(back + g_screen.width * (g_screen.height - font_height),
-// 		0,
-// 		line_size * sizeof(u32_t));
-
-// 	const u32_t rows = g_screen.height / font_header.charsize;
-// 	g_screen.row = rows - 1;
-// 	swap_rect(0, 0, g_screen.width, g_screen.height);
-// 	g_screen.cursor_col = -1;
-// 	g_screen.cursor_row = -1;
-// }
-
 void	scroll_fb(void)
 {
 	const	u32_t font_height = font_header.charsize;
@@ -180,21 +164,6 @@ void	scroll_fb(void)
 	g_screen.cursor_row = -1;
 }
 
-// void	clear_fb(void)
-// {
-// 	u32_t *back = g_screen.back_buf;
-// 	const u32_t total_pixels = g_screen.width * g_screen.height;
-
-// 	for (u32_t i = 0; i < total_pixels; ++i)
-// 		back[i] = 0x000000;
-
-// 	swap_rect(0, 0, g_screen.width, g_screen.height);
-// 	g_screen.col = 0;
-// 	g_screen.row = 0;
-// 	g_screen.cursor_col = -1;
-// 	g_screen.cursor_row = -1;
-// }
-
 void	clear_physical_fb(void)
 {
 	u32_t *back = g_screen.back_buf;
@@ -210,7 +179,6 @@ void	clear_physical_fb(void)
 	g_screen.cursor_row = -1;
 }
 
-// Clear "complet" (vtable) : physique + données logiques de l'écran actif
 void	clear_fb(void)
 {
 	clear_physical_fb();

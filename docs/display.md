@@ -127,7 +127,7 @@ trade-off for the current stage of the project, see [Future work](#future-work).
 ```
 putchar(c)                          [terminal.c, public API]
   → current_driver->putchar(c)      [putchar_vga or putchar_fb]
-      → putpixel_vga / draw_glyph   [draws into the physical buffer /
+      → putpixel_vga / putpixel_fb  [draws into the physical buffer /
                                       shared back buffer, and mirrors the
                                       char+color into g_screens[current_screen]]
   → update_cursor()                 [erases old cursor, draws new one]

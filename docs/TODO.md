@@ -10,7 +10,7 @@ corresponding `<module>.md` file for context on why each item matters.
       approximate down to its 16 colors via nearest-color match instead of
       the other way around. Change is isolated to `display.h`/`display.c`.
 - [ ] Dynamic screen allocation (`g_screens`, and eventually `back_buf`)
-      once a physical frame allocator exists — currently fixed-size,
+      once a physical frame allocator exists, currently fixed-size,
       statically allocated in `.bss` (`MAX_SCREENS = 4`).
 - [ ] IRQ-driven keyboard input (ring buffer) to decouple scancode capture
       from character rendering. Currently polling `0x60` in a busy loop;

@@ -16,6 +16,7 @@ corresponding `<module>.md` file for context on why each item matters.
       from character rendering. Currently polling `0x60` in a busy loop;
       fast typing can outrun the 8042 hardware buffer and drop/delay
       scancodes.
+- [ ] Handle the backspace key in the keyboard driver (improve the driver overall)
 
 ## Memory
 

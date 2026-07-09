@@ -32,14 +32,7 @@ void	debug_diplay()
 
 static void	ini_vga(void)
 {
-	const size_t total_size = g_screen.width * g_screen.height;
-	u16_t *vga_mem = (u16_t *)g_screen.buf;
-
-	for (size_t i = 0; i < total_size; ++i)
-		vga_mem[i] = vga_entry(' ', g_screen.color);
-
-	g_screen.row = 0;
-	g_screen.col = 0;
+	current_driver->clear();
 	update_cursor();
 }
 
@@ -56,14 +49,9 @@ static bool	init_frambuffer(void)
 	if (g_screen.width > FB_MAX_WIDTH || g_screen.height > FB_MAX_HEIGHT)
 		return false;
 
+	// le curseur s'acrit pas au demarage
 	current_driver->clear();
 
-	// back buffer cleaning
-	for (u32_t i = 0; i < g_screen.width * g_screen.height; ++i)
-		g_screen.back_buf[i] = 0x000000;
-
-	g_screen.row = 0;
-	g_screen.col = 0;
 	update_cursor();
 	return true;
 }
@@ -120,17 +108,16 @@ void init_display(multiboot_info *mbi)
 	if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type == 1) {
 		init_fb(mbi);
 		current_driver = &fb_driver;
-	} else {
+	}
+	else {
 		init_vga();
 		current_driver = &vga_driver;
 	}
-	g_screen.col	= 0;
-	g_screen.row	= 0;
-	g_screen.color	= g_screen.color = make_color(COLOR_WHITE, COLOR_BLACK);
+	g_screen.col = g_screen.row = 0;
+	g_screen.color = g_screen.color = make_color(COLOR_WHITE, COLOR_BLACK);
 
 	for (int i = 0; i < MAX_SCREENS; ++i) {
-		g_screens[i].col = 0;
-		g_screens[i].row = 0;
+		g_screens[i].col = g_screens[i].row = 0;
 		g_screens[i].color = g_screen.color;
 	}
 }

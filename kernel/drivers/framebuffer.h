@@ -7,8 +7,8 @@
 #define PSF1_FONT_MAGIC 0x0436
 #define PSF_FONT_MAGIC  0x864ab572
 
-// Pour PSF1 : la largeur du glyphe est toujours 8 bits,
-// et la hauteur = charsize
+// the width of PSF1 glyph is always 8 bits,
+// and height = charsize
 typedef struct {
 	u16_t	magic;
 	u8_t	mode;

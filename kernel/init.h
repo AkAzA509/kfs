@@ -37,6 +37,8 @@ extern int				current_screen;
 #define SCREEN_COLS		210
 #define SCREEN_ROWS		63
 
+// multiscreen struct
+// save the state of each screen (content, position, color)
 typedef struct s_screen_data {
 	char	text_buf[SCREEN_COLS * SCREEN_ROWS];
 	u8_t	color_buf[SCREEN_COLS * SCREEN_ROWS];
@@ -45,6 +47,8 @@ typedef struct s_screen_data {
 	u8_t	color;
 }			t_screen_data;
 
+// screen struct
+// contain all display and screen info, the back buffer ...
 typedef struct s_screen {
 	void	*buf;
 	u32_t	*back_buf;
@@ -60,6 +64,7 @@ typedef struct s_screen {
 	u8_t	mode;		// 0 = framebuffer, 1 = vga
 }			t_screen;
 
+// vtable: struct of pointer to function (methode for the display management)
 typedef struct s_display_driver {
 	void	(*putchar)(char c);
 	void	(*scroll)(void);

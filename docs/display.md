@@ -312,12 +312,12 @@ if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type == 1) 
 | `scroll(void)`                    | `terminal.c`  | Scroll the active driver + cursor |
 | `set_color(t_color fg, t_color bg)` | `terminal.c` | Set `g_screen.color` |
 | `screen_switch(int id)`           | `terminal.c`  | Make virtual screen `id` visible |
-| `kputchar(char c)`                | `kprint/`     | libc-like alias for `putchar` |
-| `kwrite(const void*, size_t)`     | `kprint/`     | libc-like `write()` |
-| `kprint(const char*, ...)`        | `kprint/`     | libc-like `printf()` |
+| `kputchar(char c)`                | `helpers/`     | libc-like `putchar` |
+| `kwrite(const void*, size_t)`     | `helpers/`     | libc-like `write()` |
+| `kprint(const char*, ...)`        | `helpers/kprint/`     | libc-like `printf()` |
 
 Nothing outside `terminal.c` should call `current_driver->putchar` (or
-`putchar_vga`/`putchar_fb`) directly, always go through `putchar()`.
+`putchar_vga`/`putchar_fb`) directly, always go through `putchar()` or `kputchar()`.
 
 ## Future work
 

@@ -28,9 +28,12 @@ u32_t	color_to_rgb(t_color color)
 
 void	update_cursor(void)
 {
+	// this if need a tweak the color inversion is not good in white give yellow ???
 	if (g_screen.mode == 0) {
-		u8_t bg_color = g_screen.color >> 4;
-		draw_cursor(g_screen.col, g_screen.row, ~bg_color);
+		u8_t	bg_index = (g_screen.color >> 4) & 0x0F;
+		u32_t	bg_rgb = color_to_rgb((t_color)bg_index);
+		u32_t	cursor_color = ~bg_rgb & 0x00FFFFFF;
+		draw_cursor(g_screen.col, g_screen.row, cursor_color);
 	}
 	else
 		set_cursor(g_screen.col, g_screen.row);
@@ -48,25 +51,25 @@ void	scroll(void)
 	update_cursor();
 }
 
+// When switch screen depending on the mode, it just copy or rasterize the char
+// the back screen mirror the front screen in plain char representation
+// or fb mode draw pixel so fb redraw everything on the screen
 void	screen_switch(int new_id)
 {
 	if (new_id < 0 || new_id >= MAX_SCREENS || new_id == current_screen)
 		return ;
 
 	t_screen_data *d = &g_screens[new_id];
-
 	current_screen = new_id;
+
 	if (g_screen.mode == 1)
 		clear_physical_vga();
 	else
 		clear_physical_fb();
 
-	size_t active_cols, active_rows;
-	if (g_screen.mode == 1) {				// VGA
-		active_cols = g_screen.width;
-		active_rows = g_screen.height;
-	}
-	else {
+	size_t	active_cols = g_screen.width;
+	size_t	active_rows = g_screen.height;
+	if (g_screen.mode == 0) {
 		active_cols = g_screen.width / 8;
 		active_rows = g_screen.height / font_header.charsize;
 	}
@@ -74,6 +77,7 @@ void	screen_switch(int new_id)
 	for (size_t r = 0; r < active_rows; r++) {
 		for (size_t c = 0; c < active_cols; c++) {
 			size_t idx = r * SCREEN_COLS + c;
+
 			if (d->text_buf[idx] == '\0')
 				continue ;
 			if (g_screen.mode == 0)
@@ -98,9 +102,8 @@ void	backspace(void)
 		g_screen.row--;
 		g_screen.col = (g_screen.mode == 1 ? g_screen.width : g_screen.width / 8) - 1;
 	}
-	else {
+	else
 		g_screen.col--;
-	}
 
 	if (g_screen.mode == 0) {
 		putpixel_fb(' ', g_screen.color, g_screen.col, g_screen.row);

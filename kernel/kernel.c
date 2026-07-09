@@ -54,7 +54,7 @@ static bool	init_ctx(multiboot_info *mbi, unsigned long magic)
 	return true;
 }
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #include "./drivers/framebuffer.h"
@@ -89,7 +89,7 @@ void screen_test()
 	set_term_color(make_color(COLOR_CYAN, COLOR_WHITE));
 	for (size_t i = 0; i < cols * rows - 1; ++i)
 		kprint("0");
-	// set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
+	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 }
 #endif // DEBUG
 
@@ -101,7 +101,7 @@ void kernel_main(unsigned long magic, unsigned long addr)
 		return ;
 
 	#ifdef DEBUG
-	screen_test();
+		screen_test();
 	#endif // DEBUG
 
 	keyboard_handler();

@@ -1,0 +1,25 @@
+# Ce Makefile ne connaît que ses propres sources.
+# CC, CFLAGS, CPPFLAGS sont hérités (exportés) du Makefile racine.
+# OBJDIR est passé par le Makefile racine (release ou debug).
+
+OBJDIR		?= ../objs/kernel
+
+SRC			:= kernel/kernel.c kernel/io.c kernel/init.c kernel/kputchar.c kernel/kwrite.c \
+			   kernel/kprint/kprint.c kernel/kprint/utils.c kernel/kprint/convert_format.c \
+			   arch/i386/tty.c arch/i386/vga.c arch/i386/keyboard.c arch/i386/framebuffer.c
+
+OBJ			:= $(SRC:%.c=$(OBJDIR)/%.o)
+
+all: $(OBJDIR)/kernel.a
+
+$(OBJDIR)/kernel.a: $(OBJ)
+	$(AR) rcs $@ $(OBJ)
+
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(OBJDIR)
+
+.PHONY: all clean

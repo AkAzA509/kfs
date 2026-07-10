@@ -6,7 +6,7 @@
 *.ko
 *.obj
 *.elf
-objs/
+objs**/
 
 # Linker output
 *.ilk
@@ -58,3 +58,9 @@ dkms.conf
 
 # Bootable images
 iso/
+iso_debug/
+
+# PDF
+*.pdf
+
+test*

@@ -1,3 +1,4 @@
+#include "../../kernel/terminal.h"
 #include "kprint.h"
 
 static void	len_calc(int *total_len, int len)

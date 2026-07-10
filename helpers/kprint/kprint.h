@@ -4,6 +4,7 @@
 #include "../../includes/stddef.h"
 #include "../../includes/stdarg.h"
 
+int	kprint(const char *str, ...);
 int	ft_putchar(int fd, char c);
 int	convert_hexa(int fd, unsigned long nb, char format);
 int	s_format(int fd, char *str);

@@ -1,94 +1,42 @@
 # kfs
 
 ## Overview
-This project is a small kernel and bootloader setup for a custom x86 operating system. The repository contains the bootloader, the kernel entry point, and the build rules used to generate the final ISO image.
+This project is a small kernel and bootloader setup for a custom x86 operating system, built from scratch as part of the **kfs** (Kernel From Scratch) project at 42. The repository contains the bootloader, the kernel entry point, and the build rules used to generate the final ISO image.
 
-## Environment Setup
-A cross-compilation toolchain is required. The following environment variables must be set before building:
+## Project structure
+- `bootloader/` - assembly bootloader and multiboot header
+- `includes/` - public header and libc like reimplementation
+- `kernel/` - kernel entry point, terminal, and drivers (keyboard, VGA, framebuffer)
+- `helpers/` - low-level utilities (memcpy, memset, kprint, ...)
+- `docs/` - technical and developer documentation (multiboot, memory layout, etc.)
+- `linker.ld`, `grub.cfg` - linking and GRUB boot configuration
 
-```bash
-export PREFIX="$HOME/opt/cross"
-export TARGET=i686-elf
-export PATH="$PREFIX/bin:$PATH"
-export PATH="$HOME/opt/cross/bin:$PATH"
+## Features
+- Boots via GRUB using a Multiboot-compliant kernel
+- Text output through VGA text mode or linear framebuffer, depending on what the bootloader/GRUB provides
+- Basic keyboard driver
+- Some shortcuts: f1-f4 for multiscreen and escape key to exit the kernel
+
+## Requirements
+- An i386 cross-compiler toolchain see [`docs/toolchain.md`](docs/toolchain.md)
+- `nasm`
+- `ld` (with `elf_i386` support)
+- `grub-mkrescue` and `grub-file`
+- `qemu-system-i386`
+
+## Build & run
+```sh
+make          # build the kernel binary (bin/kernel)
+make up       # build the ISO and run it in QEMU
+make dev      # run the raw kernel binary directly in QEMU (no ISO)
+make debug    # build a debug ISO (adds -DDEBUG=1) and run it in QEMU with serial output
+make clean    # remove object files
+make fclean   # remove all build artifacts (binaries, ISOs)
+make re       # fclean + all
 ```
 
-You also need the following tools and libraries installed on your system:
-
-- GCC
-- Make
-- Bison
-- Flex
-- GMP
-- MPFR
-- MPC
-- Texinfo
-- ISL
-
-
-Finally, you need the source archives for Binutils and GCC.
-
-Download the needed source code into a suitable directory such as `$HOME/src`:
-
-- You can download the desired Binutils release by visiting the [Binutils website](https://www.gnu.org/software/binutils/).
-
-- You can download the desired GCC release by visiting the [GCC website](https://www.gnu.org/software/gcc/).
-
-## Toolchain Build
-
-### Binutils
-```bash
-# For Binutils
-cd $HOME/src
-
-mkdir build-binutils
-cd build-binutils
-../binutils-x.y.z/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror --enable-default-execstack=no
-make
-make install
-```
-
-- `--target=$TARGET` builds Binutils as a cross-toolchain for the target architecture defined by `TARGET`.
-- `--prefix="$PREFIX"` installs the toolchain under the directory pointed to by `PREFIX`.
-- `--with-sysroot` enables sysroot support and points the toolchain to an empty default root for target files.
-- `--disable-nls` disables native language support, which reduces dependencies and keeps diagnostics in English.
-- `--disable-werror` prevents warnings from being treated as errors during the build.
-- `--enable-default-execstack=no` disables executable stacks by default for the generated objects and binaries.
-
-### GCC
-```bash
-# For GCC cross compiling
-cd $HOME/src
-
-# The $PREFIX/bin dir _must_ be in the PATH. This cmd check that
-which -- $TARGET-as || echo $TARGET-as is not in the PATH
-
-mkdir build-gcc
-cd build-gcc
-../gcc-x.y.z/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c --without-headers --enable-initfini-array
-make all-gcc
-make all-target-libgcc
-make install-gcc
-make install-target-libgcc
-```
-
-- `--target=$TARGET` configures GCC as a cross-compiler for the target architecture.
-- `--prefix="$PREFIX"` installs GCC in the same toolchain directory as Binutils.
-- `--disable-nls` disables native language support and keeps build output in English.
-- `--enable-languages=c` builds only the C frontend, which is enough for this kernel project.
-- `--without-headers` tells GCC not to depend on a target C library or runtime headers.
-- `--enable-initfini-array` enables support for the modern `.init_array` and `.fini_array` initialization model.
-
-### Compilation Flags
-The kernel build uses the following compiler and linker flags:
-
-- `-fno-builtin`: disables optimizations that replace standard library calls with compiler built-ins.
-- `-fno-exceptions`: disables C++ exception handling support.
-- `-fno-stack-protector`: disables stack protector and canary instrumentation.
-- `-fno-rtti`: disables Run-Time Type Information generation for classes with virtual functions.
-- `-nostdlib`: prevents the use of standard startup files and libraries during linking.
-- `-nodefaultlibs`: prevents automatic linking against the default system libraries.
-- `-T linker.ld` : The own kernel linking indication
+## Intern documentation
+Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) live in the [`docs/`](./docs/README.md) folder. This README only covers the project overview; refer to `docs/` for implementation details.
 
 ## Documentations and ressources
 - Fundamental Concepts and Structure of the Linux Kernel (old version v2.4.20) [here](https://www.irif.fr/~carton/Enseignement/Architecture/Cours/Virtual/linux.pdf)
@@ -99,3 +47,5 @@ The kernel build uses the following compiler and linker flags:
 - The little book about OS development by Erik Helin, Adam Renberg [here](https://littleosbook.github.io/)
 - Kernels 101 – Let’s write a Kernel by Arjun Sreedharan [here](https://arjunsreedharan.org/post/82710718100/kernels-101-lets-write-a-kernel)
 - Kernels 201 - Let’s write a Kernel with keyboard and screen support [here](https://arjunsreedharan.org/post/99370248137/kernels-201-lets-write-a-kernel-with-keyboard)
+- Writing My Own OS by Frank Rosner [here](https://dev.to/frosnerd/series/9585)
+- NyanOS repo [here](https://github.com/yunusemreduran388-ux/NyanOS-v1)

@@ -17,10 +17,10 @@ is active; it only talks to a small generic API (`putchar`, `scroll`,
 `screen_switch`, ...).
 
 ```
-kprint / kwrite / kputchar        (libc-like public API, kernel/helpers)
+kprint / kwrite / kputchar        (libc-like public API, kernel/kernel)
             │
             ▼
-        terminal.c                 (generic orchestration: driver dispatch,
+          tty.c                    (generic orchestration: driver dispatch,
             │                       cursor, multi-screen logic)
             ▼
    t_display_driver (vtable)
@@ -61,7 +61,7 @@ is only ever one of these, regardless of how many logical screens exist.
 | `width`, `height`, `pitch`, `bpp` | Geometry reported by GRUB (FB) or fixed 80x25 (VGA) |
 | `color`     | Current packed foreground/background color (see [Color](#color-system)) |
 | `mode`      | `0` = framebuffer, `1` = VGA                                          |
-| `cursor_col`, `cursor_row` | Last position where the blinking cursor was actually drawn (`-1` = none). Used to erase it cleanly before redrawing it elsewhere. |
+| `cursor_col`, `cursor_row` | Last position where the cursor was actually drawn (`-1` = none). Used to erase it cleanly before redrawing it elsewhere. |
 
 ### `t_screen_data` logical content of one virtual screen (array: `g_screens[MAX_SCREENS]`)
 
@@ -95,7 +95,7 @@ typedef struct s_display_driver {
 
 `current_driver` points to either `vga_driver` or `fb_driver`, selected once
 in `init_display()`. Every backend function has to match these exact
-signatures, this is what lets `terminal.c` stay ignorant of which backend
+signatures, this is what lets `tty.c` stay ignorant of which backend
 it's talking to.
 
 ## Color system
@@ -125,7 +125,7 @@ trade-off for the current stage of the project, see [Future work](#future-work).
 ### Writing a character
 
 ```
-putchar(c)                          [terminal.c, public API]
+putchar(c)                          [tty.c, public API]
   → current_driver->putchar(c)      [putchar_vga or putchar_fb]
       → putpixel_vga / putpixel_fb  [draws into the physical buffer /
                                       shared back buffer, and mirrors the
@@ -136,7 +136,7 @@ putchar(c)                          [terminal.c, public API]
 `putchar_vga` / `putchar_fb` handle `\n`/`\t`, cursor advancement, and
 triggering a scroll when reaching the bottom of the screen. They do **not**
 call `update_cursor()` themselves, that responsibility belongs entirely to
-`terminal.c`, so backends never need to know about cursor logic.
+`tty.c`, so backends never need to know about cursor logic.
 
 ### `putpixel_*` vs `putchar_*`
 
@@ -202,7 +202,7 @@ moves between them in **two distinct flows**, not a single simple pipe:
                                 │  swap_rect()
                                 │  copy: back_buf -> front
                                 │  (this also erases the old cursor)
-              ┌────────────────┴────────────────────────┐
+              ┌─────────────────┴───────────────────────┐
               │               BACK BUFFER               │  ← single shared
               │    clean pixels (g_screen.back_buf)     │    instance, never
               └─────────────────▲───────────────────────┘    contains the cursor
@@ -266,7 +266,7 @@ three stay dormant as plain character grids until selected. This is what
 keeps memory cost low: 4 compact grids (~4 KB each) instead of 4 full pixel
 buffers (~1.25 MB each).
 
-`screen_switch(new_id)` (in `terminal.c`) makes a virtual screen visible:
+`screen_switch(new_id)` (in `tty.c`) makes a virtual screen visible:
 
 1. Update `current_screen`.
 2. `current_driver->clear()` wipes the physical/back buffer and resets
@@ -308,15 +308,15 @@ if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type == 1) 
 |-----------------------------------|---------------|---------|
 | `init_display(mbi)`               | `init.c`      | Detect backend, set up `g_screen` |
 | `init_term(void)`                 | `init.c`      | Clear screen, load font (FB), reset cursor |
-| `putchar(char c)`                 | `terminal.c`  | Write one character through the active driver + cursor |
-| `scroll(void)`                    | `terminal.c`  | Scroll the active driver + cursor |
-| `set_color(t_color fg, t_color bg)` | `terminal.c` | Set `g_screen.color` |
-| `screen_switch(int id)`           | `terminal.c`  | Make virtual screen `id` visible |
-| `kputchar(char c)`                | `helpers/`     | libc-like `putchar` |
-| `kwrite(const void*, size_t)`     | `helpers/`     | libc-like `write()` |
-| `kprint(const char*, ...)`        | `helpers/kprint/`     | libc-like `printf()` |
+| `putchar(char c)`                 | `tty.c`  | Write one character through the active driver + cursor |
+| `scroll(void)`                    | `tty.c`  | Scroll the active driver + cursor |
+| `set_color(t_color fg, t_color bg)` | `tty.c` | Set `g_screen.color` |
+| `screen_switch(int id)`           | `tty.c`  | Make virtual screen `id` visible |
+| `kputchar(char c)`                | `kputchar`     | libc-like `putchar` |
+| `kwrite(const void*, size_t)`     | `kwrite`     | libc-like `write()` |
+| `kprint(const char*, ...)`        | `kprint`     | libc-like `printf()` |
 
-Nothing outside `terminal.c` should call `current_driver->putchar` (or
+Nothing outside `tty.c` should call `current_driver->putchar` (or
 `putchar_vga`/`putchar_fb`) directly, always go through `putchar()` or `kputchar()`.
 
 ## Future work

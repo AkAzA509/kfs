@@ -1,15 +1,18 @@
 # kfs
 
 ## Overview
-This project is a small kernel and bootloader setup for a custom x86 operating system, built from scratch as part of the **kfs** (Kernel From Scratch) project at 42. The repository contains the bootloader, the kernel entry point, and the build rules used to generate the final ISO image.
+This project is a small kernel and bootloader setup for a custom x86 operating system, built from scratch as part of the **kfs** (Kernel From Scratch) project at 42. The repository contains the bootloader, the kernel entry point, a lib, and the build rules used to generate the final ISO image.
 
 ## Project structure
-- `bootloader/` - assembly bootloader and multiboot header
-- `includes/` - public header and libc like reimplementation
-- `kernel/` - kernel entry point, terminal, and drivers (keyboard, VGA, framebuffer)
-- `helpers/` - low-level utilities (memcpy, memset, kprint, ...)
-- `docs/` - technical and developer documentation (multiboot, memory layout, etc.)
-- `linker.ld`, `grub.cfg` - linking and GRUB boot configuration
+- `kernel/` - kernel code space
+- `kernel/arch/` - architecture specific code
+- `kernel/include` - all the kernel header space declaration
+- `kernel/kernel` - rest of the kernel code not architecture specific
+- `libc` - general lib shared with the kernel and the future user-space
+- `libc/include/` - public header and libc like reimplementation
+- `libc/**` - code directory linked to the header
+- `docs/` - technical and developer documentation (bootloader, io, display, etc)
+- `grub.cfg` - GRUB boot configuration
 
 ## Features
 - Boots via GRUB using a Multiboot-compliant kernel
@@ -26,13 +29,14 @@ This project is a small kernel and bootloader setup for a custom x86 operating s
 
 ## Build & run
 ```sh
-make          # build the kernel binary (bin/kernel)
-make up       # build the ISO and run it in QEMU
-make dev      # run the raw kernel binary directly in QEMU (no ISO)
-make debug    # build a debug ISO (adds -DDEBUG=1) and run it in QEMU with serial output
-make clean    # remove object files
-make fclean   # remove all build artifacts (binaries, ISOs)
-make re       # fclean + all
+make                  # build the kernel binary (bin/kernel)
+make up               # build the ISO and run it in QEMU
+make dev              # run the raw kernel binary directly in QEMU (no ISO)
+make compile_commande # Use bear to generate a json compile rule for clangd autocompletion
+make debug            # build a debug ISO (adds -DDEBUG=1) and run it in QEMU with serial output
+make clean            # remove object files
+make fclean           # remove all build artifacts (binaries, ISOs)
+make re               # fclean + all
 ```
 
 ## Intern documentation
@@ -49,3 +53,4 @@ Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) li
 - Kernels 201 - Let’s write a Kernel with keyboard and screen support [here](https://arjunsreedharan.org/post/99370248137/kernels-201-lets-write-a-kernel-with-keyboard)
 - Writing My Own OS by Frank Rosner [here](https://dev.to/frosnerd/series/9585)
 - NyanOS repo [here](https://github.com/yunusemreduran388-ux/NyanOS-v1)
+- Kernel architecture with Meaty skeleton [here](https://wiki.osdev.org/Meaty_Skeleton)

@@ -62,5 +62,6 @@ iso_debug/
 
 # PDF
 *.pdf
+subject/
 
 test*

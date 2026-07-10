@@ -1,4 +1,4 @@
-# Bootloader ([`bootloader.s`](../bootloader/bootloader.s))
+# Bootloader ([`bootloader.s`](../kernel/arch/i386/bootloader.s))
 
 ## Overview
 

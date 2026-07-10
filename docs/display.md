@@ -1,4 +1,4 @@
-# Display Subsystem ()
+# Display Subsystem
 
 ## Overview
 

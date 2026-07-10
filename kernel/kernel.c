@@ -4,9 +4,7 @@
 #include "multiboot.h"
 #include "init.h"
 #include "terminal.h"
-#include <stddef.h>
 #include "kernel.h"
-// #include "terminal.h"
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -48,6 +46,16 @@ static bool	init_ctx(multiboot_info *mbi, unsigned long magic)
 
 	current_driver->clear();
 
+	set_term_color(make_color(COLOR_LIGHT_MAGENTA, COLOR_WHITE));
+	// kprint("_________________________\n");
+	// kprint("                         \n");
+	kprint(" _____    _     ___      \n");
+	kprint("|_   _|__| | __/ _ \\ ___ \n");
+	kprint("  | |/ _ \\ |/ / | | / __|\n");
+	kprint("  | |  __/   <| |_| \\__ \\\n");
+	kprint("  |_|\\___|_|\\_\\\\___/|___/\n");
+	kprint("_________________________\n");
+	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 	#ifdef DEBUG
 		debug_diplay();
 	#endif

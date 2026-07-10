@@ -1,10 +1,7 @@
 #include "../../helpers/helpers.h"
-#include "../../includes/stdbool.h"
-#include "../../helpers/kprint/kprint.h"
 #include "framebuffer.h"
 #include "../terminal.h"
 #include "../init.h"
-#include "../kernel.h"
 
 // Copy the back buffer into the front buffer, to avoid flickering
 // front_stride = number of real pixels between 2 lines in the VRAM (maybe > width because of hardware alignment => pitch)

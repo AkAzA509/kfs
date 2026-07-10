@@ -99,7 +99,7 @@ $(DEBUG_ISO_NAME): $(DEBUG_NAME) grub.cfg
 	@grub-mkrescue -o $@ $(DEBUG_BUILD_DIR)
 
 up: $(ISO_NAME)
-	@qemu-system-i386 -cdrom $(ISO_NAME) -serial stdio
+	@qemu-system-i386 -cdrom $(ISO_NAME)
 
 dev: $(BIN_NAME)
 	@qemu-system-i386 -kernel $(BIN_NAME)

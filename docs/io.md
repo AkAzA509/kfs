@@ -6,6 +6,14 @@ How the kernel talks to hardware devices through the x86 I/O address
 space, and the technical behavior of the `in`/`out` instruction family
 used to do so.
 
+## Reminder
+
+Registers are a hardware component for high-speed data access and communication with other hardware devices. Registers allow software to
+control hardware directly by writing to registers of a device, or receive information from hardware device when reading from registers of a device.
+Not all registers are used for communication with other devices. In a CPU, most registers are used as high-speed storage for temporary data. Other devices that a CPU can communicate always have a set of registers for interfacing with the CPU.
+
+Port is a specialized register in a hardware device used for communication with other devices. When data are written to a port, it causes a hardware device to perform some operation according to values written to the port. The different between a port and a register is that port does not store data, but delegate data to some other circuit.
+
 ## Why it exists
 
 x86 CPUs expose two distinct address spaces: regular memory, and a

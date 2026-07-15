@@ -11,4 +11,6 @@ u16_t	inw(u16_t port);
 u32_t	inl(u16_t port);
 void	serial_print_hex(u32_t val);
 
+void	init_gdt();
+
 #endif // KERNEL_H

@@ -1,8 +1,6 @@
 # Compilation
 export CC			:= $(TARGET)-gcc
 export AR			:= $(TARGET)-ar
-ASMXX				:= nasm
-ASMFLGS				:= -f elf32 -g
 
 # Global part
 BIN					:= bin
@@ -24,13 +22,8 @@ export CPPFLAGS		:= -I$(abspath libc/include) -I$(abspath kernel/include)
 export CFLAGS		:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror $(CPPFLAGS)
 DBGFLAGS			:= -DDEBUG=1 -g
 
-# ASM part
-ASMSRC				:= kernel/arch/i386/bootloader.s
-OBJASM				:= $(OBJDIR)/boot/bootloader.o
-DEBUG_OBJASM		:= $(DEBUG_OBJDIR)/boot/bootloader.o
-
 # Rules
-.PHONY: all debug libc kernel debug-libc debug-kernel clean fclean re up dev compile_commands
+.PHONY: all debug libc asm kernel debug-libc debug-asm debug-kernel clean fclean re up dev compile_commands
 
 all: $(BIN_NAME)
 
@@ -42,40 +35,37 @@ debug: $(DEBUG_ISO_NAME)
 libc:
 	@$(MAKE) -C libc OBJDIR=$(OBJDIR)/libc
 
-kernel: libc
+asm:
+	@$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(OBJDIR)/asm
+	
+kernel: asm libc
 	@$(MAKE) -C kernel OBJDIR=$(OBJDIR)/kernel
 
 # --- debug ---
 debug-libc:
 	@$(MAKE) -C libc OBJDIR=$(DEBUG_OBJDIR)/libc CFLAGS="$(CFLAGS) $(DBGFLAGS)"
 
-debug-kernel: debug-libc
+debug-asm:
+	@$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(DEBUG_OBJDIR)/asm"
+	
+debug-kernel: debug-asm debug-libc
 	@$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel CFLAGS="$(CFLAGS) $(DBGFLAGS)"
 
-# --- asm objet ---
-$(OBJDIR)/boot/bootloader.o: $(ASMSRC)
-	@mkdir -p $(dir $@)
-	$(ASMXX) $(ASMFLGS) $< -o $@
-
-$(DEBUG_OBJDIR)/boot/bootloader.o: $(ASMSRC)
-	@mkdir -p $(dir $@)
-	$(ASMXX) $(ASMFLGS) $< -o $@
-
 # --- final link ---
-$(BIN_NAME): kernel $(OBJASM) $(LINKER_SCRIPT)
+$(BIN_NAME): kernel $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
-	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(OBJASM) \
-		-Wl,--start-group $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a -Wl,--end-group
+	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) \
+		-Wl,--start-group $(OBJDIR)/asm/asm.a $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a -Wl,--end-group
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
 	else \
 		echo "\033[91mthe file is not multiboot\033[0m"; \
 	fi
 
-$(DEBUG_NAME): debug-kernel $(DEBUG_OBJASM) $(LINKER_SCRIPT)
+$(DEBUG_NAME): debug-kernel $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
-	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(DBGFLAGS) $(DEBUG_OBJASM) \
-		-Wl,--start-group $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a -Wl,--end-group
+	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(DBGFLAGS) \
+		-Wl,--start-group $(DEBUG_OBJDIR)/asm/asm.a $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a -Wl,--end-group
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
 	else \
@@ -111,6 +101,8 @@ clean:
 	@$(MAKE) -C libc OBJDIR=$(DEBUG_OBJDIR)/libc clean
 	@$(MAKE) -C kernel OBJDIR=$(OBJDIR)/kernel clean
 	@$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel clean
+	@$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(OBJDIR)/asm clean
+	@$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(DEBUG_OBJDIR)/asm clean
 	rm -rf $(OBJDIR) $(DEBUG_OBJDIR)
 
 fclean: clean

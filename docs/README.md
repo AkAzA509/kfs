@@ -24,9 +24,10 @@ explains it faster than a paragraph.
 |-------------------|--------|
 | `bootloader.md`   | The Multiboot entry point (`bootloader.s`): boot flow from GRUB to `kernel_main`, header layout, stack setup |
 | `display.md`      | VGA/framebuffer terminal: driver dispatch, buffers, color, cursor, multi-screen switching |
+| `gdt.md`          | The GDT (Global Descriptor Table): segment descriptors, memory protection |
+| `io.md`           | The io function out and in explanation (hardware level)
 | `memory.md`       | _Not written yet_ |
 | `toolchain.md`    | Everything required to build the kernel: language, compiler, cross-toolchain, packages |
-| `io.md`           | The io function out and in explanation (hardware level)
 | `TODO.md`         | Known gaps and planned improvements, organized by module |
 
 ## Conventions

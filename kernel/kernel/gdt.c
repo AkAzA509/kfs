@@ -63,15 +63,15 @@ void	init_gdt()
 	gdt_addr.addr = (u32_t)&gdt;
 	gdt_addr.limit = (sizeof(struct s_gdt_entry) * GDT_ENTRIES) - 1;
 
-	create_gdt_entry(0, 0x00000800, 0, 0, 0); // NULL descriptor
-	create_gdt_entry(1, 0x00000800, 0xFFFFF, 0x9A, 0xCF); // Kernel code
-	create_gdt_entry(2, 0x00000800, 0xFFFFF, 0x92, 0xCF); // Kernel data
-	create_gdt_entry(3, 0x00000800, 0xFFFFF, 0x92, 0xCF); // Kernel stack
-	create_gdt_entry(4, 0x00000800, 0xFFFFF, 0xFA, 0xCF); // User code
-	create_gdt_entry(5, 0x00000800, 0xFFFFF, 0xF2, 0xCF); // User data
-	create_gdt_entry(6, 0x00000800, 0xFFFFF, 0xF2, 0xCF); // User stack
+	create_gdt_entry(0, 0, 0, 0, 0); // NULL descriptor
+	create_gdt_entry(1, 0, 0xFFFFF, 0x9A, 0xCF); // Kernel code
+	create_gdt_entry(2, 0, 0xFFFFF, 0x92, 0xCF); // Kernel data
+	create_gdt_entry(3, 0, 0xFFFFF, 0x92, 0xCF); // Kernel stack
+	create_gdt_entry(4, 0, 0xFFFFF, 0xFA, 0xCF); // User code
+	create_gdt_entry(5, 0, 0xFFFFF, 0xF2, 0xCF); // User data
+	create_gdt_entry(6, 0, 0xFFFFF, 0xF2, 0xCF); // User stack
 
-	update_gdt((u32_t)&gdt);
+	// update_gdt((u32_t)&gdt);
 
 	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
 	kprint(BOOT_LOG "gdt initialized\n");
@@ -79,7 +79,7 @@ void	init_gdt()
 }
 
 
-// 0x92 = 1001 0010 kernel data
+// 0x92 = 1001 0010 kernel data, stack
 
 // Bit 7 (P)     = 1  → présent
 // Bit 6-5 (DPL) = 00 → ring 0
@@ -99,20 +99,20 @@ void	init_gdt()
 // Bit 1 (R)     = 1  → lisible
 // Bit 0 (A)     = 0  → pas encore accédé
 
-// // 0xF2 = 1001 0010 kernel data
+// // 0xF2 = 1001 0010 user data, stack
 
 // Bit 7 (P)     = 1  → présent
-// Bit 6-5 (DPL) = 11 → ring 0
+// Bit 6-5 (DPL) = 11 → ring 3
 // Bit 4 (S)     = 1  → segment normal
 // Bit 3 (E)     = 0  → data
 // Bit 2 (DC)    = 0  → expand-up
 // Bit 1 (W)     = 1  → writable
 // Bit 0 (A)     = 0  → pas encore accédé
 
-// 0xFA = 1001 1010 kernel code
+// 0xFA = 1001 1010 user code
 
 // Bit 7 (P)     = 1  → présent
-// Bit 6-5 (DPL) = 11 → ring 0
+// Bit 6-5 (DPL) = 11 → ring 3
 // Bit 4 (S)     = 1  → segment normal
 // Bit 3 (E)     = 1  → code
 // Bit 2 (C)     = 0  → non-conforming

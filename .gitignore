@@ -64,4 +64,9 @@ iso_debug/
 *.pdf
 subject/
 
+#clangd
+compile_commands.json
+
 test*
+
+.cache

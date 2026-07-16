@@ -31,6 +31,14 @@ corresponding `<module>.md` file for context on why each item matters.
 
 - [x] Remove the toolchain part and update/folow the new config and handled case
 
+## GDT
+
+- [ ] TSS descriptor + `ltr`, needed once ring 3 code and an IDT exist,
+  so the CPU knows which kernel stack (`SS0`/`ESP0`) to switch to on interrupt from ring 3.
+- [ ] `iret`-based jump into ring 3, once there is user code to jump to.
+- [ ] Modify the linker script to load the gdt at the right address (0x00000800)
+- [ ] Complete the asm update_gdt() function
+
 ## Misc
 
 - [x] Create a bootloader.md doc

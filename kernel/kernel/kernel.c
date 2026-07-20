@@ -5,6 +5,7 @@
 #include <arch/i386/tty.h>
 #include <kernel/init.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -108,9 +109,10 @@ void kernel_main(unsigned long magic, unsigned long addr) {
 		screen_test();
 	#endif // DEBUG
 
-	kprint("test %zu\n", mbi->boot_loader_name);
-
-	keyboard_handler();
+	// kprint("test %zu\n", mbi->boot_loader_name);
+	printf("test % #0-+coucou\n");
+	
+	// keyboard_handler();
 }
 
 // void multibootfunctest()

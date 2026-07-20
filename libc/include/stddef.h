@@ -3,6 +3,7 @@
 
 typedef unsigned long	size_t;
 typedef signed int		ssize_t;
+typedef unsigned int	uintptr_t;
 
 #define NULL ((void *)0)
 

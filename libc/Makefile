@@ -4,7 +4,8 @@
 
 OBJDIR		?= ../objs/libc
 
-SRC			:= string/memcpy.c string/memmove.c string/memset.c string/strlen.c
+SRC			:= string/memcpy.c string/memmove.c string/memset.c string/strlen.c \
+			   stdio/printf.c stdio/vprintf.c stdio/vprint_core.c
 
 OBJ			:= $(SRC:%.c=$(OBJDIR)/%.o)
 

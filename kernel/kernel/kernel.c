@@ -1,9 +1,9 @@
-#include <kernel/init.h>
-#include <kernel/kernel.h>
-#include <kernel/keyboard.h>
 #include <kernel/kprint/kprint.h>
+#include <arch/i386/keyboard.h>
 #include <kernel/multiboot.h>
-#include <kernel/tty.h>
+#include <kernel/kernel.h>
+#include <arch/i386/tty.h>
+#include <kernel/init.h>
 #include <stdbool.h>
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */

@@ -1,6 +1,6 @@
-#include <kernel/framebuffer.h>
+#include <arch/i386/framebuffer.h>
+#include <arch/i386/tty.h>
 #include <kernel/init.h>
-#include <kernel/tty.h>
 #include <string.h>
 
 // Copy the back buffer into the front buffer, to avoid flickering

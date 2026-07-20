@@ -1,7 +1,7 @@
 #include <kernel/kprint/kprint.h>
 #include <kernel/kernel.h>
+#include <arch/i386/vga.h>
 #include <kernel/init.h>
-#include <kernel/vga.h>
 #include <string.h>
 
 // pack a char with is color (fg, bg)

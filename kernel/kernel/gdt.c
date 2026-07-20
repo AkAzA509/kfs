@@ -1,6 +1,6 @@
 #include <kernel/kprint/kprint.h>
 #include <kernel/kernel.h>
-#include <kernel/tty.h>
+#include <arch/i386/tty.h>
 #include <stdint.h>
 
 struct s_gdt_entry {

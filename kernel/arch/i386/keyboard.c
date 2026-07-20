@@ -1,7 +1,7 @@
 #include <kernel/kprint/kprint.h>
-#include <kernel/keyboard.h>
+#include <arch/i386/keyboard.h>
 #include <kernel/kernel.h>
-#include <kernel/tty.h>
+#include <arch/i386/tty.h>
 #include <stdbool.h>
 
 static const u8_t RELEASE_MSK = 0x80;

@@ -1,9 +1,9 @@
+#include <arch/i386/framebuffer.h>
 #include <kernel/kprint/kprint.h>
-#include <kernel/framebuffer.h>
 #include <kernel/multiboot.h>
+#include <arch/i386/tty.h>
+#include <arch/i386/vga.h>
 #include <kernel/init.h>
-#include <kernel/tty.h>
-#include <kernel/vga.h>
 #include <stdbool.h>
 #include <stdint.h>
 

@@ -3,7 +3,7 @@ OBJDIR		?= ../../../../objs/asm
 ASMXX		:= nasm
 ASMFLGS		:= -f elf32 -g
 
-SRC			:= bootloader.s gdt.s
+SRC			:= bootloader.s #gdt.s
 
 OBJ			:= $(SRC:%.s=$(OBJDIR)/%.o)
 

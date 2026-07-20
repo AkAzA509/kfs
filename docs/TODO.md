@@ -17,6 +17,7 @@ corresponding `<module>.md` file for context on why each item matters.
       fast typing can outrun the 8042 hardware buffer and drop/delay
       scancodes.
 - [x] Handle the backspace key in the keyboard driver (improve the driver overall)
+- [ ] Add a psf2 font handler to be capable of rendering both psf1 and psf2 fonts
 
 ## Memory
 
@@ -42,3 +43,5 @@ corresponding `<module>.md` file for context on why each item matters.
 ## Misc
 
 - [x] Create a bootloader.md doc
+- [ ] rewrite the print API (kwrite, kputchar, kprint ...) its not well organise adn not enough clear to me
+      and add a public api for printf and all is family that i can handle now, not the fd specific version.

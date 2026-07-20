@@ -1,7 +1,7 @@
-#include <kernel/framebuffer.h>
+#include <arch/i386/framebuffer.h>
+#include <arch/i386/vga.h>
+#include <arch/i386/tty.h>
 #include <kernel/init.h>
-#include <kernel/vga.h>
-#include <kernel/tty.h>
 
 // ===== public API , dispatch via vtable ===== //
 

@@ -67,6 +67,6 @@ subject/
 #clangd
 compile_commands.json
 
-test*
+test_kfs.c
 
 .cache

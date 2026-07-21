@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <arch/i386/keyboard.h>
 #include <kernel/multiboot.h>
 #include <kernel/kernel.h>
@@ -107,9 +106,10 @@ void kernel_main(unsigned long magic, unsigned long addr) {
 	// init_gdt();
 	#ifdef DEBUG
 		screen_test();
+		#include <testing/testing.h>
+		test_printf_run();
 	#endif // DEBUG
 
-	test_printf_run();
 	// printf("test %u\n", mbi->boot_loader_name);
 	// printf("%f\n", 1.5);
 	// keyboard_handler();

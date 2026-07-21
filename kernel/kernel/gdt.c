@@ -1,4 +1,4 @@
-#include <kernel/kprint/kprint.h>
+#include <stdio.h>
 #include <kernel/kernel.h>
 #include <arch/i386/tty.h>
 #include <stdint.h>
@@ -74,7 +74,7 @@ void	init_gdt()
 	// update_gdt((u32_t)&gdt);
 
 	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
-	kprint(BOOT_LOG "gdt initialized\n");
+	printf(BOOT_LOG "gdt initialized\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 }
 

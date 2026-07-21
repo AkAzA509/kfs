@@ -5,23 +5,77 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-int printf(const char *restrict fmt, ...);
-int vprintf(const char *restrict fmt, va_list ap);
-
 #ifndef FILE
 #define FILE u8_t
 #endif // FILE
 
-int fprintf(FILE *restrict stream, const char *restrict fmt, ...);
-int vfprintf(FILE *restrict stream, const char *restrict fmt, va_list ap);
+// putchar(c) writes the character c to the standart output (stdout).
+int	putchar(int c);
 
-int dprintf(int fd, const char *restrict fmt, ...);
-int vdprintf(int fd, const char *restrict fmt, va_list ap);
+// The printf() function produces output according to format, writing to
+// standard output. The format string contains conversion specifications
+// beginning with '%', which are replaced by the corresponding argument.
+int	printf(const char *restrict fmt, ...)
+	__attribute__((format(printf, 1, 2)));
 
-int sprintf(char *restrict str, const char *restrict fmt, ...);
-int vsprintf(char *restrict str, const char *restrict fmt, va_list ap);
+// The vprintf() function is equivalent to printf(), except that it is
+// called with a va_list instance instead of a variable number of
+// arguments, allowing another variadic function to forward its own
+// arguments to it.
+int	vprintf(const char *restrict fmt, va_list ap)
+	__attribute__((format(printf, 1, 0)));
 
-int snprintf(char *restrict str, size_t size, const char *restrict fmt, ...);
-int vsnprintf(char *restrict str, size_t size, const char *restrict fmt, va_list ap);
+
+// The fprintf() function produces output according to format, writing to
+// the given stream instead of standard output.
+int	fprintf(FILE *restrict stream, const char *restrict fmt, ...)
+	__attribute__((nonnull(1), format(printf, 2, 3)));
+
+// The vfprintf() function is equivalent to fprintf(), except that it is
+// called with a va_list instance instead of a variable number of
+// arguments.
+int	vfprintf(FILE *restrict stream, const char *restrict fmt, va_list ap)
+	__attribute__((nonnull(1), format(printf, 2, 0)));
+
+
+// The dprintf() function produces output according to format, writing
+// directly to the file descriptor fd instead of a buffered FILE stream.
+int	dprintf(int fd, const char *restrict fmt, ...)
+	__attribute__((format(printf, 2, 3)));
+
+// The vdprintf() function is equivalent to dprintf(), except that it is
+// called with a va_list instance instead of a variable number of
+// arguments.
+int	vdprintf(int fd, const char *restrict fmt, va_list ap)
+	__attribute__((format(printf, 2, 0)));
+
+
+// The sprintf() function produces output according to format, writing the
+// result into the buffer str. The caller must ensure str is large enough;
+// no bounds checking is performed. Prefer snprintf() when the output size
+// is not known in advance.
+int	sprintf(char *restrict str, const char *restrict fmt, ...)
+	__attribute__((nonnull(1), format(printf, 2, 3)));
+
+// The vsprintf() function is equivalent to sprintf(), except that it is
+// called with a va_list instance instead of a variable number of
+// arguments.
+int	vsprintf(char *restrict str, const char *restrict fmt, va_list ap)
+	__attribute__((nonnull(1), format(printf, 2, 0)));
+
+
+// The snprintf() function produces output according to format, writing at
+// most size - 1 characters into str, followed by a terminating null byte.
+// The return value is the number of characters that would have been
+// written had size been unlimited, allowing the caller to detect
+// truncation when the return value is >= size.
+int	snprintf(char *restrict str, size_t size, const char *restrict fmt, ...)
+	__attribute__((format(printf, 3, 4)));
+
+// The vsnprintf() function is equivalent to snprintf(), except that it is
+// called with a va_list instance instead of a variable number of
+// arguments.
+int	vsnprintf(char *restrict str, size_t size, const char *restrict fmt, va_list ap)
+	__attribute__((format(printf, 3, 0)));
 
 #endif // STDIO_H

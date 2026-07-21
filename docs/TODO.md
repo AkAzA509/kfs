@@ -45,3 +45,9 @@ corresponding `<module>.md` file for context on why each item matters.
 - [x] Create a bootloader.md doc
 - [ ] rewrite the print API (kwrite, kputchar, kprint ...) its not well organise adn not enough clear to me
       and add a public api for printf and all is family that i can handle now, not the fd specific version.
+
+## FPU handling
+- [ ] Remove the fpu init from the bootloader and make a init file, for gdt and paging too
+- [ ] No #MF handler for floating point exeption (divide per 0, overflow ...) IDT needed
+- [ ] When we have a schedeler handle the context switching (FXSAVE/FXRSTOR)
+- [ ] The FPU system is not active with SSE2, mean less precision/perf, can be enable later

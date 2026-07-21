@@ -1,4 +1,4 @@
-#include <kernel/kprint/kprint.h>
+#include <stdio.h>
 #include <arch/i386/keyboard.h>
 #include <kernel/multiboot.h>
 #include <kernel/kernel.h>
@@ -30,7 +30,7 @@ void serial_print_hex(u32_t val) {
 
 static bool init_ctx(multiboot_info *mbi, unsigned long magic) {
 	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-		kprint("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);
+		printf("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);
 		return false;
 	}
 
@@ -40,18 +40,18 @@ static bool init_ctx(multiboot_info *mbi, unsigned long magic) {
 		return false;
 
 	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
-	kprint(BOOT_LOG "terminal initialized\n");
+	printf(BOOT_LOG "terminal initialized\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 
 	current_driver->clear();
 
 	set_term_color(make_color(COLOR_LIGHT_MAGENTA, COLOR_WHITE));
-	kprint(" _____    _     ___      \n");
-	kprint("|_   _|__| | __/ _ \\ ___ \n");
-	kprint("  | |/ _ \\ |/ / | | / __|\n");
-	kprint("  | |  __/   <| |_| \\__ \\\n");
-	kprint("  |_|\\___|_|\\_\\\\___/|___/\n");
-	kprint("_________________________\n");
+	printf(" _____    _     ___      \n");
+	printf("|_   _|__| | __/ _ \\ ___ \n");
+	printf("  | |/ _ \\ |/ / | | / __|\n");
+	printf("  | |  __/   <| |_| \\__ \\\n");
+	printf("  |_|\\___|_|\\_\\\\___/|___/\n");
+	printf("_________________________\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 	#ifdef DEBUG
 		debug_diplay();
@@ -62,23 +62,23 @@ static bool init_ctx(multiboot_info *mbi, unsigned long magic) {
 // #define DEBUG
 
 #ifdef DEBUG
-#include <kernel/framebuffer.h>
+#include <arch/i386/framebuffer.h>
 void screen_test() {
-	kprint("Test screen 0\n\n");
+	printf("Test screen 0\n\n");
 
 	screen_switch(1);
 	char buffer[100] = "012345678910111213141516171819202122232425\0";
-	kprint("test screen 1 %s\n\n", buffer);
+	printf("test screen 1 %s\n\n", buffer);
 
 	screen_switch(2);
-	kprint("Test backspace screen 3\n il ne dois rien y avaoir apres ca :%s",
+	printf("Test backspace screen 3\n il ne dois rien y avaoir apres ca :%s",
 		buffer);
 	for (size_t i = 0; buffer[i]; ++i) {
 		backspace();
 	}
 	screen_switch(3);
 	debug_diplay();
-	kprint("coucou after display\n\n\n\n\n\n\nplus bas");
+	printf("coucou after display\n\n\n\n\n\n\nplus bas");
 	backspace();
 	backspace();
 	backspace();
@@ -93,7 +93,7 @@ void screen_test() {
 	const u32_t rows = g_screen.height / font_header.charsize;
 	set_term_color(make_color(COLOR_CYAN, COLOR_WHITE));
 	for (size_t i = 0; i < cols * rows - 1; ++i)
-		kprint("0");
+		printf("0");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 }
 #endif // DEBUG
@@ -104,57 +104,57 @@ void kernel_main(unsigned long magic, unsigned long addr) {
 	if (!init_ctx(mbi, magic))
 		return;
 
-	init_gdt();
+	// init_gdt();
 	#ifdef DEBUG
 		screen_test();
 	#endif // DEBUG
 
-	// kprint("test %zu\n", mbi->boot_loader_name);
-	printf("test % #0-+coucou\n");
-	
+	test_printf_run();
+	// printf("test %u\n", mbi->boot_loader_name);
+	// printf("%f\n", 1.5);
 	// keyboard_handler();
 }
 
 // void multibootfunctest()
 // {
 // if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-// 	kprint("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);
+// 	printf("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);
 // 	return ;
 // }
 
-// kprint("magic = %#x\n", magic);
+// printf("magic = %#x\n", magic);
 
-// kprint("flags = %#x\n", mbi->flags);
+// printf("flags = %#x\n", mbi->flags);
 
 // if (CHECK_FLAG (mbi->flags, 0))
-// 	kprint("mem_lower = %zuKB, mem_upper = %zuKB\n", mbi->mem_lower,
+// 	printf("mem_lower = %zuKB, mem_upper = %zuKB\n", mbi->mem_lower,
 // mbi->mem_upper);
 
 // if (CHECK_FLAG (mbi->flags, 1))
-// 	kprint("boot_device = %#x\n", mbi->boot_device);
+// 	printf("boot_device = %#x\n", mbi->boot_device);
 
 // if (CHECK_FLAG (mbi->flags, 2))
-// 	kprint("cmdline = %s\n", (char *) mbi->cmdline);
+// 	printf("cmdline = %s\n", (char *) mbi->cmdline);
 
 // if (CHECK_FLAG (mbi->flags, 3)) {
 // 	multiboot_mod_list *mod = (multiboot_mod_list *) mbi->mods_addr;
 
-// 	kprint("mods_count = %d, mods_addr = %#x\n", (int)mbi->mods_count,
+// 	printf("mods_count = %d, mods_addr = %#x\n", (int)mbi->mods_count,
 // (int)mbi->mods_addr); 	for (size_t i = 0; i < mbi->mods_count; i++,
-// mod++) 		kprint(" mod_start = %#x, mod_end = %#x, cmdline =
+// mod++) 		printf(" mod_start = %#x, mod_end = %#x, cmdline =
 // %s\n", 				(unsigned) mod->mod_start,
 // (unsigned) mod->mod_end, 				(char *) mod->cmdline);
 // }
 
 // if (CHECK_FLAG (mbi->flags, 4) && CHECK_FLAG (mbi->flags, 5)) {
-// 	kprint("Both bits 4 and 5 are set.\n");
+// 	printf("Both bits 4 and 5 are set.\n");
 // 	return;
 // }
 
 // if (CHECK_FLAG (mbi->flags, 4)) {
 // 	multiboot_aout_symbol_table *multiboot_aout_sym = &(mbi->u.aout_sym);
 
-// 	kprint("multiboot_aout_symbol_table: tabsize = %#0x, "
+// 	printf("multiboot_aout_symbol_table: tabsize = %#0x, "
 // 			"strsize = %#x, addr = %#x\n",
 // 			(unsigned) multiboot_aout_sym->tabsize,
 // 			(unsigned) multiboot_aout_sym->strsize,
@@ -165,7 +165,7 @@ void kernel_main(unsigned long magic, unsigned long addr) {
 // 	multiboot_elf_section_header_table *multiboot_elf_sec =
 // &(mbi->u.elf_sec);
 
-// 	kprint("multiboot_elf_sec: num = %u, size = %#x,"
+// 	printf("multiboot_elf_sec: num = %u, size = %#x,"
 // 			" addr = %#x, shndx = %#x\n",
 // 			(unsigned) multiboot_elf_sec->num, (unsigned)
 // multiboot_elf_sec->size, 			(unsigned)
@@ -175,10 +175,10 @@ void kernel_main(unsigned long magic, unsigned long addr) {
 // if (CHECK_FLAG (mbi->flags, 6)) {
 // 	multiboot_mmap_entry *mmap = (multiboot_mmap_entry *) mbi->mmap_addr;
 
-// 	kprint("mmap_addr = %#x, mmap_length = %#x\n", (unsigned)mbi->mmap_addr,
+// 	printf("mmap_addr = %#x, mmap_length = %#x\n", (unsigned)mbi->mmap_addr,
 // (unsigned)mbi->mmap_length); 	for (; (unsigned long) mmap <
 // mbi->mmap_addr + mbi->mmap_length; mmap = (multiboot_mmap_entry *) ((unsigned
-// long) mmap + mmap->size + sizeof (mmap->size))) 		kprint(" size =
+// long) mmap + mmap->size + sizeof (mmap->size))) 		printf(" size =
 // %#x, base_addr = %#x," 				" length = %#x, type =
 // %#x\n", 				(unsigned) mmap->size,
 // (unsigned) (mmap->addr >> 32), 				(unsigned)

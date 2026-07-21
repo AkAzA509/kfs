@@ -25,10 +25,10 @@ DBGFLAGS			:= -DDEBUG=1 -g
 # Rules
 .PHONY: all debug libc asm kernel debug-libc debug-asm debug-kernel clean fclean re up dev compile_commands
 
-all: $(BIN_NAME)
+all: kernel $(BIN_NAME)
 
 debug: DBGFLAGS := $(DBGFLAGS)
-debug: $(DEBUG_ISO_NAME)
+debug: debug-kernel $(DEBUG_ISO_NAME)
 	@qemu-system-i386 -cdrom $(DEBUG_ISO_NAME) -serial stdio
 
 # --- release ---
@@ -46,26 +46,28 @@ debug-libc:
 	@$(MAKE) -C libc OBJDIR=$(DEBUG_OBJDIR)/libc CFLAGS="$(CFLAGS) $(DBGFLAGS)"
 
 debug-asm:
-	@$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(DEBUG_OBJDIR)/asm"
+	@$(MAKE) -C kernel/arch/i386/asm OBJDIR="$(DEBUG_OBJDIR)/asm"
 	
 debug-kernel: debug-asm debug-libc
 	@$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel CFLAGS="$(CFLAGS) $(DBGFLAGS)"
 
 # --- final link ---
-$(BIN_NAME): kernel $(LINKER_SCRIPT)
+$(BIN_NAME): $(OBJDIR)/asm/asm.a $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a kernel $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
 	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) \
-		-Wl,--start-group $(OBJDIR)/asm/asm.a $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a -Wl,--end-group
+		-Wl,--start-group $(OBJDIR)/asm/asm.a \
+						  $(OBJDIR)/kernel/kernel.a \
+						  $(OBJDIR)/libc/libc.a -Wl,--end-group -lgcc
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
 	else \
 		echo "\033[91mthe file is not multiboot\033[0m"; \
 	fi
 
-$(DEBUG_NAME): debug-kernel $(LINKER_SCRIPT)
+$(DEBUG_NAME): $(DEBUG_OBJDIR)/asm/asm.a $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
 	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(DBGFLAGS) \
-		-Wl,--start-group $(DEBUG_OBJDIR)/asm/asm.a $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a -Wl,--end-group
+		-Wl,--start-group $(DEBUG_OBJDIR)/asm/asm.a $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a -Wl,--end-group -lgcc
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
 	else \

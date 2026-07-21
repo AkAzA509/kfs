@@ -36,7 +36,7 @@ u8_t	make_color(t_color fg, t_color bg);
 u32_t	color_to_rgb(t_color color);
 
 void	init_screens(void);
-void	putchar(char c);
+int		kputchar(char c);
 void	scroll(void);
 void	update_cursor(void);
 void	screen_switch(int new_id);

@@ -1,4 +1,4 @@
-#include <kernel/kprint/kprint.h>
+#include <stdio.h>
 #include <arch/i386/keyboard.h>
 #include <kernel/kernel.h>
 #include <arch/i386/tty.h>
@@ -59,7 +59,7 @@ static void	handle_screen_switch(u8_t code)
 // Fake exit, to modify when the kernel has memory
 void	handle_exit(void)
 {
-	kprint("Shuting down ...\n");
+	printf("Shuting down ...\n");
 	outw(0x604, 0x2000);
 }
 

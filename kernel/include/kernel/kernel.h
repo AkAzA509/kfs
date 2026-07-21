@@ -13,4 +13,6 @@ void	serial_print_hex(u32_t val);
 
 void	init_gdt();
 
+int	test_printf_run(void);
+
 #endif // KERNEL_H

@@ -1,4 +1,4 @@
-#include <kernel/kprint/kprint.h>
+#include <stdio.h>
 #include <kernel/kernel.h>
 #include <arch/i386/vga.h>
 #include <kernel/init.h>

@@ -4,10 +4,10 @@
 
 OBJDIR		?= ../objs/kernel
 
-SRC			:= kernel/kernel.c kernel/io.c kernel/init.c kernel/kputchar.c kernel/kwrite.c \
+SRC			:= kernel/kernel.c kernel/io.c kernel/init.c kernel/kwrite.c \
 			   kernel/gdt.c \
-			   kernel/kprint/kprint.c kernel/kprint/utils.c kernel/kprint/convert_format.c \
-			   arch/i386/tty.c arch/i386/vga.c arch/i386/keyboard.c arch/i386/framebuffer.c
+			   arch/i386/tty.c arch/i386/vga.c arch/i386/keyboard.c arch/i386/framebuffer.c \
+			   kernel/test_printf.c
 
 OBJ			:= $(SRC:%.c=$(OBJDIR)/%.o)
 

@@ -28,7 +28,6 @@ u32_t	color_to_rgb(t_color color)
 
 void	update_cursor(void)
 {
-	// this if need a tweak the color inversion is not good in white give yellow ???
 	if (g_screen.mode == 0) {
 		u8_t	bg_index = (g_screen.color >> 4) & 0x0F;
 		u32_t	bg_rgb = color_to_rgb((t_color)bg_index);
@@ -39,10 +38,11 @@ void	update_cursor(void)
 		set_cursor(g_screen.col, g_screen.row);
 }
 
-void	putchar(char c)
+int	kputchar(char c)
 {
 	current_driver->putchar(c);
 	update_cursor();
+	return 1;
 }
 
 void	scroll(void)

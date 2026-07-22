@@ -9,6 +9,9 @@ size_t	strlen(const char* str)
 	__attribute__((nonnull(1), pure));	// warning, pure tell this function read only its memry, as no call to another function
 										// and the compiler optimise it to avoid call with the same value
 
+#define IS_NULL_TERM(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
+#define IS_ALIGN_PTR(x) ((uintptr_t)(x) & (sizeof(uintptr_t) - 1))
+
 // The strcmp() function compares the two strings s1 and s2,
 // the comparison is done using unsigned characters.
 int	strcmp(const char *s1, const char *s2)

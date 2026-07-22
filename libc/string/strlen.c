@@ -1,24 +1,21 @@
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 
 size_t strlen(const char* str)
 {
 	const char *start = str;
 
-	while ((uintptr_t)str & 7) {
+	while (IS_ALIGN_PTR(start)) {
 		if (!*str)
 			return str - start;
 		str++;
 	}
 
 	const u32_t *s32 = (const u32_t *)str;
-	while(1) {
-		u32_t val = *s32;
-
-		if ((val - 0x01010101) & ~val & 0x80808080)
-			break ;
+	while(IS_NULL_TERM(*s32))
 		s32++;
-	}
+
 	str = (const char *)s32;
 	while(*str)
 		str++;

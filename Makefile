@@ -27,7 +27,7 @@ DBGFLAGS			:= -DDEBUG=1 -g
 
 all: kernel $(BIN_NAME)
 
-debug: DBGFLAGS := $(DBGFLAGS)
+# debug: DBGFLAGS := $(DBGFLAGS)
 debug: debug-kernel $(DEBUG_ISO_NAME)
 	@qemu-system-i386 -cdrom $(DEBUG_ISO_NAME) -serial stdio
 
@@ -49,10 +49,10 @@ debug-asm:
 	@$(MAKE) -C kernel/arch/i386/asm OBJDIR="$(DEBUG_OBJDIR)/asm"
 	
 debug-kernel: debug-asm debug-libc
-	@$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel CFLAGS="$(CFLAGS) $(DBGFLAGS)"
+	@$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel CFLAGS="$(CFLAGS) $(DBGFLAGS)" DEBUG=1
 
 # --- final link ---
-$(BIN_NAME): $(OBJDIR)/asm/asm.a $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a kernel $(LINKER_SCRIPT)
+$(BIN_NAME): kernel $(OBJDIR)/asm/asm.a $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
 	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) \
 		-Wl,--start-group $(OBJDIR)/asm/asm.a \

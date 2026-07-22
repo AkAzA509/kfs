@@ -37,13 +37,12 @@ corresponding `<module>.md` file for context on why each item matters.
 - [ ] TSS descriptor + `ltr`, needed once ring 3 code and an IDT exist,
   so the CPU knows which kernel stack (`SS0`/`ESP0`) to switch to on interrupt from ring 3.
 - [ ] `iret`-based jump into ring 3, once there is user code to jump to.
-- [ ] Modify the linker script to load the gdt at the right address (0x00000800)
-- [ ] Complete the asm update_gdt() function
+- [x] Complete the asm update_gdt() function
 
 ## Misc
 
 - [x] Create a bootloader.md doc
-- [ ] rewrite the print API (kwrite, kputchar, kprint ...) its not well organise adn not enough clear to me
+- [x] rewrite the print API (kwrite, kputchar, kprint ...) its not well organise adn not enough clear to me
       and add a public api for printf and all is family that i can handle now, not the fd specific version.
 
 ## FPU handling

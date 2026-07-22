@@ -54,7 +54,7 @@ extern t_display_driver		*current_driver;
 
 typedef struct t_multiboot_info multiboot_info;
 
-void	debug_diplay();
+void	debug_screen();
 bool	init_term(void);
 void	init_display(multiboot_info *mbi);
 

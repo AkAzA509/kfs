@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#define HALT_ERROR do { \
+	__asm__ volatile("hlt"); \
+} while (1) \
+
 void	outb(u16_t port, u8_t val);
 void	outw(u16_t port, u16_t val);
 void	outl(u16_t port, u32_t val);

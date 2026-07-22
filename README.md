@@ -68,6 +68,7 @@ Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) li
 # Code and file organisation
 - Kernel architecture with Meaty skeleton, by OSdev[here](https://wiki.osdev.org/Meaty_Skeleton)
 - Linux kernel architecture [here](https://www.kernel.org/)
+- The Newlib project [here](https://sourceware.org/newlib/)
 
 # GDT
 - OSdev gdt, descriptors and segment [gdt here](https://wiki.osdev.org/Global_Descriptor_Table), [gdt2 here](https://wiki.osdev.org/GDT_Tutorial), [segment here](https://wiki.osdev.org/Segmentation), [descriptor here](https://wiki.osdev.org/Descriptors)

@@ -3,6 +3,7 @@
 #include <kernel/kernel.h>
 #include <arch/i386/tty.h>
 #include <kernel/init.h>
+#include <kernel/log.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -27,22 +28,58 @@ void serial_print_hex(u32_t val) {
 	outb(0x3F8, '\n');
 }
 
-static bool init_ctx(multiboot_info *mbi, unsigned long magic) {
+void	kmain(void) {
+	#ifdef DEBUG
+		#include <testing/testing.h>
+		test_screen();
+		debug_screen();
+		test_printf_run();
+	#endif // DEBUG
+
+	log_stack(4);
+	log_stack(0);
+	printf("Hello world!\n");
+}
+
+static void	panic_print(char *str)
+{
+	char *vga = (char *)0xB8000;
+	for (int i = 0; str[i]; i++) {
+		vga[i * 2] = str[i];
+		vga[i * 2 + 1] = 0x4F;
+	}
+}
+
+static bool check_multiboot(multiboot_info *mbi, unsigned long magic) {
 	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-		printf("Invalid magic number: multiboot error: %#x\n", (unsigned)magic);
+		panic_print("Invalid magic number: multiboot error");
 		return false;
 	}
+
+	if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type != 1) {
+		panic_print("Invalid framebuffer flags: multiboot error");
+		return false;
+	}
+
+	if (CHECK_FLAG (mbi->flags, 4) && CHECK_FLAG (mbi->flags, 5)) {
+		panic_print("Both bits 4 and 5 are set\n");
+		return false;
+	}
+
+	return true;
+}
+
+void	__kstart(unsigned long magic, unsigned long addr)
+{
+	multiboot_info *mbi = (multiboot_info *)addr;
+
+	if (!check_multiboot(mbi, magic))
+		HALT_ERROR;
 
 	init_display(mbi);
 
 	if (!init_term())
-		return false;
-
-	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
-	printf(BOOT_LOG "terminal initialized\n");
-	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
-
-	current_driver->clear();
+		HALT_ERROR;
 
 	set_term_color(make_color(COLOR_LIGHT_MAGENTA, COLOR_WHITE));
 	printf(" _____    _     ___      \n");
@@ -52,67 +89,11 @@ static bool init_ctx(multiboot_info *mbi, unsigned long magic) {
 	printf("  |_|\\___|_|\\_\\\\___/|___/\n");
 	printf("_________________________\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
-	#ifdef DEBUG
-		debug_diplay();
-	#endif
-	return true;
-}
 
-// #define DEBUG
+	init_gdt();
 
-#ifdef DEBUG
-#include <arch/i386/framebuffer.h>
-void screen_test() {
-	printf("Test screen 0\n\n");
-
-	screen_switch(1);
-	char buffer[100] = "012345678910111213141516171819202122232425\0";
-	printf("test screen 1 %s\n\n", buffer);
-
-	screen_switch(2);
-	printf("Test backspace screen 3\n il ne dois rien y avaoir apres ca :%s",
-		buffer);
-	for (size_t i = 0; buffer[i]; ++i) {
-		backspace();
-	}
-	screen_switch(3);
-	debug_diplay();
-	printf("coucou after display\n\n\n\n\n\n\nplus bas");
-	backspace();
-	backspace();
-	backspace();
-	backspace();
-	backspace();
-	backspace();
-	backspace();
-	backspace();
-
-	screen_switch(0);
-	const u32_t cols = g_screen.width / 8;
-	const u32_t rows = g_screen.height / font_header.charsize;
-	set_term_color(make_color(COLOR_CYAN, COLOR_WHITE));
-	for (size_t i = 0; i < cols * rows - 1; ++i)
-		printf("0");
-	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
-}
-#endif // DEBUG
-
-void kernel_main(unsigned long magic, unsigned long addr) {
-	multiboot_info *mbi = (multiboot_info *)addr;
-
-	if (!init_ctx(mbi, magic))
-		return;
-
-	// init_gdt();
-	#ifdef DEBUG
-		screen_test();
-		#include <testing/testing.h>
-		test_printf_run();
-	#endif // DEBUG
-
-	// printf("test %u\n", mbi->boot_loader_name);
-	// printf("%f\n", 1.5);
-	// keyboard_handler();
+	kmain();	/* if kmain return, that sould not happen but in case we hlt infinitly */
+	HALT_ERROR;
 }
 
 // void multibootfunctest()

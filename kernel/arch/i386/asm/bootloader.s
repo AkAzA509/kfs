@@ -41,17 +41,18 @@ align 4
 ; System V ABI standard and de-facto extensions. The compiler will assume the
 ; stack is properly aligned and failure to align the stack will result in
 ; undefined behavior.
+global stack_top
 section .bss
-align 16
+	align 16
 stack_bottom:
-resb 16384									; 16 KiB is reserved for stack
+	resb 16384								; 16 KiB is reserved for stack
 stack_top:
 
 ; This section load the font file for the framebuffer and the glyphs
 section .rodata
 global font_data
 font_data:
-	incbin "../../../fonts/Lat15-VGA16.psf"			; add the binary into the kernel blob with
+	incbin "../../../fonts/Lat15-VGA16.psf"	; add the binary into the kernel blob with
 											; the font_data name, that we can retreive in the c
 
 ; The linker script specifies _start as the entry point to the kernel and the
@@ -108,11 +109,11 @@ _start:
 	; stack since (pushed 0 bytes so far) and the alignment is thus
 	; preserved and the call is well defined.
 	; note, that if you are building on Windows, C functions may have "_" prefix in assembly: _kernel_main
-	push ebx								; framebuffer ptr
-	push eax								; magic number useless just for comprehension
+	push ebx								; mbi struct ptr
+	push eax								; magic number
 	
-	extern kernel_main
-	call kernel_main
+	extern __kstart
+	call __kstart
 
 	; If the system has nothing more to do, put the computer into an
 	; infinite loop. To do that:

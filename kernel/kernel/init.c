@@ -14,7 +14,7 @@ t_screen_data	g_screens[MAX_SCREENS];
 static u32_t	g_fb_back_buffer[FB_MAX_WIDTH * FB_MAX_HEIGHT];
 
 #ifdef DEBUG
-void	debug_diplay()
+void	debug_screen()
 {
 	printf("g_screen debug:\n");
 	printf("\tmode     : %s\n", g_screen.mode == 1 ? "vga" : "framebuffer");
@@ -49,7 +49,7 @@ static bool	init_frambuffer(void)
 	if (g_screen.width > FB_MAX_WIDTH || g_screen.height > FB_MAX_HEIGHT)
 		return false;
 
-	// le curseur s'acrit pas au demarage
+	// le curseur s'ecrit pas au demarage
 	current_driver->clear();
 
 	update_cursor();
@@ -64,6 +64,10 @@ bool init_term(void)
 	}
 	else
 		ini_vga();
+
+	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
+	printf(BOOT_LOG "terminal initialized\n");
+	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 	return true;
 }
 

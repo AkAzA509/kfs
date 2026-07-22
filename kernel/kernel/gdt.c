@@ -18,8 +18,9 @@ struct s_gdt_addr {
 } __attribute__((packed));
 
 #define GDT_ENTRIES 7
+#define GDT_ADDR 0x00000800
 
-static struct s_gdt_entry	gdt[GDT_ENTRIES];
+static struct s_gdt_entry *const gdt = (struct s_gdt_entry *)GDT_ADDR;
 static struct s_gdt_addr	gdt_addr;
 
 extern void	update_gdt(u32_t gdt);
@@ -60,7 +61,7 @@ static void	create_gdt_entry(u8_t idx, u32_t base, u32_t limit, u8_t access, u8_
 
 void	init_gdt()
 {
-	gdt_addr.addr = (u32_t)&gdt;
+	gdt_addr.addr = (u32_t)gdt;
 	gdt_addr.limit = (sizeof(struct s_gdt_entry) * GDT_ENTRIES) - 1;
 
 	create_gdt_entry(0, 0, 0, 0, 0); // NULL descriptor
@@ -71,7 +72,7 @@ void	init_gdt()
 	create_gdt_entry(5, 0, 0xFFFFF, 0xF2, 0xCF); // User data
 	create_gdt_entry(6, 0, 0xFFFFF, 0xF2, 0xCF); // User stack
 
-	// update_gdt((u32_t)&gdt);
+	update_gdt((u32_t)&gdt_addr);
 
 	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
 	printf(BOOT_LOG "gdt initialized\n");

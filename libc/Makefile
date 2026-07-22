@@ -12,7 +12,13 @@ SRC			:= string/memcpy.c string/memmove.c string/memset.c string/strlen.c \
 
 OBJ			:= $(SRC:%.c=$(OBJDIR)/%.o)
 
-all: $(OBJDIR)/libc.a
+all: echo $(OBJDIR)/libc.a reset
+
+echo:
+	@echo "\n\033[94mStart compiling libc sources\n"
+
+reset:
+	@echo "\033[0m"
 
 $(OBJDIR)/libc.a: $(OBJ)
 	$(AR) rcs $@ $(OBJ)

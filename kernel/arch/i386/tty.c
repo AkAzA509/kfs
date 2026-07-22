@@ -70,8 +70,8 @@ void	screen_switch(int new_id)
 	size_t	active_cols = g_screen.width;
 	size_t	active_rows = g_screen.height;
 	if (g_screen.mode == 0) {
-		active_cols = g_screen.width / 8;
-		active_rows = g_screen.height / font_header.charsize;
+		active_cols = g_screen.width / font_info.width;
+		active_rows = g_screen.height / font_info.height;
 	}
 
 	for (size_t r = 0; r < active_rows; r++) {

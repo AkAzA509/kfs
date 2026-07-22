@@ -1,21 +1,6 @@
-// Suite de tests pour la libc printf, à compiler avec i686-elf-gcc et
-// exécuter dans QEMU (idéalement avec -serial stdio -display none pour
-// lire confortablement le résultat dans le terminal).
-//
-// Les valeurs "expected" ont été générées avec le VRAI printf de la libc
-// hôte (voir gen_expected.c), donc elles font foi.
-//
-// N'utilise QUE putchar() et strlen()/strcmp() pour afficher les résultats
-// (pas printf), afin de ne jamais dépendre du code qu'on est justement en
-// train de tester pour l'output du test lui-même.
-
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-
-// -----------------------------------------------------------------------
-// Petits helpers d'affichage indépendants de printf
-// -----------------------------------------------------------------------
 
 static void t_print(const char *s)
 {

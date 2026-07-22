@@ -29,8 +29,10 @@ typedef struct s_screen_data {
 typedef struct s_screen {
 	void	*buf;
 	u32_t	*back_buf;
-	size_t	col;
-	size_t	row;
+	u16_t	col;
+	u16_t	row;
+	u16_t	total_rows;
+	u16_t	total_cols;
 	int		cursor_col;
 	int		cursor_row;
 	u32_t	width;

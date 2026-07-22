@@ -1,21 +1,20 @@
 #ifndef FRAMEBUFFER_H
 #define FRAMEBUFFER_H
 
+#include "stdbool.h"
 #include <stdint.h>
 #include <stddef.h>
 
-#define PSF1_FONT_MAGIC 0x0436
-#define PSF_FONT_MAGIC  0x864ab572
+typedef struct s_font_info {
+	u32_t	glyph_count;
+	u32_t	width;
+	u32_t	height;
+	u32_t	headersize;
+	u32_t	bytesperglyph;	/* size of each glyph */
+	bool	unicode;
+}				t_font_info;
 
-// the width of PSF1 glyph is always 8 bits,
-// and height = charsize
-typedef struct {
-	u16_t	magic;
-	u8_t	mode;
-	u8_t	charsize;
-}			PSF1_Header;
-
-extern PSF1_Header font_header;
+extern t_font_info font_info;
 
 void	putpixel_fb(char c, u8_t color, size_t col, size_t row);
 void	putchar_fb(char c);

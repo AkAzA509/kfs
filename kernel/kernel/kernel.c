@@ -36,9 +36,12 @@ void	kmain(void) {
 		test_printf_run();
 	#endif // DEBUG
 
-	log_stack(4);
-	log_stack(0);
+	// log_stack(4);
+	// log_stack(0);
+	printf("test %f\n", 43.34);
+	printf("%%");
 	printf("Hello world!\n");
+	keyboard_handler();
 }
 
 static void	panic_print(char *str)

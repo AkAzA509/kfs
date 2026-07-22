@@ -36,16 +36,67 @@ static void	ini_vga(void)
 	update_cursor();
 }
 
-PSF1_Header	font_header;
+t_font_info	font_info;
+
+#define PSF1_MAGIC 0x0436
+#define PSF2_MAGIC 0x864ab572
+
+static bool	init_font(void)
+{
+	
+	if (font_data[0] == 0x72) {
+		u32_t magic = (font_data[3] << 24) | (font_data[2] << 16) |
+						(font_data[1] << 8) | font_data[0];
+		if (magic != PSF2_MAGIC)
+			return false;
+
+		u32_t headersize = (font_data[11] << 24) | (font_data[10] << 16) |
+						(font_data[9] << 8) | font_data[8];
+		u32_t flags = (font_data[15] << 24) | (font_data[14] << 16) |
+						(font_data[13] << 8) | font_data[12];
+		u32_t numglyphs = (font_data[19] << 24) | (font_data[18] << 16) |
+						(font_data[17] << 8) | font_data[16];
+		u32_t bpp = (font_data[23] << 24) | (font_data[22] << 16) |
+						(font_data[21] << 8) | font_data[20];
+		u32_t height = (font_data[27] << 24) | (font_data[26] << 16) |
+						(font_data[25] << 8) | font_data[24];
+		u32_t width = (font_data[31] << 24) | (font_data[30] << 16) |
+						(font_data[29] << 8) | font_data[28];
+
+		font_info.width = width;
+		font_info.height = height;
+		font_info.headersize = headersize;
+		font_info.bytesperglyph = bpp;
+		font_info.glyph_count = numglyphs;
+		font_info.unicode = (flags & 1) ? true : false;
+	}
+	else if (font_data[0] == 0x36) {
+		u32_t	magic = (font_data[1] << 8) | font_data[0];
+		if (magic != PSF1_MAGIC)
+			return false;
+	
+		u32_t	mode = font_data[2];
+		font_info.glyph_count = (mode & 1) ? 512 : 256;
+		font_info.unicode = (mode & 2) ? true : false;
+	
+		font_info.width = 8;
+		font_info.height = font_data[3];
+		font_info.headersize = 4;
+		font_info.bytesperglyph = font_info.height;
+	}
+	else
+		return false;
+
+	g_screen.total_cols = g_screen.width / font_info.width;
+	g_screen.total_rows = g_screen.height / font_info.height;
+
+	return true;
+}
 
 static bool	init_frambuffer(void)
 {
-	font_header.charsize = font_data[3];
-	font_header.mode = font_data[2];
-	font_header.magic = (font_data[1] << 8) | font_data[0];
+	init_font();
 
-	if (font_header.charsize != 16 || font_header.magic != PSF1_FONT_MAGIC)
-		return false;
 	if (g_screen.width > FB_MAX_WIDTH || g_screen.height > FB_MAX_HEIGHT)
 		return false;
 

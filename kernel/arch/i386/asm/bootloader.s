@@ -90,16 +90,10 @@ _start:
 	push 0									; send 0 in the stack
 	popf									; put the 0 into the eflags register to clean it
 
-	; Initialize the FPU: enable hardware floating point instructions
-	; and reset it to a known clean state before any C code can run.
 	push eax
 
-	mov eax, cr0
-	and eax, ~(1 << 2)						; clear EM: allow FPU instructions (no emulation)
-	or  eax, (1 << 1)						; set MP: standard WAIT/FWAIT behavior
-	or  eax, (1 << 5)						; set NE: use modern #MF exceptions
-	mov cr0, eax
-	fninit									; reset FPU to a clean known state
+	extern init_fpu
+	call init_fpu
 
 	pop eax
 	; Enter the high-level kernel. The ABI requires the stack is 16-byte

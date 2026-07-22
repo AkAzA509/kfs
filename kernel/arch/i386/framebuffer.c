@@ -48,8 +48,8 @@ void draw_cursor(int cx, int cy, u32_t color)
 
 void	putpixel_fb(char c, u8_t color, size_t col, size_t row)
 {
-	const u32_t	font_width = 8;
-	const u32_t	font_height = font_header.charsize;
+	const u32_t	font_width = font_info.width;
+	const u32_t	font_height = font_info.height;
 	const u32_t	origin_x = col * font_width;	// col offset
 	const u32_t	origin_y = row * font_height;	// raw offset
 	u32_t	fg = color_to_rgb((t_color)(color & 0x0F));
@@ -59,12 +59,12 @@ void	putpixel_fb(char c, u8_t color, size_t col, size_t row)
 	u8_t	*glyph;
 
 	glyph_index = (u8_t)c;
-	if (!(font_header.mode & 1) && glyph_index > 255)
+	if (glyph_index > font_info.glyph_count)
 		glyph_index = 0;
 
 	// font buffer + 4 (font header) + glyph_index * font_height (16)
 	// = index of the char's first bit into font_buffer
-	glyph = font_data + 4 + glyph_index * font_height;
+	glyph = font_data + font_info.headersize + glyph_index * font_height;
 	back = g_screen.back_buf;
 
 
@@ -105,28 +105,21 @@ static void draw_glyph(const u32_t cols, char c)
 
 void	putchar_fb(char c)
 {
-	const u32_t	font_height = font_header.charsize;
-	const u32_t	cols = g_screen.width / 8;
-	const u32_t	rows = g_screen.height / font_height;
-
-	if (font_height == 0 || cols == 0 || rows == 0 || g_screen.bpp != 32)
-		return ;
-
 	if (c == '\n') {
 		g_screen.col = 0;
 		g_screen.row++;
 	}
 	else if (c == '\t') {
 		g_screen.col = (g_screen.col + 8) & ~7U;
-		if (g_screen.col >= cols) {
+		if (g_screen.col >= g_screen.total_cols) {
 			g_screen.col = 0;
 			g_screen.row++;
 		}
 	}
 	else
-		draw_glyph(cols, c);
+		draw_glyph(g_screen.total_cols, c);
 
-	if (g_screen.row >= rows)
+	if (g_screen.row >= g_screen.total_rows)
 		scroll_fb();
 
 	g_screens[current_screen].col = g_screen.col;
@@ -135,10 +128,8 @@ void	putchar_fb(char c)
 
 void	scroll_fb(void)
 {
-	const u32_t	font_height = font_header.charsize;
+	const u32_t	font_height = font_info.height;
 	const u32_t	line_size = g_screen.width * font_height;
-	const u32_t	cols = g_screen.width / 8;
-	const u32_t	rows = g_screen.height / font_height;
 	u32_t	*back = g_screen.back_buf;
 
 	if (font_height == 0)
@@ -153,8 +144,8 @@ void	scroll_fb(void)
 
 	// update the back screen
 	t_screen_data *d = &g_screens[current_screen];
-	for (u32_t r = 0; r < rows - 1; r++) {
-		for (u32_t c = 0; c < cols; c++) {
+	for (u16_t r = 0; r < g_screen.total_rows - 1; r++) {
+		for (u16_t c = 0; c < g_screen.total_cols; c++) {
 			size_t	dst = r * SCREEN_COLS + c;
 			size_t	src = (r + 1) * SCREEN_COLS + c;
 			d->text_buf[dst] = d->text_buf[src];
@@ -163,13 +154,13 @@ void	scroll_fb(void)
 	}
 
 	// clear the "new" line down
-	for (u32_t c = 0; c < cols; ++c) {
-		size_t	idx = (rows - 1) * SCREEN_COLS + c;
+	for (u16_t c = 0; c < g_screen.total_cols; ++c) {
+		size_t	idx = (g_screen.total_rows - 1) * SCREEN_COLS + c;
 		d->text_buf[idx] = ' ';
 		d->color_buf[idx] = g_screen.color;
 	}
 
-	g_screen.row = rows - 1;
+	g_screen.row = g_screen.total_rows - 1;
 	swap_rect(0, 0, g_screen.width, g_screen.height);
 	g_screen.cursor_col = g_screen.cursor_row = -1;
 }
@@ -193,12 +184,10 @@ void	clear_fb(void)
 {
 	clear_physical_fb();
 
-	const u32_t	rows = g_screen.height / font_header.charsize;
-	const u32_t	cols = g_screen.width / 8;
 	t_screen_data	*d = &g_screens[current_screen];
 
-	for (u32_t r = 0; r < rows; r++) {
-		for (u32_t c = 0; c < cols; c++) {
+	for (u16_t r = 0; r < g_screen.total_rows; r++) {
+		for (u16_t c = 0; c <g_screen.total_cols; c++) {
 			size_t	idx = r * SCREEN_COLS + c;
 			d->text_buf[idx] = ' ';
 			d->color_buf[idx] = g_screen.color;

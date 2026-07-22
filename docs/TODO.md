@@ -17,7 +17,7 @@ corresponding `<module>.md` file for context on why each item matters.
       fast typing can outrun the 8042 hardware buffer and drop/delay
       scancodes.
 - [x] Handle the backspace key in the keyboard driver (improve the driver overall)
-- [ ] Add a psf2 font handler to be capable of rendering both psf1 and psf2 fonts
+- [x] Add a psf2 font handler to be capable of rendering both psf1 and psf2 fonts
 
 ## Memory
 
@@ -46,7 +46,7 @@ corresponding `<module>.md` file for context on why each item matters.
       and add a public api for printf and all is family that i can handle now, not the fd specific version.
 
 ## FPU handling
-- [ ] Remove the fpu init from the bootloader and make a init file, for gdt and paging too
+- [x] Remove the fpu init from the bootloader and make a init file, for gdt and paging too
 - [ ] No #MF handler for floating point exeption (divide per 0, overflow ...) IDT needed
 - [ ] When we have a schedeler handle the context switching (FXSAVE/FXRSTOR)
 - [ ] The FPU system is not active with SSE2, mean less precision/perf, can be enable later

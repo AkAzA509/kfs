@@ -56,6 +56,7 @@ Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) li
 # Bootloader
 - Writing a Tiny x86 Bootloader in assembly [here](https://www.joe-bergeron.com/posts/Writing%20a%20Tiny%20x86%20Bootloader/)
 - GNU/GRUB multiboot doc [here](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
+- Boot sequence doc from OSdev [here](https://wiki.osdev.org/Boot_Sequence)
 
 # Keyboard and screen
 - The little book about OS development by Erik Helin, Adam Renberg output section [here](https://littleosbook.github.io/#output)

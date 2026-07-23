@@ -18,6 +18,7 @@ corresponding `<module>.md` file for context on why each item matters.
       scancodes.
 - [x] Handle the backspace key in the keyboard driver (improve the driver overall)
 - [x] Add a psf2 font handler to be capable of rendering both psf1 and psf2 fonts
+- [ ] Handle the unicode lookup table if the font support it
 
 ## Memory
 

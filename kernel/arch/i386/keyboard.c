@@ -1,8 +1,8 @@
-#include <stdio.h>
 #include <arch/i386/keyboard.h>
 #include <kernel/kernel.h>
 #include <arch/i386/tty.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 static const u8_t RELEASE_MSK = 0x80;
 static const u8_t LEFT_SHIFT = 0x2A;
@@ -38,19 +38,15 @@ static void	handle_screen_switch(u8_t code)
 		case 0x3b:
 			screen_switch(0);	// f1
 			return ;
-
 		case 0x3c:
 			screen_switch(1);	// f2
 			return ;
-
 		case 0x3d:
 			screen_switch(2);	// f3
 			return ;
-
 		case 0x3e:
 			screen_switch(3);	// f4
 			return ;
-
 		default:
 			break ;
 	}
@@ -101,7 +97,7 @@ static void	handle_scancode(u8_t code)
 			(caps_lock && !shift && val >= 'a' && val <= 'z'))
 		val = keycode_shift[code];
 
-	putchar(val);
+	kputchar(val);
 }
 
 void	keyboard_handler()

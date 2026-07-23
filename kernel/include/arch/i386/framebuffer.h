@@ -16,12 +16,13 @@ typedef struct s_font_info {
 
 extern t_font_info font_info;
 
-void	putpixel_fb(char c, u8_t color, size_t col, size_t row);
-void	putchar_fb(char c);
-void	scroll_fb(void);
-void	clear_fb(void);
+void	flush_rect_fb(u32_t x, u32_t y, u32_t w, u32_t h);
+void	flush_screen_fb(void);
+void	physical_scroll_fb(void);
+void	render_glyph_fb(char c, u8_t color, size_t col, size_t row);
+// void	putchar_fb(char c);
+// void	clear_fb(void);
 void	clear_physical_fb(void);
 void	draw_cursor(int cx, int cy, u32_t color);
-void	update_screens(char c);
 
 #endif // FRAMEBUFFER_H

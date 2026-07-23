@@ -32,7 +32,7 @@ void test_screen()
 
 	screen_switch(0);
 	const u32_t cols = g_screen.width / 8;
-	const u32_t rows = g_screen.height / font_header.charsize;
+	const u32_t rows = g_screen.height / font_info.height;
 	set_term_color(make_color(COLOR_CYAN, COLOR_WHITE));
 	for (size_t i = 0; i < cols * rows - 1; ++i)
 		printf("0");

@@ -13,6 +13,7 @@ t_screen_data	g_screens[MAX_SCREENS];
 
 static u32_t	g_fb_back_buffer[FB_MAX_WIDTH * FB_MAX_HEIGHT];
 
+// #define DEBUG
 #ifdef DEBUG
 void	debug_screen()
 {
@@ -24,9 +25,11 @@ void	debug_screen()
 	printf("\theight   : %d\n", g_screen.height);
 	printf("\tpitch    : %d\n", g_screen.pitch);
 	printf("\tbpp      : %d\n", g_screen.bpp);
-	printf("\tcol pos  : %zu\n", g_screen.col);
-	printf("\trow pos  : %zu\n", g_screen.row);
+	printf("\tcol pos  : %d\n", g_screen.col);
+	printf("\trow pos  : %d\n", g_screen.row);
 	printf("\tcolor    : %d\n", g_screen.color);
+	printf("\ttotal_row: %d\n", g_screen.total_rows);
+	printf("\ttotal_col: %d\n", g_screen.total_cols);
 }
 #endif // DEBUG
 
@@ -34,6 +37,8 @@ static void	ini_vga(void)
 {
 	current_driver->clear();
 	update_cursor();
+	g_screen.total_cols = g_screen.width;
+	g_screen.total_rows = g_screen.height;
 }
 
 t_font_info	font_info;
@@ -125,15 +130,15 @@ bool init_term(void)
 t_display_driver *current_driver;
 
 t_display_driver vga_driver = {
-	.putchar	= putchar_vga,
-	.scroll		= scroll_vga,
-	.clear		= clear_vga,
+	.putchar_at	= putpixel_vga,
+	.scroll		= physical_scroll_vga,
+	.clear		= clear_physical_vga,
 };
 
 t_display_driver fb_driver = {
-	.putchar	= putchar_fb,
-	.scroll		= scroll_fb,
-	.clear		= clear_fb,
+	.putchar_at	= render_glyph_fb,
+	.scroll		= physical_scroll_fb,
+	.clear		= clear_physical_fb,
 };
 
 static void	init_fb(multiboot_info *mbi)
@@ -145,6 +150,7 @@ static void	init_fb(multiboot_info *mbi)
 	g_screen.height		= mbi->framebuffer_height;
 	g_screen.pitch		= mbi->framebuffer_pitch;
 	g_screen.bpp		= mbi->framebuffer_bpp;
+	// g_screen.putchar_at = render_glyph_fb;
 }
 
 static void	init_vga(void)
@@ -156,6 +162,7 @@ static void	init_vga(void)
 	g_screen.height		= 25;
 	g_screen.bpp		= 16;
 	g_screen.pitch		= 80 * 2;
+	// g_screen.putchar_at = putpixel_vga;
 }
 
 void init_display(multiboot_info *mbi)
@@ -168,11 +175,11 @@ void init_display(multiboot_info *mbi)
 		init_vga();
 		current_driver = &vga_driver;
 	}
-	g_screen.col = g_screen.row = 0;
-	g_screen.color = make_color(COLOR_WHITE, COLOR_BLACK);
+	// g_screen.col = g_screen.row = 0;
+	// g_screen.color = make_color(COLOR_WHITE, COLOR_BLACK);
 
 	for (int i = 0; i < MAX_SCREENS; ++i) {
-		g_screens[i].col = g_screens[i].row = 0;
-		g_screens[i].color = g_screen.color;
+		g_screens[i].col = g_screens[i].head = 0;
+		g_screens[i].color = make_color(COLOR_WHITE, COLOR_BLACK);
 	}
 }

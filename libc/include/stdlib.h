@@ -3,6 +3,10 @@
 
 #include <stddef.h>
 
+// The labs() function compute the absolute value of
+// the argument x of the appropriate long type for the function.
+long	labs(long x);
+
 // The malloc() function allocates size bytes and returns a pointer to
 // the allocated memory. The memory is not initialized. If size is 0,
 // then malloc() returns a unique pointer value that can later be suc‐

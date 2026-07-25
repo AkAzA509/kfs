@@ -1,12 +1,14 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
+#include "kernel/init.h"
 #include <stdint.h>
+#include <stdbool.h>
 // #include <stddef.h>
 
 typedef enum e_color t_color;
 
-#define BOOT_LOG "[ system ] "
+#define BOOT_LOG "[system] "
 
 typedef enum e_color {
 	COLOR_BLACK = 0,
@@ -34,5 +36,11 @@ u32_t	color_to_rgb(t_color color);
 
 int		kputchar(char c);
 void	screen_switch(int new_id);
+void	screen_snap(void);
+void	screen_scroll(int delta);
+
+typedef struct s_screen_data t_screen_data;
+bool	pinned_to_bottom(t_screen_data *s);
+
 void	backspace(void);
 #endif // TERMINAL_H

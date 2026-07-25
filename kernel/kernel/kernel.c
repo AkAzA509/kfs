@@ -20,30 +20,22 @@
 
 #define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
 
-void serial_print_hex(u32_t val) {
-	char hex[] = "0123456789abcdef";
-	outb(0x3F8, '0');
-	outb(0x3F8, 'x');
-	for (int i = 7; i >= 0; i--)
-		outb(0x3F8, hex[(val >> (i * 4)) & 0xF]);
-	outb(0x3F8, '\n');
-}
-
 void	kmain(void) {
 	// #ifdef DEBUG
 	// 	#include <testing/testing.h>
-	// 	test_screen();
+	// 	// test_screen();
 	// 	debug_screen();
-	// 	test_printf_run();
+	// 	debug_font();
+	// 	// test_printf_run();
 	// #endif // DEBUG
 
 	// log_stack(4);
 	// log_stack(0);
-	printf("test %f\n", 43.34);
-	printf("%%");
-	printf("Hello world!\n");
-	screen_switch(1);
-	screen_switch(0);
+	// printf("test %f\n", 43.34);
+	// printf("%%");
+	// printf("Hello world!\n");
+	// screen_switch(1);
+	// screen_switch(0);
 	keyboard_handler();
 }
 

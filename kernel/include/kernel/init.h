@@ -36,8 +36,8 @@ typedef struct s_screen {
 	u32_t	width;
 	u32_t	height;
 	u32_t	pitch;
-	u32_t	cursor_col;
-	u32_t	cursor_row;
+	int		cursor_col;
+	int		cursor_row;
 	u16_t	total_rows;
 	u16_t	total_cols;
 	u8_t	bpp;
@@ -58,8 +58,9 @@ extern t_screen				g_screen;
 extern t_screen_data		g_screens[MAX_SCREENS];
 extern t_display_driver		*display_d;
 
-void	debug_screen();
-void	debug_current_screen();
+void	debug_screen(void);
+void	debug_font(void);
+void	debug_current_screen(void);
 
 typedef struct t_multiboot_info multiboot_info;
 

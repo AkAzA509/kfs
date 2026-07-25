@@ -1,12 +1,12 @@
 #ifndef COMMON_H
 #define COMMON_H
 
- // #define ASCII_LOGO 	printf(" _____    _     ___      \n"); 
-// 	printf("|_   _|__| | __/ _ \\ ___ \n"); 
-// 	printf("  | |/ _ \\ |/ / | | / __|\n"); 
-// 	printf("  | |  __/   <| |_| \\__ \\\n"); 
-// 	printf("  |_|\\___|_|\\_\\\\___/|___/\n"); 
-// 	printf("_________________________\n"); 
+ // #define ASCII_LOGO 	printf(" _____    _     ___      \n");
+// 	printf("|_   _|__| | __/ _ \\ ___ \n");
+// 	printf("  | |/ _ \\ |/ / | | / __|\n");
+// 	printf("  | |  __/   <| |_| \\__ \\\n");
+// 	printf("  |_|\\___|_|\\_\\\\___/|___/\n");
+// 	printf("_________________________\n");
 
 
 #define ASCII_LOGO printf("  _____    _     ___      \n \

@@ -23,8 +23,10 @@ static void	set_cursor(int x, int y)
 
 void	update_cursor_vga(void)
 {
-	int	col = g_screens[current_screen].col;
-	int	row = g_screens[current_screen].head;
+	t_screen_data	*s = &g_screens[current_screen];
+	int	col = s->col;
+	int	row = s->head - s->view_offset;
+
 	set_cursor(col, row);
 }
 
@@ -90,6 +92,14 @@ void	clear_physical_vga(void)
 
 	for (size_t i = 0; i < total_size; ++i)
 		vga_mem[i] = vga_entry(' ', g_screens[current_screen].color);
-
-	g_screens[current_screen].col = 0;
 }
+
+void	flush_rect_vga(u32_t x, u32_t y, u32_t w, u32_t h)
+{
+	(void)x;
+	(void)y;
+	(void)w;
+	(void)h;
+}
+
+void	flush_screen_vga() {}

@@ -1,11 +1,13 @@
 #include <arch/i386/framebuffer.h>
 #include <stdio.h>
 #include <kernel/multiboot.h>
+#include <kernel/log.h>
 #include <arch/i386/tty.h>
 #include <arch/i386/vga.h>
 #include <kernel/init.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 int				current_screen = 0;
 t_screen		g_screen;
@@ -15,27 +17,38 @@ static u32_t	g_fb_back_buffer[FB_MAX_WIDTH * FB_MAX_HEIGHT];
 
 // #define DEBUG
 #ifdef DEBUG
-void	debug_current_screen()
+void	debug_current_screen(void)
 {
-	printf("current_screen debug:\n");
-	printf("\tcol         : %lu\n", g_screens[current_screen].col);
-	printf("\tcolor       : %d\n", g_screens[current_screen].color);
-	printf("\thead        : %u\n", g_screens[current_screen].head);
-	printf("\tview_offset : %d\n", g_screens[current_screen].view_offset);
+	klog("current_screen debug:\n");
+	klog("\tcol         : %lu\n", g_screens[current_screen].col);
+	klog("\tcolor       : %d\n", g_screens[current_screen].color);
+	klog("\thead        : %u\n", g_screens[current_screen].head);
+	klog("\tview_offset : %d\n", g_screens[current_screen].view_offset);
 }
 
-void	debug_screen()
+void	debug_screen(void)
 {
-	printf("g_screen debug:\n");
-	printf("\tmode     : %s\n", g_screen.mode == 1 ? "vga" : "framebuffer");
-	printf("\tbuf addr : %p\n", g_screen.buf);
-	printf("\tback addr: %p\n", g_screen.back_buf);
-	printf("\twidth    : %d\n", g_screen.width);
-	printf("\theight   : %d\n", g_screen.height);
-	printf("\tpitch    : %d\n", g_screen.pitch);
-	printf("\tbpp      : %d\n", g_screen.bpp);
-	printf("\ttotal_row: %d\n", g_screen.total_rows);
-	printf("\ttotal_col: %d\n", g_screen.total_cols);
+	klog("g_screen debug:\n");
+	klog("\tmode     : %s\n", g_screen.mode == 1 ? "vga" : "framebuffer");
+	klog("\tbuf addr : %p\n", g_screen.buf);
+	klog("\tback addr: %p\n", g_screen.back_buf);
+	klog("\twidth    : %d\n", g_screen.width);
+	klog("\theight   : %d\n", g_screen.height);
+	klog("\tpitch    : %d\n", g_screen.pitch);
+	klog("\tbpp      : %d\n", g_screen.bpp);
+	klog("\ttotal_row: %d\n", g_screen.total_rows);
+	klog("\ttotal_col: %d\n", g_screen.total_cols);
+}
+
+void	debug_font(void)
+{
+	klog("font_info debug:\n");
+	klog("\tbpp        : %u\n", font_info.bytesperglyph);
+	klog("\tglyph_count: %u\n", font_info.glyph_count);
+	klog("\theadersize : %u\n", font_info.headersize);
+	klog("\theight     : %u\n", font_info.height);
+	klog("\tunicode    : %s\n", font_info.unicode ? "true" : "false");
+	klog("\twidth      : %d\n", font_info.width);
 }
 #endif // DEBUG
 
@@ -48,7 +61,7 @@ static void	ini_vga(void)
 }
 
 t_font_info	font_info;
-
+	
 #define PSF1_MAGIC 0x0436
 #define PSF2_MAGIC 0x864ab572
 
@@ -127,6 +140,12 @@ bool init_term(void)
 	else
 		ini_vga();
 
+	for (int i = 0; i < MAX_SCREENS; ++i) {
+		g_screens[i].col = g_screens[i].head = 0;
+		g_screens[i].color = make_color(COLOR_WHITE, COLOR_BLACK);
+		memset(g_screens[i].text_buf, ' ', sizeof(g_screens[i].text_buf));
+		memset(g_screens[i].color_buf, g_screens[i].color, sizeof(g_screens[i].color_buf));
+	}
 	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
 	printf(BOOT_LOG "terminal initialized\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
@@ -140,8 +159,8 @@ t_display_driver vga_driver = {
 	.scroll			= scroll_physical_vga,
 	.clear			= clear_physical_vga,
 	.cursor_update	= update_cursor_vga,
-	.flush_partial	= NULL,
-	.flush_screen	= NULL
+	.flush_partial	= flush_rect_vga,
+	.flush_screen	= flush_screen_vga
 };
 
 t_display_driver fb_driver = {
@@ -162,7 +181,6 @@ static void	init_fb(multiboot_info *mbi)
 	g_screen.height		= mbi->framebuffer_height;
 	g_screen.pitch		= mbi->framebuffer_pitch;
 	g_screen.bpp		= mbi->framebuffer_bpp;
-	// g_screen.putchar_at = render_glyph_fb;
 }
 
 static void	init_vga(void)
@@ -174,7 +192,6 @@ static void	init_vga(void)
 	g_screen.height		= 25;
 	g_screen.bpp		= 16;
 	g_screen.pitch		= 80 * 2;
-	// g_screen.putchar_at = putpixel_vga;
 }
 
 void init_display(multiboot_info *mbi)
@@ -187,9 +204,9 @@ void init_display(multiboot_info *mbi)
 		init_vga();
 		display_d = &vga_driver;
 	}
-	// g_screen.col = g_screen.row = 0;
-	// g_screen.color = make_color(COLOR_WHITE, COLOR_BLACK);
 
+	g_screen.cursor_col = -1;
+	g_screen.cursor_row = -1;
 	for (int i = 0; i < MAX_SCREENS; ++i) {
 		g_screens[i].col = g_screens[i].head = 0;
 		g_screens[i].color = make_color(COLOR_WHITE, COLOR_BLACK);

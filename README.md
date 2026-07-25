@@ -65,6 +65,7 @@ Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) li
 - GNU/GRUB multiboot doc [here](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
 - OSdev Framebuffer implementation [linear fb here](https://wiki.osdev.org/Drawing_In_a_Linear_Framebuffer), [double buffering here](https://wiki.osdev.org/Double_Buffering)
 - OSdev psf font [here](https://wiki.osdev.org/VGA_Fonts), [here](https://wiki.osdev.org/PC_Screen_Font)
+- OSdev keybord ps/2 [here](https://wiki.osdev.org/PS/2_Keyboard)
 
 # Code and file organisation
 - Kernel architecture with Meaty skeleton, by OSdev[here](https://wiki.osdev.org/Meaty_Skeleton)

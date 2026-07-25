@@ -11,7 +11,7 @@ inline u16_t vga_entry(unsigned char uc, u8_t color)
 }
 
 // set the vga cursor with the io port
-void set_cursor(int x, int y)
+static void	set_cursor(int x, int y)
 {
 	u16_t pos = y * g_screen.width + x;
 
@@ -19,6 +19,13 @@ void set_cursor(int x, int y)
 	outb(0x3D5, (u8_t)(pos & 0xFF));
 	outb(0x3D4, 0x0E);
 	outb(0x3D5, (u8_t)((pos >> 8) & 0xFF));
+}
+
+void	update_cursor_vga(void)
+{
+	int	col = g_screens[current_screen].col;
+	int	row = g_screens[current_screen].head;
+	set_cursor(col, row);
 }
 
 void	putpixel_vga(char c, u8_t color, size_t x, size_t y)
@@ -64,27 +71,7 @@ void	putpixel_vga(char c, u8_t color, size_t x, size_t y)
 // 	g_screens[current_screen].head = g_screen.height - 1;
 // }
 
-// void putchar_vga(char c)
-// {
-// 	if (c == '\n') {
-// 		g_screen.row++;
-// 		g_screen.col = 0;
-// 	}
-// 	else if (c == '\t')
-// 		g_screen.col = (g_screen.col + 8) & ~7U;
-// 	else {
-// 		putpixel_vga(c, g_screen.color, g_screen.col, g_screen.row);
-// 		if (++g_screen.col == g_screen.width) {
-// 			g_screen.col = 0;
-// 			g_screen.row++;
-// 		}
-// 	}
-
-// 	if (g_screen.row >= g_screen.height)
-// 		scroll_vga();
-// }
-
-void physical_scroll_vga(void)
+void	scroll_physical_vga(void)
 {
 	u16_t *vga = (u16_t *)g_screen.buf;
 	const size_t line = g_screen.width;
@@ -106,19 +93,3 @@ void	clear_physical_vga(void)
 
 	g_screens[current_screen].col = 0;
 }
-
-// call the back buf cleen and clean the back screen
-// void	clear_vga(void)
-// {
-// 	clear_physical_vga();
-
-// 	t_screen_data	*d = &g_screens[current_screen];
-
-// 	for (size_t r = 0; r < g_screen.height; r++) {
-// 		for (size_t c = 0; c < g_screen.width; c++) {
-// 			size_t idx = r * SCREEN_COLS + c;
-// 			d->text_buf[idx] = ' ';
-// 			d->color_buf[idx] = g_screen.color;
-// 		}
-// 	}
-// }

@@ -1,6 +1,7 @@
 #include <arch/i386/keyboard.h>
 #include <kernel/multiboot.h>
 #include <kernel/kernel.h>
+#include <kernel/common.h>
 #include <arch/i386/tty.h>
 #include <kernel/init.h>
 #include <kernel/log.h>
@@ -29,18 +30,20 @@ void serial_print_hex(u32_t val) {
 }
 
 void	kmain(void) {
-	#ifdef DEBUG
-		#include <testing/testing.h>
-		test_screen();
-		debug_screen();
-		test_printf_run();
-	#endif // DEBUG
+	// #ifdef DEBUG
+	// 	#include <testing/testing.h>
+	// 	test_screen();
+	// 	debug_screen();
+	// 	test_printf_run();
+	// #endif // DEBUG
 
 	// log_stack(4);
 	// log_stack(0);
 	printf("test %f\n", 43.34);
 	printf("%%");
 	printf("Hello world!\n");
+	screen_switch(1);
+	screen_switch(0);
 	keyboard_handler();
 }
 
@@ -59,10 +62,10 @@ static bool check_multiboot(multiboot_info *mbi, unsigned long magic) {
 		return false;
 	}
 
-	if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type != 1) {
-		panic_print("Invalid framebuffer flags: multiboot error");
-		return false;
-	}
+	// if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type != 1) {
+	// 	panic_print("Invalid framebuffer flags: multiboot error");
+	// 	return false;
+	// }
 
 	if (CHECK_FLAG (mbi->flags, 4) && CHECK_FLAG (mbi->flags, 5)) {
 		panic_print("Both bits 4 and 5 are set\n");
@@ -84,16 +87,11 @@ void	__kstart(unsigned long magic, unsigned long addr)
 	if (!init_term())
 		HALT_ERROR;
 
-	set_term_color(make_color(COLOR_LIGHT_MAGENTA, COLOR_WHITE));
-	printf(" _____    _     ___      \n");
-	printf("|_   _|__| | __/ _ \\ ___ \n");
-	printf("  | |/ _ \\ |/ / | | / __|\n");
-	printf("  | |  __/   <| |_| \\__ \\\n");
-	printf("  |_|\\___|_|\\_\\\\___/|___/\n");
-	printf("_________________________\n");
-	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
-
 	init_gdt();
+
+	set_term_color(make_color(COLOR_LIGHT_MAGENTA, COLOR_WHITE));
+	ASCII_LOGO;
+	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 
 	kmain();	/* if kmain return, that sould not happen but in case we hlt infinitly */
 	HALT_ERROR;

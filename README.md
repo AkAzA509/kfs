@@ -33,7 +33,7 @@ make                  # build the kernel binary (bin/kernel)
 make up               # build the ISO and run it in QEMU
 make dev              # run the raw kernel binary directly in QEMU (no ISO)
 make compile_commande # Use bear to generate a json compile rule for clangd autocompletion
-make debug            # build a debug ISO (adds -DDEBUG=1) and run it in QEMU with serial output
+make debug            # build a debug ISO (adds -DDEBUG=1 and some testing file) and run it in QEMU with serial output
 make clean            # remove object files
 make fclean           # remove all build artifacts (binaries, ISOs)
 make re               # fclean + all

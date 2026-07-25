@@ -19,18 +19,18 @@ static void swap_rect(u32_t x, u32_t y, u32_t width, u32_t height)
 	}
 }
 
-void draw_cursor(int cx, int cy, u32_t color)
+static void	draw_cursor(u32_t cx, u32_t cy, u32_t color)
 {
-	const	int start_x = cx * font_info.width;
-	const	int start_y = cy * font_info.height + 14;
+	const	u32_t start_x = cx * font_info.width;
+	const	u32_t start_y = cy * font_info.height + 14;
 
 	if (cx == g_screen.cursor_col && cy == g_screen.cursor_row)
 		return ;
 
-	if (g_screen.cursor_col >= 0)
-		swap_rect(g_screen.cursor_col * 8, g_screen.cursor_row * 16 + 14, 8, 16);
+	// if (g_screen.cursor_col >= 0)
+	swap_rect(g_screen.cursor_col * 8, g_screen.cursor_row * 16 + 14, 8, 16);
 
-	if (start_x < 0 || start_y < 0 || (u32_t)(start_x + 8) > g_screen.width ||
+	if (/*start_x < 0 || start_y < 0 ||*/ (u32_t)(start_x + 8) > g_screen.width ||
 		(u32_t)(start_y + 2) > g_screen.height) {
 		g_screen.cursor_col = g_screen.cursor_row = -1;
 		return ;
@@ -38,14 +38,26 @@ void draw_cursor(int cx, int cy, u32_t color)
 
 	u32_t *front = (u32_t *)g_screen.buf;
 
-	for (int x = start_x; x < start_x + 8; x++)
-		for (int y = start_y; y < start_y + 2; y++)
+	for (u32_t x = start_x; x < start_x + 8; x++)
+		for (u32_t y = start_y; y < start_y + 2; y++)
 			front[y * (g_screen.pitch / 4) + x] = color;
 
 	g_screen.cursor_col = cx;
 	g_screen.cursor_row = cy;
 }
-void render_glyph_fb(char c, u8_t color, size_t col, size_t row)
+
+void	update_cursor_fb(void)
+{
+	int	col = g_screens[current_screen].col;
+	int	row = g_screens[current_screen].head;
+
+	u8_t	bg_index = (g_screens[current_screen].color >> 4) & 0x0F;
+	u32_t	bg_rgb = color_to_rgb((t_color)bg_index);
+	u32_t	cursor_color = ~bg_rgb & 0x00FFFFFF;
+	draw_cursor(col, row, cursor_color);
+}
+
+void	render_glyph_fb(char c, u8_t color, size_t col, size_t row)
 {
 	const u32_t	font_width = font_info.width;
 	const u32_t	font_height = font_info.height;
@@ -70,25 +82,17 @@ void render_glyph_fb(char c, u8_t color, size_t col, size_t row)
 }
 
 // sync explicite, appelée UNE fois par opération logique, jamais par glyphe
-void flush_rect_fb(u32_t x, u32_t y, u32_t w, u32_t h)
+void	flush_rect_fb(u32_t x, u32_t y, u32_t w, u32_t h)
 {
-	swap_rect(x, y, w, h); // ta fonction existante, inchangée
+	swap_rect(x, y, w, h);
 }
 
-void flush_screen_fb(void)
+void	flush_screen_fb(void)
 {
 	swap_rect(0, 0, g_screen.width, g_screen.height);
 }
 
-// putpixel_fb devient juste render + flush immédiat : usage "un seul char" (kputchar)
-// void putpixel_fb(char c, u8_t color, size_t col, size_t row)
-// {
-// 	render_glyph_fb(c, color, col, row);
-// 	flush_rect_fb(col * font_info.width, row * font_info.height,
-// 					font_info.width, font_info.height);
-// }
-
-void physical_scroll_fb(void)
+void	scroll_physical_fb(void)
 {
 	const u32_t font_height = font_info.height;
 	const u32_t row_pixels = g_screen.width * font_height;
@@ -115,19 +119,3 @@ void	clear_physical_fb(void)
 	g_screen.cursor_col = g_screen.cursor_row = -1;
 	g_screens[current_screen].col = 0;
 }
-
-// call the back buf cleen and clean the back screen
-// void	clear_fb(void)
-// {
-// 	clear_physical_fb();
-
-// 	t_screen_data	*d = &g_screens[current_screen];
-
-// 	for (u16_t r = 0; r < g_screen.total_rows; r++) {
-// 		for (u16_t c = 0; c <g_screen.total_cols; c++) {
-// 			size_t	idx = r * SCREEN_COLS + c;
-// 			d->text_buf[idx] = ' ';
-// 			d->color_buf[idx] = g_screen.color;
-// 		}
-// 	}
-// }

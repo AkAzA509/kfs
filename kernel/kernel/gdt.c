@@ -1,15 +1,15 @@
-#include <stdio.h>
-#include <kernel/kernel.h>
+// #include <kernel/kernel.h>
 #include <arch/i386/tty.h>
 #include <stdint.h>
+#include <stdio.h>
 
 struct s_gdt_entry {
-	u16_t limit_1;	// limit, bits 0..15
-	u16_t base_1;	// base, bits 0..15
-	u8_t base_2;	// base, bits 16..23
-	u8_t access;	// access info (type, data/code)
-	u8_t lim_attr;	// bits 0..3: limit, bits 16..19, bits 4..7: additional data/code attributes
-	u8_t base_3;	// base, bits 24..31
+	u16_t	limit_1;	// limit, bits 0..15
+	u16_t	base_1;		// base, bits 0..15
+	u8_t	base_2;		// base, bits 16..23
+	u8_t	access;		// access info (type, data/code)
+	u8_t	lim_attr;	// bits 0..3: limit, bits 16..19, bits 4..7: additional data/code attributes
+	u8_t	base_3;		// base, bits 24..31
 } __attribute__((packed));
 
 struct s_gdt_addr {

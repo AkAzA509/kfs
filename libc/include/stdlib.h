@@ -45,6 +45,7 @@ void	*calloc(size_t nmeb, size_t size);
 // Unless ptr is NULL, it must have been returned by an earlier call to
 // malloc or related functions. If the area pointed to was moved, a
 // free(ptr) is done.
-void	*realloc(void *ptr, size_t size);
+void	*realloc(void *ptr, size_t size)
+	__attribute__(());
 
 #endif // STDLIB_H

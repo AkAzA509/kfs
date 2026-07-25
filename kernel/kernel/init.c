@@ -15,6 +15,15 @@ static u32_t	g_fb_back_buffer[FB_MAX_WIDTH * FB_MAX_HEIGHT];
 
 // #define DEBUG
 #ifdef DEBUG
+void	debug_current_screen()
+{
+	printf("current_screen debug:\n");
+	printf("\tcol         : %lu\n", g_screens[current_screen].col);
+	printf("\tcolor       : %d\n", g_screens[current_screen].color);
+	printf("\thead        : %u\n", g_screens[current_screen].head);
+	printf("\tview_offset : %d\n", g_screens[current_screen].view_offset);
+}
+
 void	debug_screen()
 {
 	printf("g_screen debug:\n");
@@ -25,9 +34,6 @@ void	debug_screen()
 	printf("\theight   : %d\n", g_screen.height);
 	printf("\tpitch    : %d\n", g_screen.pitch);
 	printf("\tbpp      : %d\n", g_screen.bpp);
-	printf("\tcol pos  : %d\n", g_screen.col);
-	printf("\trow pos  : %d\n", g_screen.row);
-	printf("\tcolor    : %d\n", g_screen.color);
 	printf("\ttotal_row: %d\n", g_screen.total_rows);
 	printf("\ttotal_col: %d\n", g_screen.total_cols);
 }
@@ -35,8 +41,8 @@ void	debug_screen()
 
 static void	ini_vga(void)
 {
-	current_driver->clear();
-	update_cursor();
+	display_d->clear();
+	display_d->cursor_update();
 	g_screen.total_cols = g_screen.width;
 	g_screen.total_rows = g_screen.height;
 }
@@ -106,9 +112,9 @@ static bool	init_frambuffer(void)
 		return false;
 
 	// le curseur s'ecrit pas au demarage
-	current_driver->clear();
+	display_d->clear();
 
-	update_cursor();
+	display_d->cursor_update();
 	return true;
 }
 
@@ -127,18 +133,24 @@ bool init_term(void)
 	return true;
 }
 
-t_display_driver *current_driver;
+t_display_driver *display_d;
 
 t_display_driver vga_driver = {
-	.putchar_at	= putpixel_vga,
-	.scroll		= physical_scroll_vga,
-	.clear		= clear_physical_vga,
+	.putchar_at		= putpixel_vga,
+	.scroll			= scroll_physical_vga,
+	.clear			= clear_physical_vga,
+	.cursor_update	= update_cursor_vga,
+	.flush_partial	= NULL,
+	.flush_screen	= NULL
 };
 
 t_display_driver fb_driver = {
-	.putchar_at	= render_glyph_fb,
-	.scroll		= physical_scroll_fb,
-	.clear		= clear_physical_fb,
+	.putchar_at		= render_glyph_fb,
+	.scroll			= scroll_physical_fb,
+	.clear			= clear_physical_fb,
+	.cursor_update	= update_cursor_fb,
+	.flush_partial	= flush_rect_fb,
+	.flush_screen	= flush_screen_fb,
 };
 
 static void	init_fb(multiboot_info *mbi)
@@ -169,11 +181,11 @@ void init_display(multiboot_info *mbi)
 {
 	if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type == 1) {
 		init_fb(mbi);
-		current_driver = &fb_driver;
+		display_d = &fb_driver;
 	}
 	else {
 		init_vga();
-		current_driver = &vga_driver;
+		display_d = &vga_driver;
 	}
 	// g_screen.col = g_screen.row = 0;
 	// g_screen.color = make_color(COLOR_WHITE, COLOR_BLACK);

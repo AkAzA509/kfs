@@ -85,7 +85,7 @@ static void	handle_scancode(u8_t code)
 	}
 
 	#ifdef DEBUG
-		serial_print_hex(code);
+		// serial_print_hex(code);
 	#endif
 	char val = keycode[code];
 	if (!val)

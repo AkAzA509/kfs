@@ -2,7 +2,6 @@
 #define LOG_H
 
 #include <stddef.h>
-#include <stdint.h>
 
 // If len = 0 the stack will be print entirely
 // else all the value from start to len

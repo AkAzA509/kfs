@@ -1,3 +1,4 @@
+#include "kernel/kernel.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,21 +30,6 @@ u32_t	color_to_rgb(t_color color)
 	return palette[(u8_t)color & 0x0F];
 }
 
-void	update_cursor(void)
-{
-	int	col = g_screens[current_screen].col;
-	int	row = g_screens[current_screen].head;
-
-	if (g_screen.mode == 0) {
-		u8_t	bg_index = (g_screens[current_screen].color >> 4) & 0x0F;
-		u32_t	bg_rgb = color_to_rgb((t_color)bg_index);
-		u32_t	cursor_color = ~bg_rgb & 0x00FFFFFF;
-		draw_cursor(col, row, cursor_color);
-	}
-	else
-		set_cursor(col, row);
-}
-
 static inline bool line_visible(t_screen_data *s, u32_t line)
 {
 	return line >= s->view_offset && line < s->view_offset + g_screen.total_rows;
@@ -58,37 +44,31 @@ static void clear_line(t_screen_data *s, u32_t line)
 {
 	u32_t	idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;
 	memset(&s->text_buf[idx], ' ', g_screen.total_cols);
-	memset(&s->color_buf[idx], g_screens[current_screen].color, g_screen.total_cols);
+	memset(&s->color_buf[idx], s->color, g_screen.total_cols);
 }
 
 static void screen_redraw(void)
 {
 	t_screen_data	*d = &g_screens[current_screen];
 
-	current_driver->clear();
+	display_d->clear();
 
 	for (u16_t r = 0; r < g_screen.total_rows; r++) {
 		u32_t	line = d->view_offset + r;
 		if (line > d->head)
 			break ;
+
 		u32_t	idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;
 		for (u16_t c = 0; c < g_screen.total_cols; c++) {
 			if (d->text_buf[idx + c] == '\0')
 				continue ;
-			current_driver->putchar_at(d->text_buf[idx + c], d->color_buf[idx + c], c, r);
-			// if (g_screen.mode == 1)
-			// 	putpixel_vga(d->text_buf[idx + c], d->color_buf[idx + c], c, r);
-			// else
-			// 	render_glyph_fb(d->text_buf[idx + c], d->color_buf[idx + c], c, r); // pas de flush ici
+			display_d->putchar_at(d->text_buf[idx + c], d->color_buf[idx + c], c, r);
 		}
 	}
-	if (g_screen.mode == 0)
-		flush_screen_fb(); // UN seul memcpy global, pas 12000
+	display_d->flush_screen();
 
-	g_screens[current_screen].col = d->col;
-	g_screens[current_screen].head = (u16_t)(d->head - d->view_offset);
-	g_screens[current_screen].color = d->color;
-	update_cursor();
+	// g_screens[current_screen].head = (u16_t)(d->head - d->view_offset);
+	display_d->cursor_update();
 }
 
 void screen_snap(void)
@@ -112,13 +92,13 @@ static void screen_newline(t_screen_data *s)
 		s->view_offset = s->head - SCROLLBACK_LINES + 1;
 	clear_line(s, s->head);
 
-	g_screens[current_screen].col = 0;
+	// g_screens[current_screen].col = 0;
 	s->col = 0;
 
 	if (!was_pinned)
 		return ; // pas visible, rien à faire — déjà optimal ici
 
-	current_driver->scroll();
+	display_d->scroll();
 	s->view_offset++;
 	g_screen.cursor_col = g_screen.cursor_row = -1; // invalide le cache du curseur fb
 }
@@ -134,7 +114,8 @@ static void partial_shift(t_screen_data *s, int delta)
 			memmove(vga, vga + delta * g_screen.width, moved * g_screen.width * sizeof(u16_t));
 		else
 			memmove(vga - delta * g_screen.width, vga, moved * g_screen.width * sizeof(u16_t));
-	} else {
+	}
+	else {
 		u32_t	*back = g_screen.back_buf;
 		u32_t	row_px = g_screen.width * font_info.height;
 		if (delta > 0)
@@ -149,16 +130,10 @@ static void partial_shift(t_screen_data *s, int delta)
 	for (u16_t r = start; r < end; r++) {
 		u32_t	line = s->view_offset + r;
 		u32_t	idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;
-		for (u16_t c = 0; c < g_screen.total_cols; c++) {
-			current_driver->putchar_at(s->text_buf[idx + c], s->color_buf[idx + c], c, r);
-			// if (g_screen.mode == 1)
-			// 	putpixel_vga(s->text_buf[idx + c], s->color_buf[idx + c], c, r);
-			// else
-			// 	render_glyph_fb(s->text_buf[idx + c], s->color_buf[idx + c], c, r);
-		}
+		for (u16_t c = 0; c < g_screen.total_cols; c++)
+			display_d->putchar_at(s->text_buf[idx + c], s->color_buf[idx + c], c, r);
 	}
-	if (g_screen.mode == 0)
-		flush_screen_fb(); // un seul sync pour tout le shift + les lignes neuves
+	display_d->flush_screen();
 }
 
 void screen_scroll(int delta)
@@ -201,14 +176,14 @@ void screen_clear(bool full)
 		memset(s->text_buf, ' ', sizeof(s->text_buf));
 		memset(s->color_buf, s->color, sizeof(s->color_buf));
 		s->head = s->view_offset = s->col = 0;
-		g_screens[current_screen].col = 0;
+		s->col = 0;
 	}
 	else {
 		for (u16_t r = 0; r < g_screen.total_rows; r++)
 			clear_line(s, s->view_offset + r);
 	}
-	current_driver->clear();
-	update_cursor();
+	display_d->clear();
+	display_d->cursor_update();
 }
 
 int kputchar(char c)
@@ -217,35 +192,34 @@ int kputchar(char c)
 
 	if (c == '\n') {
 		screen_newline(s);
-		update_cursor();
+		display_d->cursor_update();
 		return 1;
 	}
 	if (c == '\t') {
-		u16_t next = (g_screens[current_screen].col + 8) & ~7U;
-		while (g_screens[current_screen].col < next && g_screens[current_screen].col < g_screen.total_cols)
+		u16_t next = (s->col + 8) & ~7U;
+		while (s->col < next && s->col < g_screen.total_cols)
 			kputchar(' ');
 		return 1;
 	}
 
-	u32_t	idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + g_screens[current_screen].col;
+	u32_t	idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + s->col;
 	s->text_buf[idx] = c;
-	s->color_buf[idx] = g_screens[current_screen].color;
+	s->color_buf[idx] = s->color;
 
 	if (line_visible(s, s->head)) {
-		current_driver->putchar_at(c, g_screens[current_screen].color, g_screens[current_screen].col, s->head - s->view_offset);
-		if (g_screen.mode == 0) {
-			u16_t	row = s->head - s->view_offset;
-			flush_rect_fb(g_screens[current_screen].col * font_info.width, row * font_info.height,
+		display_d->putchar_at(c, s->color, s->col, s->head - s->view_offset);
+
+		u16_t	row = s->head - s->view_offset;
+		display_d->flush_partial(s->col * font_info.width, row * font_info.height,
 						font_info.width, font_info.height);
-		}
 	}
 
-	g_screens[current_screen].col++;
-	s->col = g_screens[current_screen].col;
-	if (g_screens[current_screen].col >= g_screen.total_cols)
+	// g_screens[current_screen].col++;
+	s->col++; // = ++g_screens[current_screen].col;
+	if (s->col >= g_screen.total_cols)
 		screen_newline(s);
 
-	update_cursor();
+	display_d->cursor_update();
 	return 1;
 }
 
@@ -261,22 +235,21 @@ void backspace(void)
 {
 	t_screen_data	*s = &g_screens[current_screen];
 
-	if (g_screens[current_screen].col == 0)
+	if (s->col == 0)
 		return ; // la ligne discipline (tty input) doit empêcher de remonter avant le début de l'input
-	g_screens[current_screen].col--;
-	s->col = g_screens[current_screen].col;
+	// g_screens[current_screen].col--;
+	s->col--; // = --g_screens[current_screen].col;
 
-	u32_t	idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + g_screens[current_screen].col;
+	u32_t	idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + s->col;
 	s->text_buf[idx] = ' ';
-	s->color_buf[idx] = g_screens[current_screen].color;
+	s->color_buf[idx] = s->color;
 
 	if (line_visible(s, s->head)) {
-		current_driver->putchar_at(' ', g_screens[current_screen].color, g_screens[current_screen].col, s->head - s->view_offset);
-		if (g_screen.mode == 0) {
-			u16_t	row = s->head - s->view_offset;
-			flush_rect_fb(g_screens[current_screen].col * font_info.width, row * font_info.height,
-						font_info.width, font_info.height);
-		}
+		display_d->putchar_at(' ', s->color, s->col, s->head - s->view_offset);
+
+		u16_t	row = s->head - s->view_offset;
+		display_d->flush_partial(s->col * font_info.width, row * font_info.height,
+					font_info.width, font_info.height);
 	}
-	update_cursor();
+	display_d->cursor_update();
 }

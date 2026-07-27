@@ -54,11 +54,14 @@ corresponding `<module>.md` file for context on why each item matters.
 
 ## TTY / Console
 
-- [ ] Line editor / input discipline: `input_boundary`, bounding backspace to
-  the current prompt, feeding `^L` handling described above.
+- [x] Line editor / input discipline: `input_boundary`, bounding backspace to
+  the current prompt
+- [ ] Had `^L` handling.
 - [ ] Bring `screen_clear()` in line with the non-destructive design (reuse
   `screen_newline()` instead of `memset`).
 - [ ] Revisit tab-stop expansion when it crosses a line boundary mid-loop.
+- [ ] Scroll mess TO FIX
+- [ ] when we switch screen the promt doesn't appear, unless i hit enter TO FIX
 
 ## Keyboard
 

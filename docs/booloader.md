@@ -9,7 +9,7 @@ bytes loaded into memory. Its only jobs are:
 1. Carry a **Multiboot header** that GRUB recognizes, so it knows this file
    is a bootable kernel and how it would like to be loaded.
 2. Set up the bare minimum the CPU needs to run C code: a stack.
-3. Jump into `kernel_main`, written in C, passing along what GRUB found out
+3. Jump into `__kstart`, written in C, passing along what GRUB found out
    about the machine.
 
 Everything here runs in 32-bit protected mode, with interrupts disabled and
@@ -35,12 +35,12 @@ paging off, exactly the state Multiboot guarantees, nothing more.
                                                         │       _start        │
                                                         │  (this file, asm)   │
                                                         └─────────┬───────────┘
-                                                                  │  1. set up stack
+                                                                  │  1. set up stack, fpu
                                                                   │  2. clear eflags
                                                                   │  3. push ebx, eax
                                                                   ▼
                                                         ┌───────────────────┐
-                                                        │    kernel_main    │
+                                                        │      __kstart     │
                                                         │        (C)        │
                                                         └───────────────────┘
 ```
@@ -55,7 +55,7 @@ learned:
   available, framebuffer address/width/height/pitch/bpp. This is exactly
   the `mbi` pointer consumed by `init_display()` (see [`display.md`](display.md#Boot-time--setup)).
 
-Both are pushed onto the stack before calling `kernel_main`, so the C side
+Both are pushed onto the stack before calling `__kstart`, so the C side
 receives them as its two arguments.
 
 ## The Multiboot header
@@ -154,17 +154,19 @@ _start:
 	push 0
 	popf                     ; 2. zero out eflags, start from a known, clean state
 
-	push ebx                 ; 3. framebuffer/Multiboot info pointer (2nd C arg)
-	push eax                 ; 4. Multiboot magic number   (1st C arg)
+	call init_fpu            ; 3 enable the fpu system
+
+	push ebx                 ; 4. framebuffer/Multiboot info pointer (2nd C arg)
+	push eax                 ; 5. Multiboot magic number   (1st C arg)
 
 	extern kernel_main
-	call kernel_main          ; 5. hand off to C, this never normally returns
+	call kernel_main          ; 6. hand off to C, this never normally returns
 
-	cli                       ; 6. if it ever does return: disable interrupts
+	cli                       ; 7. if it ever does return: disable interrupts
 .hang:
 	hlt                       ;    halt the CPU
 	jmp .hang                 ;    and if a non-maskable interrupt wakes it up,
-                              ;    go straight back to halting
+                            ;    go straight back to halting
 ```
 
 A few details worth calling out:
@@ -180,14 +182,14 @@ A few details worth calling out:
 - **`push 0` / `popf`** doesn't just clear flags, it's the cheapest way to
   put a known, predictable value into `eflags` without relying on whatever
   garbage the CPU or GRUB left there.
-- **The halt loop matters even though `kernel_main` never returns in
+- **The halt loop matters even though `__kstart` never returns in
   practice.** If it ever did (a bug, a deliberate `return` while
   debugging), falling off the end of `_start` into whatever bytes follow in
   memory would be far worse than a controlled, silent halt.
 
 ## What this file deliberately does *not* do
 
-- No paging, no GDT/IDT setup, no floating point initialization, the
+- No paging, no GDT/IDT setup yet, the
   comments in the file are explicit about this being intentional. Those
   belong to later kernel initialization stages in C (or later asm files),
   not to the Multiboot entry point itself.

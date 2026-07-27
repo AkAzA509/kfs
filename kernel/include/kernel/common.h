@@ -16,4 +16,8 @@
   |_|\\___|_|\\_\\\\___/|___/\n \
 _________________________\n"); \
 
+#define HALT_ERROR do { \
+	__asm__ volatile("hlt"); \
+} while (1) \
+
 #endif // COMMON_H

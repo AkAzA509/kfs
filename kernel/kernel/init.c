@@ -140,12 +140,6 @@ bool init_term(void)
 	else
 		ini_vga();
 
-	for (int i = 0; i < MAX_SCREENS; ++i) {
-		g_screens[i].col = g_screens[i].head = 0;
-		g_screens[i].color = make_color(COLOR_WHITE, COLOR_BLACK);
-		memset(g_screens[i].text_buf, ' ', sizeof(g_screens[i].text_buf));
-		memset(g_screens[i].color_buf, g_screens[i].color, sizeof(g_screens[i].color_buf));
-	}
 	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
 	printf(BOOT_LOG "terminal initialized\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
@@ -210,5 +204,7 @@ void init_display(multiboot_info *mbi)
 	for (int i = 0; i < MAX_SCREENS; ++i) {
 		g_screens[i].col = g_screens[i].head = 0;
 		g_screens[i].color = make_color(COLOR_WHITE, COLOR_BLACK);
+		memset(g_screens[i].text_buf, ' ', sizeof(g_screens[i].text_buf));
+		memset(g_screens[i].color_buf, g_screens[i].color, sizeof(g_screens[i].color_buf));
 	}
 }

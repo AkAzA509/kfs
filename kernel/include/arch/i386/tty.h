@@ -30,6 +30,14 @@ typedef enum e_color {
 	COLOR_END
 }	t_color;
 
+// command list for the tty
+// - reboot
+// - halt
+// - print logo
+// - print stack
+// - shutdown
+// - (change color)
+
 void	set_term_color(u8_t color);
 u8_t	make_color(t_color fg, t_color bg);
 u32_t	color_to_rgb(t_color color);

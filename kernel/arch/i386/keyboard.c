@@ -1,6 +1,6 @@
 #include "stdint.h"
 #include <arch/i386/keyboard.h>
-#include <kernel/kernel.h>
+#include <kernel/io.h>
 #include <kernel/log.h>
 #include <arch/i386/tty.h>
 #include <stdbool.h>

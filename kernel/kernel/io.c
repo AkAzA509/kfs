@@ -1,5 +1,4 @@
-#include <kernel/kernel.h>
-#include <stdint.h>
+#include <kernel/io.h>
 
 // ===== In io function ===== //
 

@@ -1,6 +1,5 @@
 #include <arch/i386/keyboard.h>
 #include <kernel/multiboot.h>
-#include <kernel/kernel.h>
 #include <kernel/common.h>
 #include <arch/i386/tty.h>
 #include <kernel/init.h>

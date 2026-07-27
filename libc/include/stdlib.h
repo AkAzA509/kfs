@@ -9,9 +9,7 @@ long	labs(long x);
 
 // The malloc() function allocates size bytes and returns a pointer to
 // the allocated memory. The memory is not initialized. If size is 0,
-// then malloc() returns a unique pointer value that can later be suc‐
-// cessfully passed to free(). (See "Nonportable behavior" for portabil‐
-// ity issues.)
+// then malloc() returns NULL.
 void	*malloc(size_t size)
 	__attribute__((malloc, warn_unused_result));
 
@@ -40,11 +38,7 @@ void	*calloc(size_t nmeb, size_t size);
 // If ptr is NULL, then the call is equivalent to malloc(size), for all
 // values of size.
 // If size is equal to zero, and ptr is not NULL, then the call is equiv‐
-// alent to free(ptr) (but see "Nonportable behavior" for portability is‐
-// sues).
-// Unless ptr is NULL, it must have been returned by an earlier call to
-// malloc or related functions. If the area pointed to was moved, a
-// free(ptr) is done.
+// alent to free(ptr).
 void	*realloc(void *ptr, size_t size)
 	__attribute__(());
 

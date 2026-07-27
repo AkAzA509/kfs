@@ -1,5 +1,4 @@
-#include <kernel/log.h>
-#include <kernel/kernel.h>
+#include <kernel/io.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -21,14 +20,14 @@ void	log_stack(size_t len)
 
 	printf("kernel stack log from start to end\n(higher address mean near from start)\n");
 	printf(" addresse :   value\n");
-	// u32_t *stack = (u32_t *)top;
+
 	for (size_t i = 0; i != nb_words; i++) {
 		u32_t addr = top - (i * 4) - 4;
 		printf("0x%08x: 0x%08x\n", addr, *(u32_t *)addr);
 	}
 }
 
-	void serial_print_hex(u32_t val)
+void	serial_print_hex(u32_t val)
 {
 	char hex[] = "0123456789abcdef";
 	outb(0x3F8, '0');
@@ -38,7 +37,7 @@ void	log_stack(size_t len)
 	outb(0x3F8, '\n');
 }
 
-void serial_print(char val)
+void	serial_print(char val)
 {
 	outb(0x3F8, val);
 }

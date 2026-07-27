@@ -1,4 +1,3 @@
-// #include <kernel/kernel.h>
 #include <arch/i386/tty.h>
 #include <stdint.h>
 #include <stdio.h>

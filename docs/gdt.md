@@ -202,21 +202,22 @@ update_gdt(&gdt)                        [assembly]
   ├─ lgdt [gdt_addr]                    tells the CPU where the table is,
   │                                     nothing else happens yet
   │
-  ├─ jmp 0x08:reload_cs                 far jump: only way to change CS,
-  │                                     loads selector 0x08 (kernel code)
-  │
-  reload_cs:
   ├─ mov ax, 0x10                       kernel data selector
   ├─ mov ds, ax
   ├─ mov es, ax
   ├─ mov fs, ax
   ├─ mov gs, ax
-  ├─ mov ss, ax                         kernel stack selector reused here,
-  │                                     current stack is left untouched,
-  │                                     only its privilege tag changes
+  ├─ mov ax, 0x18
+  ├─ mov ss, ax
+  │
+  ├─ jmp 0x08:done                      far jump: only way to change CS,
+  │                                     loads selector 0x08 (kernel code)
+  │
+  ├─done:
+  ├─ ret
   ▼
-CS = 0x08, DS/ES/FS/GS/SS = 0x10        GRUB's temporary GDT is now fully
-                                        replaced, ESP itself never moves
+CS = 0x08, DS/ES/FS/GS = 0x10, SS = 0x18 GRUB's temporary GDT is now fully
+                                         replaced, ESP itself never moves
 ```
 
 Building the descriptor table does not, by itself, change anything, the
@@ -266,11 +267,7 @@ enforced isolation beyond whatever the current code chooses to do.
 ## Boot-time placement
 
 The subject requires the table itself to live at physical address
-`0x00000800`. This is **not yet implemented**, `gdt[]` is currently a
-plain `static` array placed wherever the linker's `.bss` layout puts it.
-Pinning it to `0x800` will need either a dedicated linker script section
-or a fixed pointer instead of a static array, tracked in
-[TODO.md](TODO.md).
+`0x00000800`.
 
 ## Public API
 

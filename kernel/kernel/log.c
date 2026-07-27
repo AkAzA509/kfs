@@ -35,6 +35,7 @@ void	serial_print_hex(u32_t val)
 	for (int i = 7; i >= 0; i--)
 		outb(0x3F8, hex[(val >> (i * 4)) & 0xF]);
 	outb(0x3F8, '\n');
+	outb(0x3F8, '\n');
 }
 
 void	serial_print(char val)

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <kernel/multiboot.h>
 #include <kernel/log.h>
-#include <arch/i386/tty.h>
+#include <arch/i386/console.h>
 #include <arch/i386/vga.h>
 #include <kernel/init.h>
 #include <stdbool.h>

@@ -2,38 +2,43 @@
 
 ## Overview
 
-The display subsystem provides a unified terminal abstraction on top of two
-mutually exclusive video backends:
+The display subsystem is the **backend layer**: it knows how to draw a
+single glyph at a physical screen position, and nothing else. It has no
+concept of scrollback, virtual screens, or a logical write cursor, all
+of that lives one layer up, in `console.c` (see [console.md](console.md)).
+
+Two mutually exclusive video backends exist:
 
 - **VGA text mode** writes directly to the `0xB8000` text buffer.
 - **Linear framebuffer** writes RGB pixels to a memory region provided by
-  GRUB via the Multiboot info structure, and renders glyphs from a PSF1
+  GRUB via the Multiboot info structure, and renders glyphs from a PSF1/PSF2
   bitmap font.
 
 The choice between the two is made **at runtime**, during boot, based on
-what GRUB actually managed to set up, not at compile time. The rest of the
-kernel (keyboard handler, `kprint`, etc.) never needs to know which backend
-is active; it only talks to a small generic API (`putchar`, `scroll`,
-`screen_switch`, ...).
+what GRUB actually managed to set up.
 
 ```
-kprint / kwrite / kputchar        (libc-like public API, kernel/kernel)
-            │
-            ▼
-          tty.c                    (generic orchestration: driver dispatch,
-            │                       cursor, multi-screen logic)
-            ▼
-   t_display_driver (vtable)
-      /            \
-   vga.c        framebuffer.c      (hardware-specific implementations,
-                                     know nothing about each other)
+kputchar / printf                 (console.c, generic orchestration: scrollback,
+      │                             view offset, multi-screen, cursor math)
+      ▼
+t_display_driver (vtable)         (display_d: this document)
+   /            \
+vga.c        framebuffer.c        (hardware-specific implementations,
+                                    know nothing about each other, nothing
+                                    about scrollback, nothing about which
+                                    virtual screen is active)
 ```
+
+The dividing line is strict: **anything below this vtable operates only on
+physical, currently-visible coordinates**. It never sees a logical line
+number, never sees `head`/`view_offset`, never decides whether something
+should scroll. `console.c` decides *what* to draw and *where on the visible
+screen*; the backend only knows *how* to put it there.
 
 ## Why runtime dispatch instead of compile-time `#ifdef`
 
 An earlier version of this code picked the backend with a build-time
-`VIDEO_MODE` macro (`#if VIDEO_MODE == MODE_FRAMEBUFFER`). This was dropped
-because:
+`VIDEO_MODE` macro. This was dropped because:
 
 - GRUB may fail to provide a framebuffer even if the kernel requests one
   (old hardware, some VM configurations, etc.). A build-time choice cannot
@@ -42,67 +47,57 @@ because:
   to reason about and effectively produce two different kernels to
   maintain.
 
-The Multiboot header (`bootloader.s`) always requests a framebuffer and
-always embeds the PSF1 font in the binary, the actual mode used is decided
-in `init_display()` by inspecting `mbi->flags`.
+The Multiboot header always requests a framebuffer and always embeds the
+font in the binary; the actual mode used is decided in `init_display()` by
+inspecting `mbi->flags`.
 
-## Core data structures (`init.h`)
+## Core data structures
 
-### `t_screen` active rendering state (single instance: `g_screen`)
+### `t_screen`, physical output descriptor (single instance: `g_screen`)
 
-Holds everything needed to draw to the **currently visible** output. There
-is only ever one of these, regardless of how many logical screens exist.
+Describes the **hardware**, not any content. There is exactly one of these
+regardless of how many virtual screens exist above it, the machine only
+has one physical display.
 
-| Field       | Meaning                                                              |
-|-------------|-----------------------------------------------------------------------|
-| `buf`       | Pointer to the physical output: `0xB8000` (VGA) or the framebuffer address (FB) |
-| `back_buf`  | Single shared pixel back buffer, used only in framebuffer mode        |
-| `col`,`row` | Current cursor position (in character cells)                          |
+| Field         | Meaning                                                              |
+|---------------|-----------------------------------------------------------------------|
+| `buf`         | Pointer to the physical output: `0xB8000` (VGA) or the framebuffer address (FB) |
+| `back_buf`    | Single shared pixel back buffer, framebuffer mode only (see [The back buffer](#the-back-buffer)) |
 | `width`, `height`, `pitch`, `bpp` | Geometry reported by GRUB (FB) or fixed 80x25 (VGA) |
-| `color`     | Current packed foreground/background color (see [Color](#color-system)) |
-| `mode`      | `0` = framebuffer, `1` = VGA                                          |
-| `cursor_col`, `cursor_row` | Last position where the cursor was actually drawn (`-1` = none). Used to erase it cleanly before redrawing it elsewhere. |
+| `total_rows`, `total_cols` | Visible grid size, derived from `width`/`height` and font metrics |
+| `mode`        | `0` = framebuffer, `1` = VGA                                          |
+| `cursor_col`, `cursor_row` | Last position where the cursor was actually drawn (`int`, `-1` = none). Must be initialized to `-1` explicitly at boot, it is **not** zero-safe, see [Pitfalls](#known-pitfalls). |
 
-### `t_screen_data` logical content of one virtual screen (array: `g_screens[MAX_SCREENS]`)
+Note what is deliberately **not** here anymore: no `col`/`row`/`color`.
+Those are per-virtual-screen logical state and belong to `t_screen_data`
+in `console.c`'s domain, keeping them here caused several desync bugs where
+the physical struct and the logical one disagreed about the cursor
+position after a screen switch.
 
-A compact, backend-agnostic snapshot of a screen's text content. Cheap
-enough to keep one per virtual screen (`MAX_SCREENS = 4`) without a heap
-allocator.
-
-| Field                | Meaning                                   |
-|-----------------------|--------------------------------------------|
-| `text_buf[80*25]`     | Character grid                            |
-| `color_buf[80*25]`    | Packed color per cell                     |
-| `col`, `row`, `color` | Saved cursor state for that screen        |
-
-**Why this split matters (memory):** a naive design would keep a full pixel
-back buffer (`800*400*4 bytes ≈ 1.25 MB`) per virtual screen, 5 MB for
-4 screens, on a kernel with no heap yet. Instead, only **one** pixel back
-buffer exists (`g_screen.back_buf`, sized once at boot), shared by whichever
-screen is currently active. Inactive screens only keep their compact
-`text_buf`/`color_buf` (~4 KB each) and get re-rasterized into the shared
-back buffer on switch. Total cost: ~1.27 MB instead of ~5 MB.
-
-### `t_display_driver` the vtable
+### `t_display_driver`, the vtable
 
 ```c
 typedef struct s_display_driver {
-	void (*putchar)(char c);
-	void (*scroll)(void);
-	void (*clear)(void);
+	void (*putchar_at)(char c, u8_t color, size_t col, size_t row);
+	void (*scroll)(void);          // physical scroll by one row, pinned-bottom case
+	void (*clear)(void);           // wipe the physical/back buffer
+	void (*cursor_update)(void);
+	void (*flush_partial)(u32_t x, u32_t y, u32_t w, u32_t h); // nullable, FB only
+	void (*flush_screen)(void);    // nullable, FB only
 } t_display_driver;
 ```
 
-`current_driver` points to either `vga_driver` or `fb_driver`, selected once
-in `init_display()`. Every backend function has to match these exact
-signatures, this is what lets `tty.c` stay ignorant of which backend
-it's talking to.
+`display_d` points to either `vga_driver` or `fb_driver`, selected once in
+`init_display()`.
+
+**`flush_partial`/`flush_screen` are empty for VGA on purpose**. VGA
+writes straight to `0xB8000`, there's no back buffer to synchronize.
 
 ## Color system
 
 Color is a backend-agnostic concept: a 4-bit foreground + 4-bit background
-index into a fixed 16-color palette (the classic CGA/VGA palette),
-packed into a single byte, the format VGA text mode expects natively.
+index into a fixed 16-color palette, packed into a single byte, the
+format VGA text mode expects natively.
 
 ```c
 typedef enum e_color { COLOR_BLACK, COLOR_BLUE, ..., COLOR_WHITE } t_color;
@@ -111,213 +106,131 @@ u8_t  make_color(t_color fg, t_color bg);   // fg | (bg << 4)
 u32_t color_to_rgb(t_color color);          // palette lookup, FB only
 ```
 
-- **VGA** uses the packed byte directly, no conversion needed, it's the
-  native hardware format for `0xB8000`.
-- **Framebuffer** decodes each nibble and looks it up in `color_to_rgb()`
-  to get a 32-bit RGB value.
+- **VGA** uses the packed byte directly, no conversion needed.
+- **Framebuffer** decodes each nibble and looks it up in `color_to_rgb()`.
+
+**Pitfall to watch for:** any physical fill operation on the framebuffer
+(`clear_physical_fb`, `scroll_physical_fb`'s newly-exposed row) must go
+through `color_to_rgb((t_color)((color >> 4) & 0x0F))` to get the
+background. Writing the raw packed attribute byte directly into a pixel
+buffer, or hardcoding `0x000000`/`memset(..., 0, ...)`, silently ignores
+whatever background color/theme is actually active and was the cause of
+a visible "wrong background flashes in" bug during screen switches and
+scrolling.
 
 This intentionally caps the framebuffer to the same 16 colors as VGA, even
-though the hardware could display millions. That's a deliberate simplicity
-trade-off for the current stage of the project, see [Future work](#future-work).
+though the hardware could display millions, a deliberate simplicity
+trade-off, see [Future work](#future-work).
 
-## Rendering pipeline
+## The back buffer
 
-### Writing a character
+`g_screen.back_buf` exists purely to avoid tearing/flicker: glyphs are
+rendered into it first, then copied to the physical framebuffer in a
+separate, explicit sync step. It does **not** exist to hold scrollback,
+that would require one per virtual screen and cost several MB for no
+reason. Scrollback is entirely `console.c`'s responsibility, stored as
+character cells, not pixels (see [console.md](console.md)).
 
-```
-putchar(c)                          [tty.c, public API]
-  → current_driver->putchar(c)      [putchar_vga or putchar_fb]
-      → putpixel_vga / putpixel_fb  [draws into the physical buffer /
-                                      shared back buffer, and mirrors the
-                                      char+color into g_screens[current_screen]]
-  → update_cursor()                 [erases old cursor, draws new one]
-```
+Two primitives, kept deliberately separate:
 
-`putchar_vga` / `putchar_fb` handle `\n`/`\t`, cursor advancement, and
-triggering a scroll when reaching the bottom of the screen. They do **not**
-call `update_cursor()` themselves, that responsibility belongs entirely to
-`tty.c`, so backends never need to know about cursor logic.
+- **`render_glyph_fb(c, color, col, row)`**, rasterizes one glyph into
+  `back_buf` only. No sync to the physical buffer.
+- **`flush_rect_fb(x, y, w, h)` / `flush_screen_fb()`**, the explicit sync
+  step (`swap_rect` internally), called **once per logical operation**
+  (one glyph, or one full redraw), never once per pixel or per row inside
+  a loop. This is why a full-screen redraw does dozens of `putchar_at`
+  calls followed by exactly one `flush_screen_fb()`, instead of a flush
+  after every cell.
 
-### `putpixel_*` vs `putchar_*`
+## Cursor drawing (framebuffer)
 
-Two different needs are deliberately kept separate:
+The cursor is drawn as a small overlay rectangle directly onto the
+**physical** buffer, never into `back_buf`, `back_buf` must always
+reflect real content only, so it can be used to cleanly erase the cursor
+later.
 
-- **`putchar_*(c)`** sequential input. "Write the next character and
-  advance the cursor." Used for live typing / streamed output.
-- **`putpixel_vga(c, color, x, y)` / `putpixel_fb(c, color, col, row)`**
-  direct positional write. "Draw exactly this character at this cell,
-  nothing else." No cursor side effects, no scroll trigger. Used for
-  restoring a screen's content (see [Screen switching](#screen-switching)),
-  where positions are already known from `text_buf`/`color_buf` and must not
-  be recomputed or perturbed by an in-flight scroll.
+`draw_cursor(cx, cy, color)`:
 
-Reusing `putchar_*` for restoration was tried and rejected: it re-triggers
-scroll logic and overwrites `g_screens[current_screen]` mid-read, corrupting
-the very data being restored.
+1. If a previous position is recorded (`g_screen.cursor_col >= 0`), erase
+   it by copying that rectangle back from `back_buf` (which never had a
+   cursor drawn into it, so this restores the real glyph underneath).
+2. Compute the target rectangle from `font_info.width`/`font_info.height`
+  , the kernel supports both PSF1 and PSF2 with different glyph dimensions.
+3. Draw the new cursor overlay directly onto the physical buffer.
+4. Record the new position.
 
-### The framebuffer back buffer
+Any function that does a full-screen `flush_screen_fb()` (a full physical
+scroll, a full clear) invalidates the cursor cache
+(`cursor_col = cursor_row = -1`), the previous position becomes
+meaningless after the entire physical buffer has been overwritten from
+`back_buf` in one shot.
 
-`g_screen.back_buf` is the **source of truth** for framebuffer content: it
-always reflects what the terminal actually contains, with the cursor never
-drawn into it. `swap_rect()` copies a rectangle from `back_buf` to the
-physical framebuffer (`g_screen.buf`) whenever something changes.
+`cx`/`cy` passed into `draw_cursor` must already be a **row relative to
+what's currently visible**, never a raw logical line number. The caller
+(`console.c`) is responsible for that conversion; this backend has no way to
+know it's wrong if it isn't.
 
-The blinking cursor is drawn **only** on the physical buffer, never in
-`back_buf`. To move it without leaving a trail, `draw_cursor()`:
+## VGA specifics
 
-1. If a previous cursor position is recorded (`g_screen.cursor_col >= 0`),
-   restores that cell from `back_buf` via `swap_rect` (erasing the old
-   cursor with the "clean" content).
-2. Draws the new cursor directly onto the physical buffer.
-3. Records the new position in `g_screen.cursor_col/row`.
-
-Any function that does a **global** `swap_rect` (`scroll_fb`, `clear_fb`)
-must reset `cursor_col`/`cursor_row` to `-1`, since the previous cursor
-position becomes meaningless after a full repaint.
-
-## Screen switching
-
-The three layers involved don't all live at the same "depth", and data
-moves between them in **two distinct flows**, not a single simple pipe:
-
-- **(a) Typing a character** writes fan out from the incoming char to
-  *two* places at once: the visible buffer (drawn immediately) and the
-  matching `g_screens[current_screen]` cell (mirrored, so it survives a
-  future switch away and back).
-- **(b) Switching screens** the flow reverses: the newly selected
-  screen's saved cells are read back out of `g_screens[new_id]` and
-  rasterized into the shared back buffer, cell by cell.
-
-### Framebuffer mode
-
-```
-                            CURSOR (draw_cursor)
-                       writes directly, bypasses back_buf
-                                     │
-                                     ▼
-              ┌────────────────────────────────────────┐
-              │              FRONT BUFFER              │  ← physical
-              │   physical pixels (g_screen.buf)       │    framebuffer,
-              └─────────────────▲──────────────────────┘   what's visible
-                                │  swap_rect()
-                                │  copy: back_buf -> front
-                                │  (this also erases the old cursor)
-              ┌─────────────────┴───────────────────────┐
-              │               BACK BUFFER               │  ← single shared
-              │    clean pixels (g_screen.back_buf)     │    instance, never
-              └─────────────────▲───────────────────────┘    contains the cursor
-                                │
-                     (a) putpixel_fb(c, color, col, row)
-                         one cell, drawn as it's typed
-                                │▲
-                                │└── (b) screen_switch(): rasterizes
-                                │        every cell of the newly
-                                │        selected screen, in a loop
-                                ▼
-       ┌─────────────────────────────────────────────────────┐
-       │  (a) putchar_fb() ALSO mirrors the same char here,  │
-       │      in parallel with drawing it above              │
-       ▼                                                     │
- ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
- │ screens[0]  │ │ screens[1]  │ │ screens[2]  │ │ screens[3]  │
- │ text_buf    │ │ text_buf    │ │ text_buf    │ │ text_buf    │
- │ color_buf   │ │ color_buf   │ │ color_buf   │ │ color_buf   │
- └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
-                        ▲
-                current_screen selects exactly one of these:
-                the target of (a)'s mirror, the source of (b)'s rasterize
-```
-
-### VGA mode
-
-No back buffer exists in this mode, `g_screen.buf` points straight at the
-physical VGA memory (`0xB8000`), so "drawing" and "being visible" are the
-same write. The hardware cursor (`set_cursor`) is a CRTC register, not a
-pixel, so there's no draw/erase dance to do.
-
-```
-              ┌────────────────────────────────────────┐
-              │              FRONT BUFFER              │  ← 0xB8000, IS the
-              │        g_screen.buf == 0xB8000         │    visible output
-              └─────────────────▲──────────────────────┘
-                                │
-                     (a) putpixel_vga(c, color, x, y)
-                         one cell, written directly, no back buffer step
-                                │▲
-                                │└── (b) screen_switch(): rewrites every
-                                │        cell of the newly selected screen
-                                ▼
-       ┌─────────────────────────────────────────────────────┐
-       │  (a) putchar_vga() ALSO mirrors the same char here  │
-       ▼                                                     │
- ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
- │ screens[0]  │ │ screens[1]  │ │ screens[2]  │ │ screens[3]  │
- │ text_buf    │ │ text_buf    │ │ text_buf    │ │ text_buf    │
- │ color_buf   │ │ color_buf   │ │ color_buf   │ │ color_buf   │
- └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
-```
-
-Only one of these two panels is active at runtime, chosen once in
-`init_display()` never both, and never switched mid-boot.
-
-Only the screen matching `current_screen` ever gets rasterized into the
-shared back buffer (or, in VGA mode, straight into `0xB8000`); the other
-three stay dormant as plain character grids until selected. This is what
-keeps memory cost low: 4 compact grids (~4 KB each) instead of 4 full pixel
-buffers (~1.25 MB each).
-
-`screen_switch(new_id)` (in `tty.c`) makes a virtual screen visible:
-
-1. Update `current_screen`.
-2. `current_driver->clear()` wipes the physical/back buffer and resets
-   the cursor tracking state.
-3. Walk `g_screens[new_id].text_buf`/`color_buf` cell by cell, calling
-   `putpixel_vga`/`putpixel_fb` directly (never `putchar_*`) to redraw each
-   non-empty cell at its exact position.
-4. Restore `g_screen.col`/`row`/`color` from the saved screen state and
-   call `update_cursor()`.
-
-Every `putchar_*` call also mirrors the character it just wrote into
-`g_screens[current_screen]`, so the compact per-screen state always stays
-in sync with what's on screen no separate synchronization step is needed
-outside of `screen_switch`.
+No back buffer exists in this mode; `g_screen.buf` points straight at
+`0xB8000`, so drawing and being visible are the same write. The cursor is
+a CRTC hardware register (`set_cursor`, via `outb` to ports `0x3D4`/
+`0x3D5`), not a pixel overlay, no draw/erase dance needed, which is why
+`flush_partial`/`flush_screen` are empty for this backend.
 
 ## Boot-time setup
-
-`bootloader.s` (Multiboot header) requests or not a framebuffer (`1680x1000`,
-32bpp) and always embeds the PSF1 font (`font_data`) in `.rodata`, regardless
-of whether GRUB honors the request. This matches the runtime-driven design:
-the kernel doesn't know at build time which mode it will end up in, so both
-paths must always be available in the binary.
 
 `init_display(multiboot_info *mbi)`:
 
 ```c
 if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type == 1) {
-    init_fb(mbi);          // g_screen.buf = framebuffer_addr, back_buf = static array
-    current_driver = &fb_driver;
+	init_fb(mbi);
+	display_d = &fb_driver;
 } else {
-    init_vga();             // g_screen.buf = 0xB8000, back_buf = NULL
-    current_driver = &vga_driver;
+	init_vga();
+	display_d = &vga_driver;
 }
+g_screen.cursor_col = -1;
+g_screen.cursor_row = -1;
 ```
+
+The explicit `-1` initialization matters: `g_screen` is a global, zero-
+initialized in BSS by default. Without this line, the very first
+`cursor_update()` call (triggered by the boot log's first `\n`, before the
+keyboard even takes over) sees `cursor_col == cursor_row == 0`, matches
+whatever position it's asked to draw at, and returns early without ever
+drawing anything, the cursor logic starts from a phantom state that
+doesn't correspond to any real drawn position. The symptom was a visible
+cursor artifact left behind on every line, which only self-corrected once
+the first full-screen scroll forced a global resync.
 
 ## Public API
 
-| Function                          | File          | Purpose |
-|-----------------------------------|---------------|---------|
-| `init_display(mbi)`               | `init.c`      | Detect backend, set up `g_screen` |
-| `init_term(void)`                 | `init.c`      | Clear screen, load font (FB), reset cursor |
-| `putchar(char c)`                 | `tty.c`  | Write one character through the active driver + cursor |
-| `scroll(void)`                    | `tty.c`  | Scroll the active driver + cursor |
-| `set_color(t_color fg, t_color bg)` | `tty.c` | Set `g_screen.color` |
-| `screen_switch(int id)`           | `tty.c`  | Make virtual screen `id` visible |
-| `kputchar(char c)`                | `kputchar`     | libc-like `putchar` |
-| `kwrite(const void*, size_t)`     | `kwrite`     | libc-like `write()` |
-| `kprint(const char*, ...)`        | `kprint`     | libc-like `printf()` |
+| Function                          | File            | Purpose |
+|-----------------------------------|-----------------|---------|
+| `init_display(mbi)`               | `init.c`        | Detect backend, set up `g_screen` |
+| `putpixel_vga(c, color, x, y)`    | `vga.c`         | Draw one glyph at a physical VGA cell |
+| `scroll_physical_vga(void)`       | `vga.c`         | Physical row scroll (VGA memory) |
+| `clear_physical_vga(void)`        | `vga.c`         | Wipe `0xB8000` with the active background |
+| `update_cursor_vga(void)`         | `vga.c`         | Move the CRTC hardware cursor |
+| `render_glyph_fb(c, color, col, row)` | `framebuffer.c` | Rasterize one glyph into `back_buf` (no sync) |
+| `flush_rect_fb` / `flush_screen_fb` | `framebuffer.c` | Explicit `back_buf` → physical sync |
+| `scroll_physical_fb(void)`        | `framebuffer.c` | Physical pixel scroll on `back_buf` |
+| `clear_physical_fb(void)`         | `framebuffer.c` | Wipe `back_buf` with the active background |
+| `update_cursor_fb(void)`          | `framebuffer.c` | Erase/redraw the pixel cursor overlay |
 
-Nothing outside `tty.c` should call `current_driver->putchar` (or
-`putchar_vga`/`putchar_fb`) directly, always go through `putchar()` or `kputchar()`.
+Nothing outside `console.c` should call any of these directly, always go
+through the generic API described in [console.md](console.md).
+
+## Known pitfalls
+
+A running list of mistakes made and fixed at this layer, kept as a
+reminder for future backends or changes:
+
+- **Never call a nullable vtable function unconditionally.** `flush_partial`/
+  `flush_screen` are empty not `NULL` for VGA by design.
+- **Never write a raw packed color attribute into a pixel buffer.** Always
+  decode through `color_to_rgb()` first.
 
 ## Future work
 

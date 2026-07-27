@@ -1,8 +1,10 @@
 #include <arch/i386/keyboard.h>
+#include <arch/i386/console.h>
 #include <kernel/multiboot.h>
 #include <kernel/common.h>
-#include <arch/i386/tty.h>
+#include <kernel/shell.h>
 #include <kernel/init.h>
+#include <kernel/tty.h>
 #include <kernel/log.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -35,6 +37,7 @@ void	kmain(void) {
 	// printf("Hello world!\n");
 	// screen_switch(1);
 	// screen_switch(0);
+	editor_start();
 	keyboard_handler();
 }
 

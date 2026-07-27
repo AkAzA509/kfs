@@ -1,4 +1,4 @@
-#include <arch/i386/tty.h>
+#include <arch/i386/console.h>
 #include "vprint_core.h"
 #include <stdio.h>
 

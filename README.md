@@ -17,9 +17,10 @@ This project is a small kernel and bootloader setup for a custom x86 operating s
 ## Features
 - Boots via GRUB using a Multiboot-compliant kernel
 - Text output through VGA text mode or linear framebuffer, depending on what the bootloader/GRUB provides
-- Basic keyboard driver
-- Some shortcuts: f1-f4 for multiscreen and escape key to exit the kernel
-
+- Keyboard driver
+- Virtual terminal up to 4 (can be update in init.h)
+- f1-f4 keybind for multiscreen and escape key to exit the kernel
+- Basic tty with small history and some keybind (4 arrows, pg up/down, end, home, ctrl + a/l)
 ## Requirements
 - An i386 cross-compiler toolchain see [`docs/toolchain.md`](docs/toolchain.md)
 - `nasm`

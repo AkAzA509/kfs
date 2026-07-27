@@ -1,20 +1,34 @@
-#include "stdint.h"
 #include <arch/i386/keyboard.h>
-#include <kernel/io.h>
+#include <arch/i386/console.h>
+#include <kernel/common.h>
 #include <kernel/log.h>
-#include <arch/i386/tty.h>
+#include <kernel/tty.h>
+#include <kernel/io.h>
 #include <stdbool.h>
 #include <stdio.h>
 
-#define RELEASE_MSK 0x80
+// Single scancode
 #define LEFT_SHIFT 0x2A
 #define RIGHT_SHIFT 0x36
+#define LEFT_CTRL 0x1D
+
 #define CAPS_LOCK 0x3A
 #define HOME 0x47
+#define END 0x4F
+
+#define RELEASE_MSK 0x80
+#define EXTEND_CODE 0xE0
+
+// Double scancode 0xE0 + ...
+#define RIGHT_CTRL 0x1D
+#define DELETE 0x53
 
 #define ARROW_UP 0x48
-#define PAGE_UP 0x49
 #define ARROW_DOWN 0x50
+#define ARROW_LEFT 0x4B
+#define ARROW_RIGHT 0x4D
+
+#define PAGE_UP 0x49
 #define PAGE_DOWN 0x51
 
 static const char keycode[] = {
@@ -56,10 +70,10 @@ static void	handle_screen_switch(u8_t code)
 void	handle_exit(void)
 {
 	printf("Shuting down ...\n");
-	outw(0x604, 0x2000);
+	SHUTDOWN;
 }
 
-static void	handle_scroll_arrow(u8_t code, bool is_release)
+static void	handle_scroll_key(u8_t code, bool is_release)
 {
 	if (is_release)
 		return ;
@@ -74,11 +88,33 @@ static void	handle_scroll_arrow(u8_t code, bool is_release)
 	}
 }
 
+static void	handle_edit_key(u8_t code, bool is_release)
+{
+	if (is_release)
+		return ;
+	// to fill
+	switch (code) {
+		case ARROW_LEFT: move_cursor(-1); break ;
+		case ARROW_RIGHT: move_cursor(1); break ;
+		case END:
+		case 0x1E: // case ctrl + a back to start of line
+		default: break ;
+	}
+}
+
 // For the key with 2 code
 static void	handle_extended_key(u8_t code, bool is_release)
 {
+	// klog("in the special key code : %#.2x\n", code);
 	if (code >= 0x47 && code <= 0x51) // HOME to PAGE DOWN
-		handle_scroll_arrow(code, is_release);
+		handle_scroll_key(code, is_release);
+	if (code == ARROW_LEFT || code == ARROW_RIGHT ||
+		code == END || code == 0x1E) {
+		// klog("in handler\n");
+		handle_edit_key(code, is_release);
+	}
+	if (code == DELETE)
+		editor_delete();
 }
 
 static void	handle_release_special_key(u8_t code)
@@ -119,7 +155,7 @@ static bool	handle_single_key(u8_t code, bool is_release)
 		return false;
 	}
 	if (code == 0x0e) {
-		backspace();
+		editor_backspace();
 		return false;
 	}
 	return true;
@@ -139,18 +175,21 @@ static void	print_code(u8_t code)
 
 	if (!pinned_to_bottom(&g_screens[current_screen]))
 		screen_snap();
-	kputchar(val);
+	editor_putchar(val);
 }
 
 static void	read_scancode(u8_t scancode)
 {
-	if (scancode == 0xE0) {
+	#ifdef DEBUG
+		// serial_print_hex(scancode);
+	#endif
+	if (scancode == EXTEND_CODE || scancode == LEFT_CTRL || scancode == RIGHT_CTRL) {
 		extended_pending = true;
 		return ;
 	}
 
 	bool	is_extended = extended_pending;
-	bool	is_release = scancode & 0x80;
+	bool	is_release = scancode & RELEASE_MSK;
 	u8_t	code = scancode & 0x7F;
 
 	extended_pending = false;
@@ -162,10 +201,6 @@ static void	read_scancode(u8_t scancode)
 	if (!handle_single_key(code, is_release))
 		return ;
 
-	#ifdef DEBUG
-		serial_print_hex(code);
-	#endif
-
 	print_code(code);
 }
 
@@ -174,8 +209,7 @@ void	keyboard_handler()
 	while (1)
 	{
 		// 0x64 register give the port's status (ready or not, busy ...)
-		if (inb(0x64) & 0x01)
-		{
+		if (inb(0x64) & 0x01) {
 			u8_t scancode = inb(0x60); // 0x60 register give the data (key press)
 			read_scancode(scancode);
 		}

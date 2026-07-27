@@ -1,10 +1,13 @@
 #include <arch/i386/framebuffer.h>
+#include <arch/i386/console.h>
 #include <arch/i386/vga.h>
-#include <arch/i386/tty.h>
 #include <kernel/init.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+#include "kernel/log.h"
 
 // ===== public API , dispatch via vtable ===== //
 
@@ -29,16 +32,24 @@ u32_t	color_to_rgb(t_color color)
 	return palette[(u8_t)color & 0x0F];
 }
 
-static inline bool	line_visible(t_screen_data *s, u32_t line)
+// check if the current line is in the current screen frame
+inline bool	line_visible(t_screen_data *s, u32_t line)
 {
 	return line >= s->view_offset && line < s->view_offset + g_screen.total_rows;
 }
 
+// check if the current line is on the last current screen frame's col
 inline bool	pinned_to_bottom(t_screen_data *s)
 {
 	return s->view_offset + g_screen.total_rows - 1 == s->head;
 }
 
+inline u8_t	get_current_col(void)
+{
+	return g_screens[current_screen].col;
+}
+
+// clear and reinitialize the line when a '\n'
 static void	clear_line(t_screen_data *s, u32_t line)
 {
 	u32_t	idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;
@@ -81,12 +92,17 @@ void	screen_snap(void)
 	screen_redraw();
 }
 
+// Detect the line position and from that handle de differents case:
+// - scroll and update if the line was the last in the frame
+// - if the line overflow the history len, return to the start
+// - 	
 static void	screen_newline(t_screen_data *s)
 {
 	bool	was_pinned = pinned_to_bottom(s);
 	u32_t	old_offset = s->view_offset;
 
 	s->head++;
+	// check the history bound
 	if (s->head - s->view_offset >= SCROLLBACK_LINES)
 		s->view_offset = s->head - SCROLLBACK_LINES + 1;
 	clear_line(s, s->head);
@@ -188,7 +204,7 @@ void	screen_clear(bool full)
 	display_d->cursor_update();
 }
 
-int	kputchar(char c)
+int	screen_putchar(char c)
 {
 	t_screen_data	*s = &g_screens[current_screen];
 
@@ -200,10 +216,11 @@ int	kputchar(char c)
 	if (c == '\t') {
 		u16_t next = (s->col + 8) & ~7U;
 		while (s->col < next && s->col < g_screen.total_cols)
-			kputchar(' ');
+			screen_putchar(' ');
 		return 1;
 	}
 
+	// current pos in the linear buf
 	u32_t	idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + s->col;
 	s->text_buf[idx] = c;
 	s->color_buf[idx] = s->color;
@@ -232,24 +249,29 @@ void	screen_switch(int new_id)
 	screen_redraw();
 }
 
-void	backspace(void)
+// This function set a cursor to the requested position
+// Prefer move_corsor() for the arrow deplacement, or all the
+// -1/+1 cursor deplacement
+void	move_cursor_to(size_t col)
 {
 	t_screen_data	*s = &g_screens[current_screen];
 
-	if (s->col == 0)
-		return ; // la ligne discipline (tty input) doit empêcher de remonter avant le début de l'input
-	s->col--;
+	s->col = col;
+	display_d->cursor_update();
+}
 
-	u32_t	idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + s->col;
-	s->text_buf[idx] = ' ';
+void	overwrite_at(size_t col, char c)
+{
+	t_screen_data	*s = &g_screens[current_screen];
+	u32_t	idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + col;
+
+	s->text_buf[idx] = c;
 	s->color_buf[idx] = s->color;
-
 	if (line_visible(s, s->head)) {
-		display_d->putchar_at(' ', s->color, s->col, s->head - s->view_offset);
+		display_d->putchar_at(c, s->color, col, s->head - s->view_offset);
 
 		u16_t	row = s->head - s->view_offset;
-		display_d->flush_partial(s->col * font_info.width, row * font_info.height,
-					font_info.width, font_info.height);
+		display_d->flush_partial(col * font_info.width, row * font_info.height,
+						font_info.width, font_info.height);
 	}
-	display_d->cursor_update();
 }

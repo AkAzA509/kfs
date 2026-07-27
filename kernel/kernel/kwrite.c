@@ -1,5 +1,10 @@
-#include <arch/i386/tty.h>
+#include <arch/i386/console.h>
 #include <stddef.h>
+
+int	kputchar(char c)
+{
+	return screen_putchar(c);
+}
 
 ssize_t	kwrite(int fd, const void* data, size_t size)
 {

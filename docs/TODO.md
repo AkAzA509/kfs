@@ -51,3 +51,36 @@ corresponding `<module>.md` file for context on why each item matters.
 - [ ] No #MF handler for floating point exeption (divide per 0, overflow ...) IDT needed
 - [ ] When we have a schedeler handle the context switching (FXSAVE/FXRSTOR)
 - [ ] The FPU system is not active with SSE2, mean less precision/perf, can be enable later
+
+## TTY / Console
+
+- [ ] Line editor / input discipline: `input_boundary`, bounding backspace to
+  the current prompt, feeding `^L` handling described above.
+- [ ] Bring `screen_clear()` in line with the non-destructive design (reuse
+  `screen_newline()` instead of `memset`).
+- [ ] Revisit tab-stop expansion when it crosses a line boundary mid-loop.
+
+## Keyboard
+
+- [ ] when the tty prompt has been implemented add a end/^a for deplacement in the command,
+  and add arrow left/right cursor deplacement for modification 
+code for leftarro: 0x000000e0 press
+									 0x0000004b
+									 0x000000e0 release
+									 0x000000cb.
+
+				rightarro: 0x000000e0 press
+									 0x0000004d
+									 0x000000e0 release
+									 0x000000cd.
+
+							^a : 0x0000001d ctrl press
+									 0x0000001e a press
+									 0x0000009e a release
+									 0x0000009d ctrl release
+
+							end: 0x000000e0 press
+									 0x0000004f
+									 0x000000e0 release
+									 0x000000cf
+)

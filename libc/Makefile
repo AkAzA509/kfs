@@ -5,7 +5,7 @@
 OBJDIR		?= ../objs/libc
 
 SRC			:= string/memcpy.c string/memmove.c string/memset.c string/strlen.c \
-			   string/strcmp.c \
+			   string/strcmp.c string/strncmp.c \
 			   stdio/putchar.c stdio/vsnprintf.c stdio/vprintf.c stdio/vprint_core.c \
 			   stdio/vfprintf.c stdio/vdprintf.c stdio/vsprintf.c \
 			   stdio/printf.c stdio/sprintf.c stdio/dprintf.c stdio/snprintf.c stdio/fprintf.c \

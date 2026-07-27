@@ -4,9 +4,9 @@
 
 OBJDIR		?= ../objs/kernel
 
-SRC			:= kernel/kernel.c kernel/io.c kernel/init.c kernel/kwrite.c \
-			   kernel/gdt.c kernel/log.c \
-			   arch/i386/tty.c arch/i386/vga.c arch/i386/keyboard.c arch/i386/framebuffer.c \
+SRC			:= kernel/kernel.c kernel/io.c kernel/init.c kernel/kwrite.c kernel/tty.c \
+			   kernel/gdt.c kernel/log.c kernel/shell.c \
+			   arch/i386/console.c arch/i386/vga.c arch/i386/keyboard.c arch/i386/framebuffer.c \
 
 ifdef DEBUG
 SRC			+= testing/test_printf.c testing/test_screen.c

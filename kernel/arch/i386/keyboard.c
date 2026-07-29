@@ -17,6 +17,7 @@
 #define END 0x4F
 
 #define RELEASE_MSK 0x80
+#define CODE_MSK 0x7F
 #define EXTEND_CODE 0xE0
 
 // Double scancode 0xE0 + ...
@@ -92,12 +93,12 @@ static void	handle_edit_key(u8_t code, bool is_release)
 {
 	if (is_release)
 		return ;
-	// to fill
+
 	switch (code) {
-		case ARROW_LEFT: move_cursor(-1); break ;
-		case ARROW_RIGHT: move_cursor(1); break ;
-		case END:
-		case 0x1E: // case ctrl + a back to start of line
+		case ARROW_LEFT: move_cursor(move_one_left); break ;
+		case ARROW_RIGHT: move_cursor(move_one_right); break ;
+		case END: move_cursor(move_end); break ;
+		case 0x1E: move_cursor(move_start); break ; // ctrl + a
 		default: break ;
 	}
 }
@@ -113,7 +114,7 @@ static void	handle_extended_key(u8_t code, bool is_release)
 		// klog("in handler\n");
 		handle_edit_key(code, is_release);
 	}
-	if (code == DELETE)
+	if (code == DELETE && !is_release)
 		editor_delete();
 }
 
@@ -190,7 +191,7 @@ static void	read_scancode(u8_t scancode)
 
 	bool	is_extended = extended_pending;
 	bool	is_release = scancode & RELEASE_MSK;
-	u8_t	code = scancode & 0x7F;
+	u8_t	code = scancode & CODE_MSK;
 
 	extended_pending = false;
 

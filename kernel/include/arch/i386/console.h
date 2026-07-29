@@ -39,7 +39,6 @@ void	screen_switch(int new_id);
 void	screen_snap(void);
 void	screen_scroll(int delta);
 
-void	move_cursor(i8_t direction);
 void	move_cursor_to(size_t col);
 void	overwrite_at(size_t col, char c);
 

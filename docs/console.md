@@ -10,8 +10,15 @@ into pixels or VGA cells. It sits directly on top of the backend vtable
 to call into it.
 
 ```
-kputchar(c)                       (public entry point, everything funnels
-      │                            through here: printf, keyboard echo)
+shell_execute() / print_prompt()   (shell.c: command table dispatch,
+      │                             see tty.md)
+      ▼
+editor_putchar() / editor_backspace() / editor_delete()
+      │                            (tty.c: line editor, see tty.md)
+      ▼
+screen_putchar(c)                 (public entry point, everything funnels
+      │                            through here: printf's out_target_t,
+      │                            keyboard echo, the line editor)
       ▼
 console.c                         (this document: scrollback buffer,
       │                            view offset, cursor math, multi-screen)
@@ -21,6 +28,10 @@ t_display_driver (display_d)      (display.md: dumb physical drawing)
 
 The backend never sees a logical line number. This layer never touches a
 pixel or an I/O port directly.
+
+**Naming note:** this entry point was called `kputchar` in an earlier
+version of the kernel. It is now `screen_putchar`; the rest of this
+document uses the current name.
 
 ## Why this layer exists
 
@@ -34,25 +45,55 @@ framebuffer pixels). This had two compounding problems:
    output without it vanishing the moment the screen fills up.
 2. **A single "cursor" was doing three unrelated jobs**: tracking where
    the kernel writes next, tracking what the user is currently looking at,
-   and (eventually) bounding what a line editor is allowed to erase. As
-   long as these shared one variable, there was no way to let a user
-   scroll back through history without either losing their read position
-   on the next `printf`, or corrupting where the next character gets
-   written.
+   and bounding what a line editor is allowed to erase. As long as these
+   shared one variable, there was no way to let a user scroll back through
+   history without either losing their read position on the next `printf`,
+   or corrupting where the next character gets written.
 
-The fix is a strict separation into three independent roles:
+The fix is a strict separation into three roles:
 
 | Role | Owner | Field(s) | Changes when |
 |------|-------|----------|--------------|
-| Write cursor | kernel (`kputchar`) | `head`, `col` | A character or `\n` is written. Monotonic, never decremented. |
+| Write cursor | `screen_putchar` (console.c) | `head`, `col` | A character or `\n` is written. `head` is monotonic, never decremented. |
 | View | user / display logic | `view_offset` | Manual scroll (`PgUp`/`PgDown`/`↑`/`↓`/`Home`), or an explicit snap-to-bottom. |
-| Input boundary *(planned, shell bonus)* | line editor | not yet implemented | A prompt is printed; bounds how far backspace/left-arrow can go. |
+| Input boundary | line editor (`t_line_editor`, tty.c) | `input_boundary_col`, `edit_pos`, `len` | A prompt is printed (`editor_start`); bounds how far backspace/delete/left-arrow can go. See [tty.md](tty.md). |
 
 `view_offset` is **not** a delta from `head`, it is an absolute logical
 line number, exactly like `head`. Storing it as an offset would recouple
 the two variables and defeat the entire point of the split: the user
 could no longer scroll back through history while new output keeps
 arriving at the bottom without their read position jumping around.
+
+### `col` is now a shared-ownership field, by contract
+
+The table above still lists `col` under the write cursor, but it is no
+longer written to exclusively by `screen_putchar`. The line editor
+(tty.c) needs to reposition the cursor and redraw arbitrary characters
+on the *current, unsubmitted* line without going through the normal
+write path (which would advance `col`, trigger `screen_newline` on
+overflow, and disturb characters typed after the edit point). Two extra
+entry points exist specifically for this:
+
+- **`move_cursor_to(col)`** sets `s->col` directly and calls
+  `display_d->cursor_update()`. It writes no character and does not
+  touch `head`. It is how the line editor moves the visual cursor after
+  an insert, delete, or arrow-key press.
+- **`overwrite_at(col, c)`** writes a single character into `text_buf`/
+  `color_buf` at `col` on the *current head line* and redraws it on
+  screen if visible, exactly like `screen_putchar` does, but without
+  advancing `col` and without ever calling `screen_newline`. It is how
+  the line editor redraws the tail of the input line after a character
+  is inserted or removed, one column at a time.
+
+Both functions assume the caller stays within the current line
+(`s->head`) and within `g_screen.total_cols`; neither of them wraps or
+scrolls. That assumption is currently enforced by the line editor, not
+by `console.c` itself, see [tty.md](tty.md) for the actual bound checks
+and a caveat about the input line potentially exceeding one screen row.
+
+`get_current_col()` and `set_term_color()` are simple accessors used the
+same way: read the write cursor's column, or change the active color for
+future writes on the current screen.
 
 ## Core data structure: `t_screen_data`
 
@@ -102,12 +143,12 @@ exists yet at this stage of the kernel.
 ## Visibility helpers
 
 ```c
-static inline bool line_visible(t_screen_data *s, u32_t line)
+inline bool line_visible(t_screen_data *s, u32_t line)
 {
 	return line >= s->view_offset && line < s->view_offset + g_screen.total_rows;
 }
 
-static inline bool pinned_to_bottom(t_screen_data *s)
+inline bool pinned_to_bottom(t_screen_data *s)
 {
 	return s->view_offset + g_screen.total_rows - 1 == s->head;
 }
@@ -119,15 +160,15 @@ if the user has scrolled away from the bottom, new output still updates
 never calls into `display_d`, since nothing about the visible screen
 actually changed.
 
-## Writing a character: `kputchar`
+## Writing a character: `screen_putchar`
 
 ```c
-int kputchar(char c)
+int screen_putchar(char c)
 {
 	t_screen_data *s = &g_screens[current_screen];
 
-	if (c == '\n') { screen_newline(s); ... return 1; }
-	if (c == '\t') { /* expand via repeated kputchar(' ') */ }
+	if (c == '\n') { screen_newline(s); display_d->cursor_update(); return 1; }
+	if (c == '\t') { /* expand to next multiple of 8 via repeated screen_putchar(' ') */ }
 
 	// always write into the logical buffer, regardless of visibility
 	u32_t idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + s->col;
@@ -137,7 +178,9 @@ int kputchar(char c)
 	// only touch the physical layer if this line is actually on screen
 	if (line_visible(s, s->head)) {
 		display_d->putchar_at(c, s->color, s->col, s->head - s->view_offset);
-		display_d->flush_partial(...);
+		display_d->flush_partial(s->col * font_info.width,
+			(s->head - s->view_offset) * font_info.height,
+			font_info.width, font_info.height);
 	}
 
 	if (++s->col >= g_screen.total_cols)
@@ -192,10 +235,6 @@ development:
   of a bounded scrollback (a real terminal's history limit has the same
   effect), but the display must stay in sync with it.
 
-`clear_line` writes real space characters, not a `'\0'` sentinel, see
-[Empty cells must be real cells](#empty-cells-must-be-real-cells) for why
-that distinction matters.
-
 ## Manual scrolling
 
 `screen_scroll(int delta)` clamps the requested movement between how far
@@ -213,31 +252,31 @@ picks between two rendering strategies:
 one screen height), used when the user explicitly asks to jump back to
 "now" rather than scrolling incrementally.
 
-### Empty cells must be real cells
+### ⚠ Regression: the `'\0'` sentinel is back
 
-Both `screen_redraw()` and `partial_shift()` must treat "never written"
-cells identically. An earlier version used `'\0'` as a sentinel and
-skipped drawing those cells, which worked for `screen_redraw()` (which
-clears the physical buffer first, so skipped cells show a correct blank
-background) but broke `partial_shift()`: that function only `memmove`s
-existing pixels and never clears anything, so a skipped cell leaves
-whatever stale pixels were physically there before the shift, visible as
-ghosted/duplicated content with the wrong color whenever scrolling exposed
-a region that mixed written and never-written cells.
+An earlier version of this module used `'\0'` to mean "never written"
+and skipped drawing those cells in both `screen_redraw()` and
+`partial_shift()`. That was identified as a bug and fixed: `clear_line()`
+was changed to write real `' '` characters, and the `'\0'` skip was
+removed from both redraw paths, because `partial_shift()` only
+`memmove`s existing pixels and never clears anything, so a skipped cell
+leaves stale pixels visible whenever a scroll exposes a region mixing
+written and never-written cells (this was the diagnosed cause of a boot
+logo's background ghosting on first scroll).
 
-The fix: initialize every cell to a real `' '` with the active color at
-boot (and in `clear_line()`), and remove the `'\0'` skip entirely, always
-draw every cell unconditionally. This makes the two redraw paths strictly
-equivalent regardless of which one happens to fire.
+**The current code has reverted to the old behavior**: `clear_line()`
+fills with `'\0'` again, and both `screen_redraw()` and `partial_shift()`
+still contain `if (text_buf[idx + c] == '\0') continue;`. On top of that,
+`screen_clear(full=true)` fills with `' '` directly, so the two clearing
+paths in this file no longer even agree with each other on what an empty
+cell looks like.
 
-This also means: **anything that should survive a scroll or a screen
-switch must go through `kputchar`**, writing into `text_buf`/`color_buf`
-like any other character. Content drawn by bypassing this (direct pixel
-writes) has no representation in the logical buffer, so any later
-`screen_redraw()`/`partial_shift()` will paint right over it with what it
-believes is the correct (blank) content, this was diagnosed as the cause
-of a boot logo with a temporary background color getting overwritten by
-plain background on the first scroll.
+This needs a decision: either reinstate the `' '`-everywhere invariant
+(remove the `'\0'` skip from both redraw paths, make `clear_line` write
+`' '`), or, if there's a new reason `'\0'` is needed, that reason should
+replace this note rather than sit silently contradicted by it. Flagging
+here rather than silently documenting the regression as if it were
+intended.
 
 ## Clearing: `clear` vs `^L` (design intent)
 
@@ -253,17 +292,21 @@ The two differ only in what happens *after* the screen is pushed:
 - **`clear` (shell command)**, runs after Enter was pressed, the input
   line has already been submitted. Nothing else needed; the shell's
   normal loop prints the next prompt.
-- **`^L` (planned, once a line editor exists)**, intercepted mid-edit,
-  the current input line was never submitted. After clearing, the prompt
-  and whatever the user had already typed must be explicitly redrawn from
-  the line editor's own buffer (which must be kept independent of screen
-  content specifically so it can redraw itself without reading the
-  screen back).
+- **`^L`**, intercepted mid-edit, the current input line was never
+  submitted. After clearing, the prompt and whatever the user had
+  already typed must be explicitly redrawn from the line editor's own
+  buffer. The line editor described in [tty.md](tty.md) now exists and
+  keeps its buffer independent of screen content for exactly this
+  reason, but nothing currently calls it in response to `^L`, the key
+  itself isn't wired up yet. Still future work.
 
-**Current status:** `screen_clear(bool full)` as implemented still does a
-direct `memset` on `text_buf`/`color_buf` (destructive) rather than
-reusing `screen_newline()`. Flagged in [Future work](#future-work) to
-bring in line with the design above.
+**Current status:** `screen_clear(bool full)` as implemented still does
+a direct `memset` (full clear) or a `clear_line()` loop over the visible
+rows (partial clear) rather than reusing `screen_newline()`, so both
+paths remain destructive: history is not preserved, `full` additionally
+resets `head`/`view_offset`/`col` to `0`, which throws away scrollback
+entirely rather than pushing it further back in the ring buffer. Flagged
+in [Future work](#future-work).
 
 ## Multi-screen management
 
@@ -276,7 +319,7 @@ is not special to "background" screens, it's simply how every screen
 tracks its own write position, visible or not.
 
 `current_screen` is the only thing that ties the two together, it's the
-index into `g_screens[]` that `kputchar` writes into and that
+index into `g_screens[]` that `screen_putchar` writes into and that
 `screen_redraw()` reads from.
 
 `screen_switch(new_id)`:
@@ -297,5 +340,9 @@ logical state.
 
 ## Future work
 
-See [TODO.md](TODO.md) for the current list of planned improvements to this
-module.
+- Resolve the `'\0'`/`' '` sentinel regression above.
+- Make `screen_clear()` non-destructive by reusing `screen_newline()`,
+  per the design intent described above.
+- Wire `^L` to the line editor's redraw path (tty.md).
+
+See [TODO.md](TODO.md) for the rest of the current list.

@@ -250,8 +250,7 @@ void	screen_switch(int new_id)
 }
 
 // This function set a cursor to the requested position
-// Prefer move_corsor() for the arrow deplacement, or all the
-// -1/+1 cursor deplacement
+// Prefer move_cursor() for the arrow deplacement
 void	move_cursor_to(size_t col)
 {
 	t_screen_data	*s = &g_screens[current_screen];

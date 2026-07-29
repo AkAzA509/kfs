@@ -62,6 +62,10 @@ corresponding `<module>.md` file for context on why each item matters.
 - [ ] Revisit tab-stop expansion when it crosses a line boundary mid-loop.
 - [ ] Scroll mess TO FIX
 - [ ] when we switch screen the promt doesn't appear, unless i hit enter TO FIX
+- [x] delete erase 2 char at once and the cursor disapear
+- [ ] when screen switch the cursor is not restore at the right (and so the input) place maybe because
+      the switch not save the context of the current screen, and on another screen the previous data
+      are overwriten by the current screen ?
 
 ## Keyboard
 

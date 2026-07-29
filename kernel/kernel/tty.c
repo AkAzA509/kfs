@@ -1,4 +1,3 @@
-#include "stdint.h"
 #include <arch/i386/framebuffer.h>
 #include <arch/i386/console.h>
 #include <kernel/shell.h>
@@ -7,37 +6,18 @@
 #include <stddef.h>
 #include <string.h>
 
-#define MAX_LINE 100
-
-typedef struct s_line_editor {
-	char	buffer[MAX_LINE];
-	size_t	len;
-	size_t	edit_pos;
-	u8_t	input_boundary_col;
-}			t_line_editor;
-
-t_line_editor	g_line_editor;
 
 // #define DEBUG
 #ifdef DEBUG
 void	debug_editor(void)
 {
-	klog("g_line_editor debug:\n");
-	klog("\tlen      : %lu\n", g_line_editor.len);
-	klog("\tedist_pos: %lu\n", g_line_editor.edit_pos);
-	klog("\tinput_bnd: %u\n", g_line_editor.input_boundary_col);
+	t_line_editor *le = &g_screens[current_screen].editor;
+	klog("line_editor debug:\n");
+	klog("\tlen      : %lu\n", le->.len);
+	klog("\tedist_pos: %lu\n", le->.edit_pos);
+	klog("\tinput_bnd: %u\n", le->.input_boundary_col);
 }
 #endif // DEBUG
-
-// static void editor_insert_char(t_line_editor *le, size_t pos)
-// {
-// 	memmove(&le->buffer[pos + 1], &le->buffer[pos], le->len - pos - 1);
-// 	le->len++;
-
-// 	for (size_t i = pos; i < le->len; i++)
-// 		overwrite_at(le->input_boundary_col + i, le->buffer[i]);
-// 	overwrite_at(le->input_boundary_col + le->len, ' ');
-// }
 
 static void	editor_remove_char(t_line_editor *le, size_t pos)
 {
@@ -51,7 +31,7 @@ static void	editor_remove_char(t_line_editor *le, size_t pos)
 
 void	editor_backspace(void)
 {
-	t_line_editor *le = &g_line_editor;
+	t_line_editor *le = &g_screens[current_screen].editor;
 
 	if (le->edit_pos == 0)
 		return ;
@@ -65,7 +45,7 @@ void	editor_backspace(void)
 
 void	editor_delete(void)
 {
-	t_line_editor *le = &g_line_editor;
+	t_line_editor *le = &g_screens[current_screen].editor;
 
 	if (le->edit_pos >= le->len)
 		return ;
@@ -74,7 +54,7 @@ void	editor_delete(void)
 
 void	move_cursor(e_editor_move editor_move)
 {
-	t_line_editor *le = &g_line_editor;
+	t_line_editor *le = &g_screens[current_screen].editor;
 
 	if ((le->edit_pos == 0 && editor_move < 0) ||
 		(le->edit_pos == g_screen.total_cols && editor_move > 0))
@@ -95,66 +75,47 @@ void	move_cursor(e_editor_move editor_move)
 void	editor_start(void)
 {
 	print_prompt();
-	g_line_editor.len = 0;
-	g_line_editor.edit_pos = 0;
-	g_line_editor.input_boundary_col = get_current_col();
+	g_screens[current_screen].editor.len = 0;
+	g_screens[current_screen].editor.edit_pos = 0;
+	g_screens[current_screen].editor.input_boundary_col = get_current_col();
 }
 
-static size_t	compute_screen_col(const char *buffer, size_t up_to_pos)
+static void	handle_tab(void)
 {
-	size_t	col = 0;
-	for (size_t i = 0; i < up_to_pos; i++)
-	{
-		if (buffer[i] == '\t')
-			col = (col + 8) & ~7U;
-		else
-			col++;
-	}
-	return col;
+	t_line_editor	*le = &g_screens[current_screen].editor;
+	size_t	current_col = le->input_boundary_col + le->edit_pos;
+	size_t	next_stop = (current_col + 8) & ~7U;
+	size_t	nb_spaces = next_stop - current_col;
+
+	for (size_t i = 0; i < nb_spaces; i++)
+		editor_putchar(' ');
 }
 
 void	editor_putchar(char c)
 {
-	if (g_line_editor.len >= MAX_LINE - 1)
+	t_line_editor *le = &g_screens[current_screen].editor;
+	if (le->len >= MAX_LINE - 1)
 		return ;
 	if (c == '\n') {
 		screen_putchar(c);
-		shell_execute(g_line_editor.buffer, g_line_editor.len);
+		shell_execute(le->buffer, le->len);
 		editor_start();
 		return ;
 	}
-	// if (c == '\t') {
-	// 	// editor_insert_char(&g_line_editor, g_line_editor.edit_pos);
-	// 	screen_putchar(c);
-	// 	// u16_t next = (g_line_editor.edit_pos + 8) & ~7U;
-	// 	// klog("next = %u\n", next);
-	// 	// g_line_editor.len = next;
-	// 	// g_line_editor.edit_pos = next;
-	// 	// move_cursor_to(g_line_editor.input_boundary_col + g_line_editor.edit_pos);
-	// 	return ;
-	// }
-
-	if (g_line_editor.edit_pos < g_line_editor.len)
-	{
-		memmove(&g_line_editor.buffer[g_line_editor.edit_pos + 1],
-			&g_line_editor.buffer[g_line_editor.edit_pos],
-			g_line_editor.len - g_line_editor.edit_pos);
+	if (c == '\t') {
+		handle_tab();
+		return ;
 	}
-	g_line_editor.buffer[g_line_editor.edit_pos] = c;
-	g_line_editor.len++;
-	g_line_editor.edit_pos++;
 
-	// for (size_t i = g_line_editor.edit_pos - 1; i < g_line_editor.len; i++)
-	// 	overwrite_at(g_line_editor.input_boundary_col + i, g_line_editor.buffer[i]);
-	// move_cursor_to(g_line_editor.input_boundary_col + g_line_editor.edit_pos);
-	size_t	start_col = compute_screen_col(g_line_editor.buffer, g_line_editor.edit_pos - 1);
-	move_cursor_to(g_line_editor.input_boundary_col + start_col);
+	if (le->edit_pos < le->len)
+		memmove(&le->buffer[le->edit_pos + 1],
+			&le->buffer[le->edit_pos], le->len - le->edit_pos);
 
-	for (size_t i = g_line_editor.edit_pos - 1; i < g_line_editor.len; i++)
-		screen_putchar(g_line_editor.buffer[i]);
-	move_cursor_to(g_line_editor.input_boundary_col + compute_screen_col(g_line_editor.buffer, g_line_editor.edit_pos));
+	le->buffer[le->edit_pos] = c;
+	le->len++;
+	le->edit_pos++;
+
+	for (size_t i = le->edit_pos - 1; i < le->len; i++)
+		overwrite_at(le->input_boundary_col + i, le->buffer[i]);
+	move_cursor_to(le->input_boundary_col + le->edit_pos);
 }
-
-// void	editor_submit(void)
-// {
-// }

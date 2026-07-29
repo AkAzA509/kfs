@@ -29,28 +29,7 @@ t_display_driver (display_d)      (display.md: dumb physical drawing)
 The backend never sees a logical line number. This layer never touches a
 pixel or an I/O port directly.
 
-**Naming note:** this entry point was called `kputchar` in an earlier
-version of the kernel. It is now `screen_putchar`; the rest of this
-document uses the current name.
-
-## Why this layer exists
-
-An earlier design let the display backends manage their own scroll and
-clear logic directly on physical memory (`memmove` on VGA text memory or
-framebuffer pixels). This had two compounding problems:
-
-1. **Scrolling was destructive.** The line pushed off the top of the
-   screen was gone, physically overwritten, with no way to recover it.
-   Any future shell needs scrollback (`PgUp`) and the ability to review
-   output without it vanishing the moment the screen fills up.
-2. **A single "cursor" was doing three unrelated jobs**: tracking where
-   the kernel writes next, tracking what the user is currently looking at,
-   and bounding what a line editor is allowed to erase. As long as these
-   shared one variable, there was no way to let a user scroll back through
-   history without either losing their read position on the next `printf`,
-   or corrupting where the next character gets written.
-
-The fix is a strict separation into three roles:
+## What this layer do
 
 | Role | Owner | Field(s) | Changes when |
 |------|-------|----------|--------------|

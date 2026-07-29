@@ -1,3 +1,4 @@
+#include "arch/i386/console.h"
 #include <kernel/common.h>
 #include <kernel/shell.h>
 #include <kernel/log.h>
@@ -24,16 +25,16 @@ unsigned char get_RTC_register(int reg) {
 
 void read_rtc() {
 	int century_register = 0x00;
-	unsigned char century;
-	unsigned char last_second, second;
-	unsigned char last_minute, minute;
-	unsigned char last_hour, hour;
-	unsigned char last_day, day;
-	unsigned char last_month, month;
-	unsigned char last_year;
-	unsigned int year;
-	unsigned char last_century;
-	unsigned char registerB;
+	unsigned char	century;
+	unsigned char	last_second, second;
+	unsigned char	last_minute, minute;
+	unsigned char	last_hour, hour;
+	unsigned char	last_day, day;
+	unsigned char	last_month, month;
+	unsigned char	last_year;
+	unsigned int	year;
+	unsigned char	last_century;
+	unsigned char	registerB;
 
 	// Note: This uses the "read registers until you get the same values twice in a row" technique
 	// to avoid getting dodgy/inconsistent values due to RTC updates
@@ -98,17 +99,13 @@ void read_rtc() {
 	printf("date: %.2u/%.2u/%u time: %.2uh%.2u\n", day, month, year, (hour + 2) % 24, minute);
 }
 
-static const char *cmd_table[] = {
-	"reboot", "halt", "plogo", "pstack", "shutdown", "date", "help", "clear", NULL
-};
-
 static void	cmd_reboot(void) { REBOOT }
 static void	cmd_halt(void) { __asm__ volatile ("cli"); HALT_ERROR; }
 static void	cmd_print_logo(void) { ASCII_LOGO; }
 static void	cmd_print_stack(void){ log_stack(0); }
 static void	cmd_shutdown(void) { SHUTDOWN; }
 static void	cmd_date(void) { read_rtc(); }
-// static void	cmd_clear(void) { ; }
+static void	cmd_clear(void) { screen_clear(); }
 static void	cmd_help(void) {
 	printf("here is a list of the command available on this shell\n\n");
 	printf("reboot             reboot the os\n");
@@ -122,9 +119,13 @@ static void	cmd_help(void) {
 	printf("clear              not yet available\n");
 }
 
+static const char	*cmd_table[] = {
+	"reboot", "halt", "plogo", "pstack", "shutdown", "date", "help", "clear", NULL
+};
+
 typedef void (*cmd_handler_t)(void);
-static const cmd_handler_t cmd_handlers[] = {
-	cmd_reboot, cmd_halt, cmd_print_logo, cmd_print_stack, cmd_shutdown, cmd_date, cmd_help //, cmd_clear
+static const cmd_handler_t	cmd_handlers[] = {
+	cmd_reboot, cmd_halt, cmd_print_logo, cmd_print_stack, cmd_shutdown, cmd_date, cmd_help , cmd_clear
 };
 
 void	shell_execute(const char *input, size_t len)

@@ -57,7 +57,7 @@ static void	clear_line(t_screen_data *s, u32_t line)
 	memset(&s->color_buf[idx], s->color, g_screen.total_cols);
 }
 
-static void	screen_redraw(void)
+void	screen_redraw(void)
 {
 	t_screen_data	*d = &g_screens[current_screen];
 
@@ -90,12 +90,18 @@ void	screen_snap(void)
 		return ;
 	s->view_offset = new_offset;
 	screen_redraw();
+	// t_screen_data *s = &g_screens[current_screen];
+
+	// 	if (line_visible(s, s->head))
+	// 		return ; // déjà sur le direct, rien à faire
+	// 	s->view_offset = s->head - g_screen.total_rows + 1;
+	// 	screen_redraw();
 }
 
 // Detect the line position and from that handle de differents case:
 // - scroll and update if the line was the last in the frame
 // - if the line overflow the history len, return to the start
-// - 	
+// -
 static void	screen_newline(t_screen_data *s)
 {
 	bool	was_pinned = pinned_to_bottom(s);
@@ -144,9 +150,8 @@ static void	partial_shift(t_screen_data *s, int delta)
 		u32_t	line = s->view_offset + r;
 		u32_t	idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;
 		for (u16_t c = 0; c < g_screen.total_cols; c++) {
-			if (s->text_buf[idx + c] == '\0')
-				continue ;
-			display_d->putchar_at(s->text_buf[idx + c], s->color_buf[idx + c], c, r);
+			char ch = s->text_buf[idx + c];
+			display_d->putchar_at(ch ? ch : ' ', s->color_buf[idx + c], c, r);
 		}
 	}
 	display_d->flush_screen();
@@ -155,51 +160,42 @@ static void	partial_shift(t_screen_data *s, int delta)
 		display_d->cursor_update();
 }
 
-void	screen_scroll(int delta)
+void screen_scroll(int step)
 {
-	t_screen_data	*s = &g_screens[current_screen];
-	long	max_off = (long)s->head - g_screen.total_rows + 1;
-	long	min_off = (long)s->head - SCROLLBACK_LINES + 1;
+	t_screen_data *s = &g_screens[current_screen];
+	u32_t old_offset = s->view_offset;
+	long new_off = (long)old_offset + step;
 
-	if (max_off < 0)
-		max_off = 0;
+	long min_off = (long)s->head - SCROLLBACK_LINES + 1;
 	if (min_off < 0)
 		min_off = 0;
 
-	long	new_off = s->view_offset + delta;
+	long max_off = (long)s->head - g_screen.total_rows + 1;
+	if (max_off < 0)
+		max_off = 0;
 	if (new_off > max_off)
 		new_off = max_off;
 	if (new_off < min_off)
 		new_off = min_off;
 
-	long	actual = new_off - (long)s->view_offset;
-	if (actual == 0)
-		return ;
-
-	if (labs(actual) >= g_screen.total_rows) {
-		s->view_offset = (u32_t)new_off;
-		screen_redraw();
-		return ;
-	}
+	int delta = (int)(new_off - (long)old_offset);
+	if (delta == 0)
+		return;
 
 	s->view_offset = (u32_t)new_off;
-	partial_shift(s, (int)actual);
+	if (labs(delta) >= g_screen.total_rows)
+		screen_redraw();
+	else
+		partial_shift(s, delta);
 }
 
-void	screen_clear(bool full)
+void	screen_clear()
 {
 	t_screen_data	*s = &g_screens[current_screen];
 
-	if (full) {
-		memset(s->text_buf, ' ', sizeof(s->text_buf));
-		memset(s->color_buf, s->color, sizeof(s->color_buf));
-		s->head = s->view_offset = s->col = 0;
-		s->col = 0;
-	}
-	else {
-		for (u16_t r = 0; r < g_screen.total_rows; r++)
-			clear_line(s, s->view_offset + r);
-	}
+	memset(s->text_buf, ' ', sizeof(s->text_buf));
+	memset(s->color_buf, s->color, sizeof(s->color_buf));
+	s->head = s->view_offset = s->col = 0;
 	display_d->clear();
 	display_d->cursor_update();
 }

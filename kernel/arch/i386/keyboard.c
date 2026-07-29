@@ -1,3 +1,4 @@
+#include "kernel/shell.h"
 #include <arch/i386/keyboard.h>
 #include <arch/i386/console.h>
 #include <kernel/common.h>
@@ -116,6 +117,10 @@ static void	handle_extended_key(u8_t code, bool is_release)
 	}
 	if (code == DELETE && !is_release)
 		editor_delete();
+	if (code == 0x26 && !is_release) {
+		screen_clear();
+		print_prompt();
+	}
 }
 
 static void	handle_release_special_key(u8_t code)
@@ -174,7 +179,7 @@ static void	print_code(u8_t code)
 			(caps_lock && !shift && val >= 'a' && val <= 'z'))
 		val = keycode_shift[code];
 
-	if (!pinned_to_bottom(&g_screens[current_screen]))
+	if (!line_visible(&g_screens[current_screen], g_screens[current_screen].head))
 		screen_snap();
 	editor_putchar(val);
 }

@@ -2,7 +2,7 @@
 #define CONSOLE_H
 
 #include <kernel/init.h>
-#include <stdbool.h>
+// #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -40,17 +40,28 @@ extern int				current_screen;
 #define SCREEN_ROWS		63
 #define SCROLLBACK_LINES 1024
 
+
+#define MAX_LINE 100
+
+typedef struct s_line_editor {
+	char	buffer[MAX_LINE];
+	size_t	len;
+	size_t	edit_pos;
+	u8_t	input_boundary_col;
+}			t_line_editor;
+
 // multiscreen struct
 // save the state of each screen (content, position, color)
 // and the rendering view [historic [screen view] historic]
 typedef struct s_screen_data {
-	char	text_buf[SCREEN_COLS * SCROLLBACK_LINES];
-	u8_t	color_buf[SCREEN_COLS * SCROLLBACK_LINES];
-	size_t	col;			// write cursor column on the "head" line
-	u32_t	head;			// logical line index currently being written to, monotonically increasing, never decremented
-	u32_t	view_offset;	// logical line index rendered at the top of the screen, independent from head,
-							// only changed by manual scroll or explicit snap-to-bottom
-	u8_t	color;
+	char			text_buf[SCREEN_COLS * SCROLLBACK_LINES];
+	u8_t			color_buf[SCREEN_COLS * SCROLLBACK_LINES];
+	size_t			col;			// write cursor column on the "head" line
+	u32_t			head;			// logical line index currently being written to, monotonically increasing, never decremented
+	u32_t			view_offset;	// logical line index rendered at the top of the screen, independent from head,
+									// only changed by manual scroll or explicit snap-to-bottom
+	u8_t			color;
+	t_line_editor	editor;
 }			t_screen_data;
 
 // screen struct
@@ -91,6 +102,7 @@ int		screen_putchar(char c);
 void	screen_switch(int new_id);
 void	screen_snap(void);
 void	screen_scroll(int delta);
+void	screen_clear();
 
 void	move_cursor_to(size_t col);
 void	overwrite_at(size_t col, char c);
@@ -99,5 +111,7 @@ u8_t	get_current_col(void);
 
 bool	line_visible(t_screen_data *s, u32_t line);
 bool	pinned_to_bottom(t_screen_data *s);
+
+void	screen_redraw(void);
 
 #endif // CONSOLE_H

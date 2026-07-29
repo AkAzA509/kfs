@@ -1,7 +1,6 @@
-#include <stdio.h>
-#include <kernel/io.h>
+#include <arch/i386/console.h>
 #include <arch/i386/vga.h>
-#include <kernel/init.h>
+#include <kernel/io.h>
 #include <string.h>
 
 // pack a char with is color (fg, bg)

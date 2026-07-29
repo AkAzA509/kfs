@@ -1,18 +1,17 @@
 #include <arch/i386/framebuffer.h>
-#include <stdio.h>
-#include <kernel/multiboot.h>
-#include <kernel/log.h>
 #include <arch/i386/console.h>
+#include <kernel/multiboot.h>
 #include <arch/i386/vga.h>
 #include <kernel/init.h>
+#include <kernel/log.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 int				current_screen = 0;
 t_screen		g_screen;
 t_screen_data	g_screens[MAX_SCREENS];
-
 static u32_t	g_fb_back_buffer[FB_MAX_WIDTH * FB_MAX_HEIGHT];
 
 // #define DEBUG

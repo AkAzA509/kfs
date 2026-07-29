@@ -1,8 +1,7 @@
 #include <arch/i386/framebuffer.h>
 #include <arch/i386/console.h>
-#include <kernel/init.h>
-#include <string.h>
 #include <kernel/log.h>
+#include <string.h>
 
 // Copy the back buffer into the front buffer, to avoid flickering
 // front_stride = number of real pixels between 2 lines in the VRAM (maybe > width because of hardware alignment => pitch)

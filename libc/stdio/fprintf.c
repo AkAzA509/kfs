@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int	fprintf(FILE *restrict stream, const char *restrict fmt, ...)
+int fprintf(FILE *restrict stream, const char *restrict fmt, ...)
 {
 	va_list ap;
 

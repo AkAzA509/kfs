@@ -5,23 +5,22 @@
 
 // The labs() function compute the absolute value of
 // the argument x of the appropriate long type for the function.
-long	labs(long x);
+long labs(long x);
 
 // The abs() function compute the absolute value of
 // the argument x of the appropriate int type for the function.
-int	abs(int x);
+int abs(int x);
 
 // The malloc() function allocates size bytes and returns a pointer to
 // the allocated memory. The memory is not initialized. If size is 0,
 // then malloc() returns NULL.
-void	*malloc(size_t size)
-	__attribute__((malloc, warn_unused_result));
+void *malloc(size_t size) __attribute__((malloc, warn_unused_result));
 
 // The free() function frees the memory space pointed to by ptr, which
 // must have been returned by a previous call to malloc() or related
 // functions. Otherwise, or if ptr has already been freed, undefined be‐
 // havior occurs. If ptr is NULL, no operation is performed.
-void	free(void *ptr);
+void free(void *ptr);
 
 // The calloc() function allocates memory for an array of nmemb elements
 // of size bytes each and returns a pointer to the allocated memory. The
@@ -32,8 +31,8 @@ void	free(void *ptr);
 // flow would not be detected in the following call to malloc(), with the
 // result that an incorrectly sized block of memory would be allocated:
 // malloc(nmemb * size);
-void	*calloc(size_t nmeb, size_t size);
-	
+void *calloc(size_t nmeb, size_t size);
+
 // The realloc() function changes the size of the memory block pointed to
 // by ptr to size bytes. The contents of the memory will be unchanged in
 // the range from the start of the region up to the minimum of the old
@@ -43,7 +42,6 @@ void	*calloc(size_t nmeb, size_t size);
 // values of size.
 // If size is equal to zero, and ptr is not NULL, then the call is equiv‐
 // alent to free(ptr).
-void	*realloc(void *ptr, size_t size)
-	__attribute__(());
+void *realloc(void *ptr, size_t size) __attribute__(());
 
 #endif // STDLIB_H

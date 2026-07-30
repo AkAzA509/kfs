@@ -3,16 +3,16 @@
 #include <stddef.h>
 #include <stdio.h>
 
-static inline	u32_t get_esp(void)
+static inline u32_t get_esp(void)
 {
-	u32_t	esp;
+	u32_t esp;
 	__asm__ volatile("mov %%esp, %0" : "=r"(esp));
 	return esp;
 }
 
 extern u32_t stack_top;
 
-void	log_stack(size_t len)
+void log_stack(size_t len)
 {
 	u32_t esp = get_esp();
 	u32_t top = (u32_t)&stack_top;
@@ -27,7 +27,7 @@ void	log_stack(size_t len)
 	}
 }
 
-void	serial_print_hex(u32_t val)
+void serial_print_hex(u32_t val)
 {
 	char hex[] = "0123456789abcdef";
 	outb(0x3F8, '0');
@@ -38,32 +38,28 @@ void	serial_print_hex(u32_t val)
 	outb(0x3F8, '\n');
 }
 
-void	serial_print(char val)
+void serial_print(char val)
 {
 	outb(0x3F8, val);
 }
 
-static void	_vprint_e(void *ctx, char c)
+static void _vprint_e(void *ctx, char c)
 {
 	(void)ctx;
 	serial_print(c);
 }
 
 #include "../../libc/stdio/vprint_core.h"
-static int	kvprintf(const char *restrict fmt, va_list ap)
+static int kvprintf(const char *restrict fmt, va_list ap)
 {
-	out_target_t target = {
-		.emit = _vprint_e,
-		.ctx = NULL,
-		.count = 0
-	};
+	out_target_t target = { .emit = _vprint_e, .ctx = NULL, .count = 0 };
 
 	int ret = vprint_core(fmt, &ap, &target);
 
 	return ret;
 }
 
-int	klog(const char *restrict fmt, ...)
+int klog(const char *restrict fmt, ...)
 {
 	va_list ap;
 

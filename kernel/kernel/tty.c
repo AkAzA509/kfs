@@ -6,10 +6,9 @@
 #include <stddef.h>
 #include <string.h>
 
-
 // #define DEBUG
 #ifdef DEBUG
-void	debug_editor(void)
+void debug_editor(void)
 {
 	t_line_editor *le = &g_screens[current_screen].editor;
 	klog("line_editor debug:\n");
@@ -19,7 +18,7 @@ void	debug_editor(void)
 }
 #endif // DEBUG
 
-static void	editor_remove_char(t_line_editor *le, size_t pos)
+static void editor_remove_char(t_line_editor *le, size_t pos)
 {
 	memmove(&le->buffer[pos], &le->buffer[pos + 1], le->len - pos - 1);
 	le->len--;
@@ -29,50 +28,50 @@ static void	editor_remove_char(t_line_editor *le, size_t pos)
 	overwrite_at(le->input_boundary_col + le->len, ' ');
 }
 
-void	editor_backspace(void)
+void editor_backspace(void)
 {
 	t_line_editor *le = &g_screens[current_screen].editor;
 
 	if (le->edit_pos == 0)
-		return ;
+		return;
 	le->edit_pos--;
-	#ifdef DEBUG
-	// debug_editor();
-	#endif // DEBUG
+#ifdef DEBUG
+// debug_editor();
+#endif // DEBUG
 	editor_remove_char(le, le->edit_pos);
 	move_cursor_to(le->input_boundary_col + le->edit_pos);
 }
 
-void	editor_delete(void)
+void editor_delete(void)
 {
 	t_line_editor *le = &g_screens[current_screen].editor;
 
 	if (le->edit_pos >= le->len)
-		return ;
+		return;
 	editor_remove_char(le, le->edit_pos);
 }
 
-void	move_cursor(e_editor_move editor_move)
+void move_cursor(e_editor_move editor_move)
 {
 	t_line_editor *le = &g_screens[current_screen].editor;
 
 	if ((le->edit_pos == 0 && editor_move < 0) ||
-		(le->edit_pos == g_screen.total_cols && editor_move > 0))
-		return ;
+	    (le->edit_pos == g_screen.total_cols && editor_move > 0))
+		return;
 
 	if ((editor_move == move_one_left || editor_move == move_one_right) &&
-		le->edit_pos + editor_move <= le->len)
+	    le->edit_pos + editor_move <= le->len)
 		le->edit_pos += editor_move;
 	else if (editor_move == move_end && le->edit_pos != le->len)
 		le->edit_pos = le->len;
 	else if (editor_move == move_start && le->edit_pos > 0)
 		le->edit_pos = 0;
 	else
-		return ;
+		return;
 	move_cursor_to(le->input_boundary_col + le->edit_pos);
 }
 
-void	editor_start(void)
+void editor_start(void)
 {
 	print_prompt();
 	g_screens[current_screen].editor.len = 0;
@@ -80,31 +79,31 @@ void	editor_start(void)
 	g_screens[current_screen].editor.input_boundary_col = get_current_col();
 }
 
-static void	handle_tab(void)
+static void handle_tab(void)
 {
-	t_line_editor	*le = &g_screens[current_screen].editor;
-	size_t	current_col = le->input_boundary_col + le->edit_pos;
-	size_t	next_stop = (current_col + 8) & ~7U;
-	size_t	nb_spaces = next_stop - current_col;
+	t_line_editor *le = &g_screens[current_screen].editor;
+	size_t current_col = le->input_boundary_col + le->edit_pos;
+	size_t next_stop = (current_col + 8) & ~7U;
+	size_t nb_spaces = next_stop - current_col;
 
 	for (size_t i = 0; i < nb_spaces; i++)
 		editor_putchar(' ');
 }
 
-void	editor_putchar(char c)
+void editor_putchar(char c)
 {
 	t_line_editor *le = &g_screens[current_screen].editor;
 	if (le->len >= MAX_LINE - 1)
-		return ;
+		return;
 	if (c == '\n') {
 		screen_putchar(c);
 		shell_execute(le->buffer, le->len);
 		editor_start();
-		return ;
+		return;
 	}
 	if (c == '\t') {
 		handle_tab();
-		return ;
+		return;
 	}
 
 	if (le->edit_pos < le->len)

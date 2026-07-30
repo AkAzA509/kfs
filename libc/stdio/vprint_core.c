@@ -7,54 +7,62 @@
 
 typedef struct {
 	// flags
-	bool	minus, zero, plus, space, hash;
+	bool minus, zero, plus, space, hash;
 
 	// width / precision
-	int		width;			// -1 if absent
-	int		precision;		// -1 if absent (distinct from 0 !)
+	int width; // -1 if absent
+	int precision; // -1 if absent (distinct from 0 !)
 
 	// length modifier
-	enum {
-			LEN_NONE,
-			LEN_HH,
-			LEN_H,
-			LEN_L,
-			LEN_LL,
-			LEN_Z
-	}		length;
+	enum { LEN_NONE, LEN_HH, LEN_H, LEN_L, LEN_LL, LEN_Z } length;
 
 	// conversion
-	char	conv;
-}			format_spec_t;
+	char conv;
+} format_spec_t;
 
 // ----- Args parser ----- //
 
-static const char
-*parse_flags(const char *restrict fmt, format_spec_t *spec)
+static const char *parse_flags(const char *restrict fmt, format_spec_t *spec)
 {
 	bool scanning = true;
 
 	while (scanning) {
 		switch (*fmt) {
-			case '-': spec->minus = true; fmt++; break;
-			case ' ': spec->space = true; fmt++; break;
-			case '0': spec->zero = true; fmt++; break;
-			case '+': spec->plus = true; fmt++; break;
-			case '#': spec->hash = true; fmt++; break;
-			default: scanning = false; break;
+		case '-':
+			spec->minus = true;
+			fmt++;
+			break;
+		case ' ':
+			spec->space = true;
+			fmt++;
+			break;
+		case '0':
+			spec->zero = true;
+			fmt++;
+			break;
+		case '+':
+			spec->plus = true;
+			fmt++;
+			break;
+		case '#':
+			spec->hash = true;
+			fmt++;
+			break;
+		default:
+			scanning = false;
+			break;
 		}
 	}
 	return fmt;
 }
 
-static const char
-*parse_width(const char *restrict fmt, format_spec_t *spec, va_list *ap)
+static const char *parse_width(const char *restrict fmt, format_spec_t *spec,
+			       va_list *ap)
 {
 	if (*fmt == '*') {
 		spec->width = va_arg(*ap, int);
 		fmt++;
-	}
-	else if (*fmt >='1' && *fmt <= '9') {
+	} else if (*fmt >= '1' && *fmt <= '9') {
 		int w = 0;
 		while (*fmt >= '0' && *fmt <= '9') {
 			w = w * 10 + (*fmt - '0');
@@ -66,8 +74,8 @@ static const char
 	return fmt;
 }
 
-static const char
-*parse_precision(const char *restrict fmt, format_spec_t *spec, va_list *ap)
+static const char *parse_precision(const char *restrict fmt,
+				   format_spec_t *spec, va_list *ap)
 {
 	if (*fmt != '.')
 		return fmt;
@@ -77,8 +85,7 @@ static const char
 	if (*fmt == '*') {
 		spec->precision = va_arg(*ap, int);
 		fmt++;
-	}
-	else {
+	} else {
 		int p = 0;
 		while (*fmt >= '0' && *fmt <= '9') {
 			p = p * 10 + (*fmt - '0');
@@ -89,30 +96,25 @@ static const char
 	return fmt;
 }
 
-static const char
-*parse_length(const char *restrict fmt, format_spec_t *spec)
+static const char *parse_length(const char *restrict fmt, format_spec_t *spec)
 {
 	if (*fmt == 'h') {
 		if (*(fmt + 1) == 'h') {
 			spec->length = LEN_HH;
 			fmt += 2;
-		}
-		else {
+		} else {
 			spec->length = LEN_H;
 			fmt += 1;
 		}
-	}
-	else if (*fmt == 'l') {
+	} else if (*fmt == 'l') {
 		if (*(fmt + 1) == 'l') {
 			spec->length = LEN_LL;
 			fmt += 2;
-		}
-		else {
+		} else {
 			spec->length = LEN_L;
 			fmt += 1;
 		}
-	}
-	else if (*fmt == 'z') {
+	} else if (*fmt == 'z') {
 		spec->length = LEN_Z;
 		fmt += 1;
 	}
@@ -121,41 +123,52 @@ static const char
 
 // ----- Lenght getter ----- //
 
-static long long	get_int_arg(format_spec_t *spec, va_list *ap)
+static long long get_int_arg(format_spec_t *spec, va_list *ap)
 {
 	switch (spec->length) {
-		case LEN_HH: return (signed char)va_arg(*ap, int);
-		case LEN_H: return (short)va_arg(*ap, int);
-		case LEN_L: return va_arg(*ap, long);
-		case LEN_LL: return va_arg(*ap, long long);
-		case LEN_Z: return va_arg(*ap, size_t);
-		default: return va_arg(*ap, int);
+	case LEN_HH:
+		return (signed char)va_arg(*ap, int);
+	case LEN_H:
+		return (short)va_arg(*ap, int);
+	case LEN_L:
+		return va_arg(*ap, long);
+	case LEN_LL:
+		return va_arg(*ap, long long);
+	case LEN_Z:
+		return va_arg(*ap, size_t);
+	default:
+		return va_arg(*ap, int);
 	}
 }
 
-static unsigned long long	get_uint_arg(format_spec_t *spec, va_list *ap)
+static unsigned long long get_uint_arg(format_spec_t *spec, va_list *ap)
 {
 	switch (spec->length) {
-		case LEN_HH: return (unsigned char)va_arg(*ap, int);
-		case LEN_H: return (unsigned short)va_arg(*ap, int);
-		case LEN_L: return va_arg(*ap, unsigned long);
-		case LEN_LL: return va_arg(*ap, unsigned long long);
-		case LEN_Z: return va_arg(*ap, size_t);
-		default: return va_arg(*ap, unsigned int);
+	case LEN_HH:
+		return (unsigned char)va_arg(*ap, int);
+	case LEN_H:
+		return (unsigned short)va_arg(*ap, int);
+	case LEN_L:
+		return va_arg(*ap, unsigned long);
+	case LEN_LL:
+		return va_arg(*ap, unsigned long long);
+	case LEN_Z:
+		return va_arg(*ap, size_t);
+	default:
+		return va_arg(*ap, unsigned int);
 	}
 }
 
 // ----- Convertion core ----- //
 
-static void	out_char(out_target_t *target, char c)
+static void out_char(out_target_t *target, char c)
 {
 	target->emit(target->ctx, c);
 	target->count++;
 }
 
-static int
-get_prefix(char *prefix_buf, format_spec_t *spec,
-	unsigned long long val, int base, bool uppercase)
+static int get_prefix(char *prefix_buf, format_spec_t *spec,
+		      unsigned long long val, int base, bool uppercase)
 {
 	if (!spec->hash || val == 0)
 		return 0;
@@ -172,14 +185,15 @@ get_prefix(char *prefix_buf, format_spec_t *spec,
 	return 0;
 }
 
-static void
-get_sign_and_abs(long long val, char *sign, unsigned long long *abs_val, format_spec_t *spec)
+static void get_sign_and_abs(long long val, char *sign,
+			     unsigned long long *abs_val, format_spec_t *spec)
 {
 	if (val < 0) {
 		*sign = '-';
-		*abs_val = -(unsigned long long)val; // to protect the var overflow if val is LLONG_MIN
-	}
-	else {
+		*abs_val =
+			-(unsigned long long)
+				val; // to protect the var overflow if val is LLONG_MIN
+	} else {
 		*abs_val = (unsigned long long)val;
 		if (spec->plus)
 			*sign = '+';
@@ -190,9 +204,9 @@ get_sign_and_abs(long long val, char *sign, unsigned long long *abs_val, format_
 	}
 }
 
-static char
-*apply_precision(char *digits, int digits_len, char *buf_start,
-	format_spec_t *spec, unsigned long long val, int *out_len)
+static char *apply_precision(char *digits, int digits_len, char *buf_start,
+			     format_spec_t *spec, unsigned long long val,
+			     int *out_len)
 {
 	if (spec->precision == 0 && val == 0) {
 		*out_len = 0;
@@ -206,16 +220,16 @@ static char
 		pad--;
 	}
 
-	*out_len = (spec->precision > digits_len) ? spec->precision : digits_len;
+	*out_len = (spec->precision > digits_len) ? spec->precision :
+						    digits_len;
 	return digits;
 }
 
-static void
-emit_prefixed_number(out_target_t *target, char *prefix, int prefix_len,
-				char *digits, int len, format_spec_t *spec, int pad_len)
+static void emit_prefixed_number(out_target_t *target, char *prefix,
+				 int prefix_len, char *digits, int len,
+				 format_spec_t *spec, int pad_len)
 {
-	bool	zero_pad = spec->zero && !spec->minus && spec->precision == -1;
-
+	bool zero_pad = spec->zero && !spec->minus && spec->precision == -1;
 
 	if (!spec->minus && !zero_pad) {
 		while (pad_len-- > 0)
@@ -237,11 +251,12 @@ emit_prefixed_number(out_target_t *target, char *prefix, int prefix_len,
 			out_char(target, ' ');
 }
 
-static char
-*uint_to_str(unsigned long long val, char *buf_end, int base, bool uppercase)
+static char *uint_to_str(unsigned long long val, char *buf_end, int base,
+			 bool uppercase)
 {
-	const char	*digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
-	char	*p = buf_end;
+	const char *digits = uppercase ? "0123456789ABCDEF" :
+					 "0123456789abcdef";
+	char *p = buf_end;
 
 	*p = '\0';
 	if (val == 0)
@@ -255,69 +270,69 @@ static char
 	return p;
 }
 
-static void
-conv_signed(format_spec_t *spec, va_list *ap, out_target_t *target)
+static void conv_signed(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	long long	val = get_int_arg(spec, ap);
+	long long val = get_int_arg(spec, ap);
 
-	char	sign;
-	unsigned long long	abs_val;
+	char sign;
+	unsigned long long abs_val;
 	get_sign_and_abs(val, &sign, &abs_val, spec);
 
-	char	tmp[32];
-	char	*digits = uint_to_str(abs_val, tmp + sizeof(tmp) - 1, 10, false);
-	int		digits_len = tmp + sizeof(tmp) - 1 - digits;
+	char tmp[32];
+	char *digits = uint_to_str(abs_val, tmp + sizeof(tmp) - 1, 10, false);
+	int digits_len = tmp + sizeof(tmp) - 1 - digits;
 
-	int	len;
+	int len;
 	digits = apply_precision(digits, digits_len, tmp, spec, abs_val, &len);
 
-	char	prefix[1];
-	int		prefix_len = 0;
+	char prefix[1];
+	int prefix_len = 0;
 	if (sign != '\0') {
 		prefix[0] = sign;
 		prefix_len = 1;
 	}
 
-	int	total_len = prefix_len + len;
-	int	pad_len = (spec->width > total_len) ? spec->width - total_len : 0;
+	int total_len = prefix_len + len;
+	int pad_len = (spec->width > total_len) ? spec->width - total_len : 0;
 
-	emit_prefixed_number(target, prefix, prefix_len, digits, len, spec, pad_len);
+	emit_prefixed_number(target, prefix, prefix_len, digits, len, spec,
+			     pad_len);
 }
 
-static void
-conv_unsigned(format_spec_t *spec, va_list *ap,
-		out_target_t *target, int base, bool uppercase)
+static void conv_unsigned(format_spec_t *spec, va_list *ap,
+			  out_target_t *target, int base, bool uppercase)
 {
-	unsigned long long	val = get_uint_arg(spec, ap);
+	unsigned long long val = get_uint_arg(spec, ap);
 
-	char	tmp[32];
-	char	*digits = uint_to_str(val, tmp + sizeof(tmp) - 1, base, uppercase);
-	int		digits_len = tmp + sizeof(tmp) - 1 - digits;
+	char tmp[32];
+	char *digits = uint_to_str(val, tmp + sizeof(tmp) - 1, base, uppercase);
+	int digits_len = tmp + sizeof(tmp) - 1 - digits;
 
-	int	len;
+	int len;
 	digits = apply_precision(digits, digits_len, tmp, spec, val, &len);
 
-	char	prefix[2];
-	int	prefix_len = get_prefix(prefix, spec, val, base, uppercase);
+	char prefix[2];
+	int prefix_len = get_prefix(prefix, spec, val, base, uppercase);
 
-	int	total_len = prefix_len + len;
-	int	pad_len = (spec->width > total_len) ? spec->width - total_len : 0;
+	int total_len = prefix_len + len;
+	int pad_len = (spec->width > total_len) ? spec->width - total_len : 0;
 
-	emit_prefixed_number(target, prefix, prefix_len, digits, len, spec, pad_len);
+	emit_prefixed_number(target, prefix, prefix_len, digits, len, spec,
+			     pad_len);
 }
 
 static void conv_string(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	const char	*str = va_arg(*ap, const char *);
+	const char *str = va_arg(*ap, const char *);
 	if (str == NULL)
 		str = "(null)";
 
-	int	len = (int)strlen(str);
+	int len = (int)strlen(str);
 
 	if (spec->precision != -1 && spec->precision < len)
 		len = spec->precision;
 
-	int	pad_len = (spec->width > len) ? spec->width - len : 0;
+	int pad_len = (spec->width > len) ? spec->width - len : 0;
 
 	if (!spec->minus)
 		while (pad_len-- > 0)
@@ -333,9 +348,9 @@ static void conv_string(format_spec_t *spec, va_list *ap, out_target_t *target)
 
 static void conv_char(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	char	c = (char)va_arg(*ap, int);
+	char c = (char)va_arg(*ap, int);
 
-	int	pad_len = (spec->width > 1) ? spec->width - 1 : 0;
+	int pad_len = (spec->width > 1) ? spec->width - 1 : 0;
 
 	if (!spec->minus)
 		while (pad_len-- > 0)
@@ -350,12 +365,12 @@ static void conv_char(format_spec_t *spec, va_list *ap, out_target_t *target)
 
 static void conv_pointer(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	void	*ptr = va_arg(*ap, void *);
+	void *ptr = va_arg(*ap, void *);
 
 	if (ptr == NULL) {
-		const	char *nil_str = "(nil)";
-		int	len = 5;
-		int	pad_len = (spec->width > len) ? spec->width - len : 0;
+		const char *nil_str = "(nil)";
+		int len = 5;
+		int pad_len = (spec->width > len) ? spec->width - len : 0;
 
 		if (!spec->minus)
 			while (pad_len-- > 0)
@@ -370,18 +385,19 @@ static void conv_pointer(format_spec_t *spec, va_list *ap, out_target_t *target)
 
 	uintptr_t val = (uintptr_t)ptr;
 
-	char	tmp[32];
-	char	*digits = uint_to_str(val, tmp + sizeof(tmp) - 1, 16, false);
-	int		digits_len = tmp + sizeof(tmp) - 1 - digits;
+	char tmp[32];
+	char *digits = uint_to_str(val, tmp + sizeof(tmp) - 1, 16, false);
+	int digits_len = tmp + sizeof(tmp) - 1 - digits;
 
-	char	prefix[2] = {'0', 'x'};
-	int		total_len = 2 + digits_len;
-	int		pad_len = (spec->width > total_len) ? spec->width - total_len : 0;
+	char prefix[2] = { '0', 'x' };
+	int total_len = 2 + digits_len;
+	int pad_len = (spec->width > total_len) ? spec->width - total_len : 0;
 
-	format_spec_t	p_spec = *spec;
+	format_spec_t p_spec = *spec;
 	p_spec.precision = -1;
 
-	emit_prefixed_number(target, prefix, 2, digits, digits_len, &p_spec, pad_len);
+	emit_prefixed_number(target, prefix, 2, digits, digits_len, &p_spec,
+			     pad_len);
 }
 
 // ----- Floating point handling ----- //
@@ -400,7 +416,8 @@ typedef struct {
 	int shift;
 } float_decomp_t;
 
-static float_decomp_t decompose_significand(int exponent, u64_t mantissa_bits, int exp_stored)
+static float_decomp_t decompose_significand(int exponent, u64_t mantissa_bits,
+					    int exp_stored)
 {
 	float_decomp_t r;
 	if (exp_stored == 0) {
@@ -413,7 +430,8 @@ static float_decomp_t decompose_significand(int exponent, u64_t mantissa_bits, i
 	return r;
 }
 
-static void split_int_frac(float_decomp_t d, u64_t *int_part, u64_t *frac_num, int *n)
+static void split_int_frac(float_decomp_t d, u64_t *int_part, u64_t *frac_num,
+			   int *n)
 {
 	if (d.shift >= 0) {
 		*int_part = (d.shift < 64) ? (d.significand << d.shift) : 0;
@@ -426,7 +444,8 @@ static void split_int_frac(float_decomp_t d, u64_t *int_part, u64_t *frac_num, i
 	}
 }
 
-static int extract_frac_digits_rounded(u64_t frac_num, int n, int precision, char *out, u64_t *int_part)
+static int extract_frac_digits_rounded(u64_t frac_num, int n, int precision,
+				       char *out, u64_t *int_part)
 {
 	char digits[32];
 	for (int i = 0; i < precision + 1; i++) {
@@ -440,8 +459,11 @@ static int extract_frac_digits_rounded(u64_t frac_num, int n, int precision, cha
 	int i = precision - 1;
 	while (round_up && i >= 0) {
 		digits[i]++;
-		if (digits[i] == 10) { digits[i] = 0; i--; }
-		else round_up = false;
+		if (digits[i] == 10) {
+			digits[i] = 0;
+			i--;
+		} else
+			round_up = false;
 	}
 	if (round_up)
 		(*int_part)++;
@@ -451,53 +473,63 @@ static int extract_frac_digits_rounded(u64_t frac_num, int n, int precision, cha
 	return precision;
 }
 
-static void emit_special_float(out_target_t *target, format_spec_t *spec, const char *str)
+static void emit_special_float(out_target_t *target, format_spec_t *spec,
+			       const char *str)
 {
 	int len = 0;
-	while (str[len]) len++;
+	while (str[len])
+		len++;
 	int pad_len = (spec->width > len) ? spec->width - len : 0;
 	if (!spec->minus)
-		while (pad_len-- > 0) out_char(target, ' ');
+		while (pad_len-- > 0)
+			out_char(target, ' ');
 	for (int i = 0; i < len; i++)
 		out_char(target, str[i]);
 	if (spec->minus)
-		while (pad_len-- > 0) out_char(target, ' ');
+		while (pad_len-- > 0)
+			out_char(target, ' ');
 }
 
 static void conv_float(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	double	val = va_arg(*ap, double);
-	double_bits_t	u;
+	double val = va_arg(*ap, double);
+	double_bits_t u;
 	u.d = val;
 
-	int		sign_bit = (u.bits >> 63) & 0x1;
-	int		exp_stored = (u.bits >> 52) & 0x7FF;
-	u64_t	mantissa_bits = u.bits & 0xFFFFFFFFFFFFF;
-	int		exponent = exp_stored - 1023;
+	int sign_bit = (u.bits >> 63) & 0x1;
+	int exp_stored = (u.bits >> 52) & 0x7FF;
+	u64_t mantissa_bits = u.bits & 0xFFFFFFFFFFFFF;
+	int exponent = exp_stored - 1023;
 
 	if (exp_stored == 0x7FF) {
-		emit_special_float(target, spec, (mantissa_bits != 0) ? "nan" : (sign_bit ? "-inf" : "inf"));
+		emit_special_float(target, spec,
+				   (mantissa_bits != 0) ?
+					   "nan" :
+					   (sign_bit ? "-inf" : "inf"));
 		return;
 	}
 
-	int	precision = (spec->precision == -1) ? 6 : spec->precision;
+	int precision = (spec->precision == -1) ? 6 : spec->precision;
 	if (precision > 30)
 		precision = 30;
 
-	float_decomp_t	decomp = decompose_significand(exponent, mantissa_bits, exp_stored);
+	float_decomp_t decomp =
+		decompose_significand(exponent, mantissa_bits, exp_stored);
 
-	u64_t	int_part, frac_num;
-	int		n;
+	u64_t int_part, frac_num;
+	int n;
 	split_int_frac(decomp, &int_part, &frac_num, &n);
 
-	char	frac_digits[32];
-	extract_frac_digits_rounded(frac_num, n, precision, frac_digits, &int_part);
+	char frac_digits[32];
+	extract_frac_digits_rounded(frac_num, n, precision, frac_digits,
+				    &int_part);
 
-	char	tmp[32];
-	char	*int_digits = uint_to_str(int_part, tmp + sizeof(tmp) - 1, 10, false);
-	int		int_len = tmp + sizeof(tmp) - 1 - int_digits;
+	char tmp[32];
+	char *int_digits =
+		uint_to_str(int_part, tmp + sizeof(tmp) - 1, 10, false);
+	int int_len = tmp + sizeof(tmp) - 1 - int_digits;
 
-	char	sign = '\0';
+	char sign = '\0';
 	if (sign_bit)
 		sign = '-';
 	else if (spec->plus)
@@ -505,9 +537,10 @@ static void conv_float(format_spec_t *spec, va_list *ap, out_target_t *target)
 	else if (spec->space)
 		sign = ' ';
 
-	int		total_len = (sign != '\0' ? 1 : 0) + int_len + (precision > 0 ? 1 + precision : 0);
-	int		pad_len = (spec->width > total_len) ? spec->width - total_len : 0;
-	bool	zero_pad = spec->zero && !spec->minus;
+	int total_len = (sign != '\0' ? 1 : 0) + int_len +
+			(precision > 0 ? 1 + precision : 0);
+	int pad_len = (spec->width > total_len) ? spec->width - total_len : 0;
+	bool zero_pad = spec->zero && !spec->minus;
 
 	if (!spec->minus && !zero_pad)
 		while (pad_len-- > 0)
@@ -529,58 +562,56 @@ static void conv_float(format_spec_t *spec, va_list *ap, out_target_t *target)
 			out_char(target, ' ');
 }
 
-static void
-execute_conversion(format_spec_t *spec, va_list *ap, out_target_t *target)
+static void execute_conversion(format_spec_t *spec, va_list *ap,
+			       out_target_t *target)
 {
 	switch (spec->conv) {
-		case 'd':
-		case 'i':
-			conv_signed(spec, ap, target);
-			break;
-		case 'u':
-			conv_unsigned(spec, ap, target, 10, false);
-			break;
-		case 'x':
-			conv_unsigned(spec, ap, target, 16, false);
-			break;
-		case 'X':
-			conv_unsigned(spec, ap, target, 16, true);
-			break;
-		case 'o':
-			conv_unsigned(spec, ap, target, 8, false);
-			break;
-		case 's':
-			conv_string(spec, ap, target);
-			break;
-		case 'c':
-			conv_char(spec, ap, target);
-			break;
-		case 'p':
-			conv_pointer(spec, ap, target);
-			break;
-		case 'f':
-			conv_float(spec, ap, target);
-			break;
-		case 'F':
-			conv_float(spec, ap, target);
-			break;
-		default:
-			// conversion inconnue : comportement défensif
-			out_char(target, '%');
-			if (spec->conv)
-				out_char(target, spec->conv);
-			break;
+	case 'd':
+	case 'i':
+		conv_signed(spec, ap, target);
+		break;
+	case 'u':
+		conv_unsigned(spec, ap, target, 10, false);
+		break;
+	case 'x':
+		conv_unsigned(spec, ap, target, 16, false);
+		break;
+	case 'X':
+		conv_unsigned(spec, ap, target, 16, true);
+		break;
+	case 'o':
+		conv_unsigned(spec, ap, target, 8, false);
+		break;
+	case 's':
+		conv_string(spec, ap, target);
+		break;
+	case 'c':
+		conv_char(spec, ap, target);
+		break;
+	case 'p':
+		conv_pointer(spec, ap, target);
+		break;
+	case 'f':
+		conv_float(spec, ap, target);
+		break;
+	case 'F':
+		conv_float(spec, ap, target);
+		break;
+	default:
+		// conversion inconnue : comportement défensif
+		out_char(target, '%');
+		if (spec->conv)
+			out_char(target, spec->conv);
+		break;
 	}
 }
 
-static const char
-*parse_directive(const char *restrict fmt, va_list *ap, out_target_t *target)
+static const char *parse_directive(const char *restrict fmt, va_list *ap,
+				   out_target_t *target)
 {
-	format_spec_t spec = {
-		.width = -1,
-		.precision = -1,
-		.length = LEN_NONE
-	};
+	format_spec_t spec = { .width = -1,
+			       .precision = -1,
+			       .length = LEN_NONE };
 
 	fmt = parse_flags(fmt, &spec);
 	fmt = parse_width(fmt, &spec, ap);
@@ -595,7 +626,7 @@ static const char
 	return fmt;
 }
 
-int	vprint_core(const char *restrict fmt, va_list *ap, out_target_t *target)
+int vprint_core(const char *restrict fmt, va_list *ap, out_target_t *target)
 {
 	while (*fmt) {
 		if (*fmt != '%') {

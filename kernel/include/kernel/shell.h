@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-void	shell_execute(const char *input, size_t len);
-void	print_prompt(void);
+void shell_execute(const char *input, size_t len);
+void print_prompt(void);
 
 #endif // SHELL_H

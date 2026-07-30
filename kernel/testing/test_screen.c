@@ -14,7 +14,7 @@ void test_screen()
 
 	screen_switch(2);
 	printf("Test backspace screen 3\n il ne dois rien y avaoir apres ca :%s",
-		buffer);
+	       buffer);
 	for (size_t i = 0; buffer[i]; ++i) {
 		// backspace();
 		;

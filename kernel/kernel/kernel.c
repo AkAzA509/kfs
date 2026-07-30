@@ -11,17 +11,18 @@
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
-	#error "You are not using a cross-compiler, you will most certainly run into trouble"
+#error "You are not using a cross-compiler, you will most certainly run into trouble"
 #endif
 
 /* Check for the 32-bit ix86 targets. */
 #if !defined(__i386__)
-	#error "This code needs to be compiled with a ix86-elf compiler"
+#error "This code needs to be compiled with a ix86-elf compiler"
 #endif
 
 #define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
 
-void	kmain(void) {
+void kmain(void)
+{
 	// #ifdef DEBUG
 	// 	#include <testing/testing.h>
 	// 	// test_screen();
@@ -41,7 +42,7 @@ void	kmain(void) {
 	keyboard_handler();
 }
 
-static void	panic_print(char *str)
+static void panic_print(char *str)
 {
 	char *vga = (char *)0xB8000;
 	for (int i = 0; str[i]; i++) {
@@ -50,7 +51,8 @@ static void	panic_print(char *str)
 	}
 }
 
-static bool check_multiboot(multiboot_info *mbi, unsigned long magic) {
+static bool check_multiboot(multiboot_info *mbi, unsigned long magic)
+{
 	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
 		panic_print("Invalid magic number: multiboot error");
 		return false;
@@ -61,7 +63,7 @@ static bool check_multiboot(multiboot_info *mbi, unsigned long magic) {
 	// 	return false;
 	// }
 
-	if (CHECK_FLAG (mbi->flags, 4) && CHECK_FLAG (mbi->flags, 5)) {
+	if (CHECK_FLAG(mbi->flags, 4) && CHECK_FLAG(mbi->flags, 5)) {
 		panic_print("Both bits 4 and 5 are set\n");
 		return false;
 	}
@@ -69,7 +71,7 @@ static bool check_multiboot(multiboot_info *mbi, unsigned long magic) {
 	return true;
 }
 
-void	__kstart(unsigned long magic, unsigned long addr)
+void __kstart(unsigned long magic, unsigned long addr)
 {
 	multiboot_info *mbi = (multiboot_info *)addr;
 
@@ -87,7 +89,7 @@ void	__kstart(unsigned long magic, unsigned long addr)
 	ASCII_LOGO;
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 
-	kmain();	/* if kmain return, that sould not happen but in case we hlt infinitly */
+	kmain(); /* if kmain return, that sould not happen but in case we hlt infinitly */
 	HALT_ERROR;
 }
 

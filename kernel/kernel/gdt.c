@@ -3,26 +3,26 @@
 #include <stdio.h>
 
 struct s_gdt_entry {
-	u16_t	limit_1;	// limit, bits 0..15
-	u16_t	base_1;		// base, bits 0..15
-	u8_t	base_2;		// base, bits 16..23
-	u8_t	access;		// access info (type, data/code)
-	u8_t	lim_attr;	// bits 0..3: limit, bits 16..19, bits 4..7: additional data/code attributes
-	u8_t	base_3;		// base, bits 24..31
+	u16_t limit_1; // limit, bits 0..15
+	u16_t base_1; // base, bits 0..15
+	u8_t base_2; // base, bits 16..23
+	u8_t access; // access info (type, data/code)
+	u8_t lim_attr; // bits 0..3: limit, bits 16..19, bits 4..7: additional data/code attributes
+	u8_t base_3; // base, bits 24..31
 } __attribute__((packed));
 
 struct s_gdt_addr {
-	u16_t	limit;
-	u32_t	addr;
+	u16_t limit;
+	u32_t addr;
 } __attribute__((packed));
 
 #define GDT_ENTRIES 7
 #define GDT_ADDR 0x00000800
 
 static struct s_gdt_entry *const gdt = (struct s_gdt_entry *)GDT_ADDR;
-static struct s_gdt_addr	gdt_addr;
+static struct s_gdt_addr gdt_addr;
 
-extern void	update_gdt(u32_t gdt);
+extern void update_gdt(u32_t gdt);
 
 // flags = CF = 1100 1111
 //		& F0  = 1100 0000
@@ -45,20 +45,23 @@ extern void	update_gdt(u32_t gdt);
 // 			>> 24  = 0000 0000 0000 0000 0000 0000 1111 1111 | "1111 1111 1111 1111 1111 1111"
 // 			& FF   = 0000 0000 0000 0000 0000 0000 1111 1111
 
-static void	create_gdt_entry(u8_t idx, u32_t base, u32_t limit, u8_t access, u8_t flags)
+static void create_gdt_entry(u8_t idx, u32_t base, u32_t limit, u8_t access,
+			     u8_t flags)
 {
-	gdt[idx].base_1 = base & 0xFFFF;			// the 16 low bits
-	gdt[idx].base_2 = (base >> 16) & 0xFF;		// the 8 next bits
-	gdt[idx].base_3 = (base >> 24) & 0xFF;		// the 8 last high bits
+	gdt[idx].base_1 = base & 0xFFFF; // the 16 low bits
+	gdt[idx].base_2 = (base >> 16) & 0xFF; // the 8 next bits
+	gdt[idx].base_3 = (base >> 24) & 0xFF; // the 8 last high bits
 
-	gdt[idx].limit_1 = limit & 0xFFFF;			// the 16 low bits
-	gdt[idx].lim_attr = (limit >> 16) & 0xF;	// the 4 high bits in the first bits of lim_attr
-	gdt[idx].lim_attr |= flags & 0xF0;			// set the high nibble of flags
+	gdt[idx].limit_1 = limit & 0xFFFF; // the 16 low bits
+	gdt[idx].lim_attr =
+		(limit >> 16) &
+		0xF; // the 4 high bits in the first bits of lim_attr
+	gdt[idx].lim_attr |= flags & 0xF0; // set the high nibble of flags
 
 	gdt[idx].access = access;
 }
 
-void	init_gdt()
+void init_gdt()
 {
 	gdt_addr.addr = (u32_t)gdt;
 	gdt_addr.limit = (sizeof(struct s_gdt_entry) * GDT_ENTRIES) - 1;
@@ -77,7 +80,6 @@ void	init_gdt()
 	printf(BOOT_LOG "gdt initialized\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 }
-
 
 // 0x92 = 1001 0010 kernel data, stack
 

@@ -33,6 +33,7 @@
 #define PAGE_UP 0x49
 #define PAGE_DOWN 0x51
 
+// clang-format off
 static const char keycode[] = {
 	0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',	// 0x00-0x0E (0x01 = escape)
 	'\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',	// 0x0F-0x1C
@@ -52,66 +53,96 @@ static const char keycode_shift[] = {
 	0, 0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.',	// 0x45-53 (number lock, scrolllock)
 	0, 0, 0, 0, 0															// 0x54 to 0x56 empty 0x57-0x58 (f11, f12)
 };
+// clang-format on
 
 static bool shift = false;
 static bool caps_lock = false;
 static bool extended_pending = false;
 
-static void	handle_screen_switch(u8_t code)
+static void handle_screen_switch(u8_t code)
 {
 	switch (code) {
-		case 0x3b: screen_switch(0); return ; // f1
-		case 0x3c: screen_switch(1); return ; // f2
-		case 0x3d: screen_switch(2); return ; // f3
-		case 0x3e: screen_switch(3); return ; // f4
-		default: break ;
+	case 0x3b:
+		screen_switch(0);
+		return; // f1
+	case 0x3c:
+		screen_switch(1);
+		return; // f2
+	case 0x3d:
+		screen_switch(2);
+		return; // f3
+	case 0x3e:
+		screen_switch(3);
+		return; // f4
+	default:
+		break;
 	}
 }
 
 // Fake exit, to modify when the kernel has memory
-void	handle_exit(void)
+void handle_exit(void)
 {
 	printf("Shuting down ...\n");
 	SHUTDOWN;
 }
 
-static void	handle_scroll_key(u8_t code, bool is_release)
+static void handle_scroll_key(u8_t code, bool is_release)
 {
 	if (is_release)
-		return ;
+		return;
 
 	switch (code) {
-		case ARROW_UP: screen_scroll(-1); break ;
-		case ARROW_DOWN: screen_scroll(1); break ;
-		case PAGE_UP: screen_scroll(-(int)g_screen.total_rows); break ;
-		case PAGE_DOWN: screen_scroll((int)g_screen.total_rows); break ;
-		case HOME: screen_snap(); break ;
-		default: break ;
+	case ARROW_UP:
+		screen_scroll(-1);
+		break;
+	case ARROW_DOWN:
+		screen_scroll(1);
+		break;
+	case PAGE_UP:
+		screen_scroll(-(int)g_screen.total_rows);
+		break;
+	case PAGE_DOWN:
+		screen_scroll((int)g_screen.total_rows);
+		break;
+	case HOME:
+		screen_snap();
+		break;
+	default:
+		break;
 	}
 }
 
-static void	handle_edit_key(u8_t code, bool is_release)
+static void handle_edit_key(u8_t code, bool is_release)
 {
 	if (is_release)
-		return ;
+		return;
 
 	switch (code) {
-		case ARROW_LEFT: move_cursor(move_one_left); break ;
-		case ARROW_RIGHT: move_cursor(move_one_right); break ;
-		case END: move_cursor(move_end); break ;
-		case 0x1E: move_cursor(move_start); break ; // ctrl + a
-		default: break ;
+	case ARROW_LEFT:
+		move_cursor(move_one_left);
+		break;
+	case ARROW_RIGHT:
+		move_cursor(move_one_right);
+		break;
+	case END:
+		move_cursor(move_end);
+		break;
+	case 0x1E:
+		move_cursor(move_start);
+		break; // ctrl + a
+	default:
+		break;
 	}
 }
 
 // For the key with 2 code
-static void	handle_extended_key(u8_t code, bool is_release)
+static void handle_extended_key(u8_t code, bool is_release)
 {
 	// klog("in the special key code : %#.2x\n", code);
 	if (code >= 0x47 && code <= 0x51) // HOME to PAGE DOWN
 		handle_scroll_key(code, is_release);
-	if (code == ARROW_LEFT || code == ARROW_RIGHT ||
-		code == END || code == 0x1E) {
+	if (code == ARROW_LEFT || code == ARROW_RIGHT || code == END ||
+	    code == 0x1E) {
 		// klog("in handler\n");
 		handle_edit_key(code, is_release);
 	}
@@ -123,26 +154,26 @@ static void	handle_extended_key(u8_t code, bool is_release)
 	}
 }
 
-static void	handle_release_special_key(u8_t code)
+static void handle_release_special_key(u8_t code)
 {
 	u8_t key = code & ~RELEASE_MSK;
 
 	if (key == LEFT_SHIFT || key == RIGHT_SHIFT)
 		shift = false;
-	return ;
+	return;
 }
 
-static void	handle_press_special_key(u8_t code)
+static void handle_press_special_key(u8_t code)
 {
 	if (code == LEFT_SHIFT || code == RIGHT_SHIFT) {
 		shift = true;
-		return ;
+		return;
 	}
 	if (code == CAPS_LOCK)
 		caps_lock = !caps_lock;
 }
 
-static bool	handle_single_key(u8_t code, bool is_release)
+static bool handle_single_key(u8_t code, bool is_release)
 {
 	if (is_release) {
 		handle_release_special_key(code);
@@ -167,56 +198,58 @@ static bool	handle_single_key(u8_t code, bool is_release)
 	return true;
 }
 
-static void	print_code(u8_t code)
+static void print_code(u8_t code)
 {
 	char val = keycode[code];
 	if (!val)
-		return ;
+		return;
 
 	if (shift && !caps_lock)
 		val = keycode_shift[code];
 	else if ((caps_lock && shift && (val < 'a' || val > 'z')) ||
-			(caps_lock && !shift && val >= 'a' && val <= 'z'))
+		 (caps_lock && !shift && val >= 'a' && val <= 'z'))
 		val = keycode_shift[code];
 
-	if (!line_visible(&g_screens[current_screen], g_screens[current_screen].head))
+	if (!line_visible(&g_screens[current_screen],
+			  g_screens[current_screen].head))
 		screen_snap();
 	editor_putchar(val);
 }
 
-static void	read_scancode(u8_t scancode)
+static void read_scancode(u8_t scancode)
 {
-	#ifdef DEBUG
-		// serial_print_hex(scancode);
-	#endif
-	if (scancode == EXTEND_CODE || scancode == LEFT_CTRL || scancode == RIGHT_CTRL) {
+#ifdef DEBUG
+	// serial_print_hex(scancode);
+#endif
+	if (scancode == EXTEND_CODE || scancode == LEFT_CTRL ||
+	    scancode == RIGHT_CTRL) {
 		extended_pending = true;
-		return ;
+		return;
 	}
 
-	bool	is_extended = extended_pending;
-	bool	is_release = scancode & RELEASE_MSK;
-	u8_t	code = scancode & CODE_MSK;
+	bool is_extended = extended_pending;
+	bool is_release = scancode & RELEASE_MSK;
+	u8_t code = scancode & CODE_MSK;
 
 	extended_pending = false;
 
 	if (is_extended) {
 		handle_extended_key(code, is_release);
-		return ;
+		return;
 	}
 	if (!handle_single_key(code, is_release))
-		return ;
+		return;
 
 	print_code(code);
 }
 
-void	keyboard_handler()
+void keyboard_handler()
 {
-	while (1)
-	{
+	while (1) {
 		// 0x64 register give the port's status (ready or not, busy ...)
 		if (inb(0x64) & 0x01) {
-			u8_t scancode = inb(0x60); // 0x60 register give the data (key press)
+			u8_t scancode = inb(
+				0x60); // 0x60 register give the data (key press)
 			read_scancode(scancode);
 		}
 	}

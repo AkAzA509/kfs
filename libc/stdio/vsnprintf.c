@@ -2,10 +2,10 @@
 #include "vprint_core.h"
 
 typedef struct {
-	char	*buf;
-	size_t	size;
-	size_t	pos;
-}			snprintf_ctx_t;
+	char *buf;
+	size_t size;
+	size_t pos;
+} snprintf_ctx_t;
 
 static void _vsnprintf_e(void *ctx, char c)
 {
@@ -21,20 +21,12 @@ static void _vsnprintf_e(void *ctx, char c)
 // (excluding the terminating null byte) which would have been written to
 // the final string if enough space had been available.
 // Thus, a return value of size or more means that the output was truncated.
-int
-vsnprintf(char *restrict str, size_t size, const char *restrict fmt, va_list ap)
+int vsnprintf(char *restrict str, size_t size, const char *restrict fmt,
+	      va_list ap)
 {
-	snprintf_ctx_t sc = {
-		.buf = str,
-		.size = size,
-		.pos = 0
-	};
+	snprintf_ctx_t sc = { .buf = str, .size = size, .pos = 0 };
 
-	out_target_t target = {
-		.emit = _vsnprintf_e,
-		.ctx = &sc,
-		.count = 0
-	};
+	out_target_t target = { .emit = _vsnprintf_e, .ctx = &sc, .count = 0 };
 
 	vprint_core(fmt, &ap, &target);
 

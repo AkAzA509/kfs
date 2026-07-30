@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stddef.h>
 
-size_t strlen(const char* str)
+size_t strlen(const char *str)
 {
 	const char *start = str;
 
@@ -13,11 +13,11 @@ size_t strlen(const char* str)
 	}
 
 	const u32_t *s32 = (const u32_t *)str;
-	while(IS_NULL_TERM(*s32))
+	while (IS_NULL_TERM(*s32))
 		s32++;
 
 	str = (const char *)s32;
-	while(*str)
+	while (*str)
 		str++;
 
 	return str - start;

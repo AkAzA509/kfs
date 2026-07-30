@@ -20,7 +20,8 @@ typedef struct s_worker {
 	size_t live_slots;
 } t_worker;
 
-static size_t next_size(unsigned int *state) {
+static size_t next_size(unsigned int *state)
+{
 	// unsigned int bucket;
 	(void)state;
 	// bucket = rand_r(state) % 10u;
@@ -32,7 +33,8 @@ static size_t next_size(unsigned int *state) {
 	return 0;
 }
 
-static void *worker_main(void *arg) {
+static void *worker_main(void *arg)
+{
 	t_worker *w = (t_worker *)arg;
 	void *slots[SLOT_COUNT];
 	size_t i;
@@ -54,15 +56,16 @@ static void *worker_main(void *arg) {
 				w->malloc_attempt++;
 				slots[idx] = malloc(s);
 				if (slots[idx]) {
-					memset(slots[idx], (unsigned char)('A' + (w->id % 26)), s);
+					memset(slots[idx],
+					       (unsigned char)('A' +
+							       (w->id % 26)),
+					       s);
 					w->malloc_success++;
 					w->live_slots++;
-				}
-				else
+				} else
 					w->malloc_fail++;
 			}
-		}
-		else if (op == 1u) {
+		} else if (op == 1u) {
 			if (slots[idx]) {
 				size_t s = next_size(&w->seed);
 				w->realloc_attempt++;
@@ -70,12 +73,10 @@ static void *worker_main(void *arg) {
 				if (p) {
 					slots[idx] = p;
 					w->realloc_success++;
-				}
-				else
+				} else
 					w->realloc_fail++;
 			}
-		}
-		else {
+		} else {
 			if (slots[idx]) {
 				free(slots[idx]);
 				slots[idx] = NULL;
@@ -101,7 +102,8 @@ static void *worker_main(void *arg) {
 	return NULL;
 }
 
-int main(void) {
+int main(void)
+{
 	// pthread_t threads[THREAD_COUNT];
 	t_worker workers[THREAD_COUNT];
 	size_t i;
@@ -115,12 +117,13 @@ int main(void) {
 	size_t total_free;
 	size_t total_live;
 
-	printf(BLD_BLUE"\n== ft_malloc thread test ==\n"RESET);
+	printf(BLD_BLUE "\n== ft_malloc thread test ==\n" RESET);
 
 	i = 0;
 	while (i < THREAD_COUNT) {
 		workers[i].id = (int)i;
-		workers[i].seed = (unsigned int)(12345u + (unsigned int)i * 100u);
+		workers[i].seed =
+			(unsigned int)(12345u + (unsigned int)i * 100u);
 		workers[i].malloc_attempt = 0;
 		workers[i].malloc_success = 0;
 		workers[i].malloc_fail = 0;
@@ -147,7 +150,8 @@ int main(void) {
 	}
 
 	if (ok)
-		printf(BLD_GREEN"[OK] all threads joined successfully\n"RESET);
+		printf(BLD_GREEN
+		       "[OK] all threads joined successfully\n" RESET);
 
 	total_malloc_attempt = 0;
 	total_malloc_success = 0;
@@ -160,16 +164,12 @@ int main(void) {
 
 	i = 0;
 	while (i < THREAD_COUNT) {
-		printf(BLD_WHITE"worker %lu: malloc %lu/%lu (fail=%lu), realloc %lu/%lu (fail=%lu), free=%lu, live=%lu\n"RESET,
-			i,
-			workers[i].malloc_success,
-			workers[i].malloc_attempt,
-			workers[i].malloc_fail,
-			workers[i].realloc_success,
-			workers[i].realloc_attempt,
-			workers[i].realloc_fail,
-			workers[i].free_count,
-			workers[i].live_slots);
+		printf(BLD_WHITE
+		       "worker %lu: malloc %lu/%lu (fail=%lu), realloc %lu/%lu (fail=%lu), free=%lu, live=%lu\n" RESET,
+		       i, workers[i].malloc_success, workers[i].malloc_attempt,
+		       workers[i].malloc_fail, workers[i].realloc_success,
+		       workers[i].realloc_attempt, workers[i].realloc_fail,
+		       workers[i].free_count, workers[i].live_slots);
 		total_malloc_attempt += workers[i].malloc_attempt;
 		total_malloc_success += workers[i].malloc_success;
 		total_malloc_fail += workers[i].malloc_fail;
@@ -181,15 +181,11 @@ int main(void) {
 		i++;
 	}
 
-	printf(BLD_BLUE"totals: malloc %lu/%lu (fail=%lu), realloc %lu/%lu (fail=%lu), free=%lu, live=%lu\n"RESET,
-		total_malloc_success,
-		total_malloc_attempt,
-		total_malloc_fail,
-		total_realloc_success,
-		total_realloc_attempt,
-		total_realloc_fail,
-		total_free,
-		total_live);
+	printf(BLD_BLUE
+	       "totals: malloc %lu/%lu (fail=%lu), realloc %lu/%lu (fail=%lu), free=%lu, live=%lu\n" RESET,
+	       total_malloc_success, total_malloc_attempt, total_malloc_fail,
+	       total_realloc_success, total_realloc_attempt, total_realloc_fail,
+	       total_free, total_live);
 
 	show_alloc_mem();
 	show_alloc_mem_ex();

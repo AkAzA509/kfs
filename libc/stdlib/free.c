@@ -3,15 +3,14 @@
 
 // Find the right zone in the allocation linked list
 // to match the pointer
-t_zone	**find_zone_link(t_zone **head, t_zone *zone)
+t_zone **find_zone_link(t_zone **head, t_zone *zone)
 {
-	t_zone	**link = head;
+	t_zone **link = head;
 
 	while (*link && *link != zone)
 		link = &(*link)->next;
 	return link;
 }
-
 
 // Returns true if 'right' starts exactly where 'left' ends in memory.
 //
@@ -28,16 +27,15 @@ t_zone	**find_zone_link(t_zone **head, t_zone *zone)
 //
 // If (char *)(left + 1) + left->size == (char *)right -> blocks are adjacent
 //
-bool	is_adjacent(t_block *left, t_block *right)
+bool is_adjacent(t_block *left, t_block *right)
 {
 	return ((char *)(left + 1) + left->size == (char *)right);
 }
 
-
 // Take two block and merge it together (if they are adjacent in memory and in the linked list)
-t_block	*merge_with_next(t_block *block, t_zone *zone)
+t_block *merge_with_next(t_block *block, t_zone *zone)
 {
-	t_block	*next = block->next;
+	t_block *next = block->next;
 
 	if (!next || !next->is_free || !is_adjacent(block, next))
 		return block;
@@ -54,35 +52,38 @@ t_block	*merge_with_next(t_block *block, t_zone *zone)
 	return block;
 }
 
-
 // TINY or SMALL zones: marks the block as free.
 // Check whether, as a result of this block being freed, the entire zone is now free,
 // if so, the entire zone is freed,
 // otherwise, check whether the adjacent blocks are free in order to group the blocks together (defragment the memory)
-static void	free_other(t_block *block, t_zone **zone_head)
+static void free_other(t_block *block, t_zone **zone_head)
 {
-	t_zone	*zone = block->owner;
-	t_zone	**zone_link = find_zone_link(zone_head, zone);
+	t_zone *zone = block->owner;
+	t_zone **zone_link = find_zone_link(zone_head, zone);
 
 	if (!*zone_link) {
 		if (g_alloc.env.MALLOC_LOG_)
-			printf(BLD_RED"Error: ptr not recognize, free failed\n"RESET);
+			printf(BLD_RED
+			       "Error: ptr not recognize, free failed\n" RESET);
 		return;
 	}
 
 	if (block->is_free)
 		return;
-	if (g_alloc.env.MALLOC_PERTURB_ENABLE_ && g_alloc.env.MALLOC_PERTURB_VALUE_)
+	if (g_alloc.env.MALLOC_PERTURB_ENABLE_ &&
+	    g_alloc.env.MALLOC_PERTURB_VALUE_)
 		perturb_fill((void *)(block + 1), block->size, true);
 
 	block->is_free = true;
 	zone->free_blocks++;
 	// int kind = block->kind;
 
-	while (block->prev && block->prev->is_free && is_adjacent(block->prev, block))
+	while (block->prev && block->prev->is_free &&
+	       is_adjacent(block->prev, block))
 		block = merge_with_next(block->prev, zone);
 
-	while (block->next && block->next->is_free && is_adjacent(block, block->next))
+	while (block->next && block->next->is_free &&
+	       is_adjacent(block, block->next))
 		block = merge_with_next(block, zone);
 
 	// if (zone->total_blocks == 1) {
@@ -96,21 +97,21 @@ static void	free_other(t_block *block, t_zone **zone_head)
 	// }
 }
 
-
 // LARGE type zone: free the entire zone
-static void	free_large(t_block *block)
+static void free_large(t_block *block)
 {
-	t_zone	*zone = block->owner;
-	t_zone	**zone_link = find_zone_link(&g_alloc.large, zone);
+	t_zone *zone = block->owner;
+	t_zone **zone_link = find_zone_link(&g_alloc.large, zone);
 
 	if (!*zone_link) {
 		if (g_alloc.env.MALLOC_LOG_)
-			printf(BLD_RED"Error: ptr not recognize, free failed\n"RESET);
+			printf(BLD_RED
+			       "Error: ptr not recognize, free failed\n" RESET);
 		return;
 	}
 
 	t_zone *next = zone->next;
-	
+
 	// if (munmap(zone, zone->zone_size) < 0) {
 	// 	if (g_alloc.env.MALLOC_LOG_)
 	// 		printf(BLD_RED"Error: munmap() failed while dealocate LARGE block\n"RESET);
@@ -123,22 +124,30 @@ static void	free_large(t_block *block)
 		*zone_link = next;
 }
 
-void	internal_free(void *ptr)
+void internal_free(void *ptr)
 {
 	if (!ptr)
 		return;
 
-	t_block	*block = ((t_block *)ptr) - 1;
+	t_block *block = ((t_block *)ptr) - 1;
 
 	switch (block->kind) {
-		case TINY: free_other(block, &g_alloc.tiny); break;
-		case SMALL: free_other(block, &g_alloc.small); break;
-		case LARGE: free_large(block); break;
-		default: break;
+	case TINY:
+		free_other(block, &g_alloc.tiny);
+		break;
+	case SMALL:
+		free_other(block, &g_alloc.small);
+		break;
+	case LARGE:
+		free_large(block);
+		break;
+	default:
+		break;
 	}
 }
 
-void	free(void *ptr) {
+void free(void *ptr)
+{
 	// pthread_mutex_lock(&g_alloc.mutex);
 	is_env_var();
 	internal_free(ptr);

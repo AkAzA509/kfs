@@ -3,50 +3,51 @@
 #include <stdlib.h>
 #include "../../libc/stdlib/malloc.h"
 
-static int	g_pass = 0;
-static int	g_fail = 0;
+static int g_pass = 0;
+static int g_fail = 0;
 
-static void	report(const char *name, int ok) {
+static void report(const char *name, int ok)
+{
 	if (ok) {
 		g_pass++;
-		printf(BLD_GREEN"[OK] "RESET"%s\n", name);
-	}
-	else {
+		printf(BLD_GREEN "[OK] " RESET "%s\n", name);
+	} else {
 		g_fail++;
-		printf(BLD_RED"[KO] "RESET"%s\n", name);
+		printf(BLD_RED "[KO] " RESET "%s\n", name);
 	}
 }
 
 // void print_lenght_calcul() {
-	// printf("align: %d\n", ALIGN8(4050));
-	// size_t zone = sizeof(t_zone);
-	// size_t block = sizeof(t_block);
-	// size_t align_t = ALIGN8(TINY_MAX);
-	// size_t align_s = ALIGN8(SMALL_MAX);
-	// size_t page_size = PAGE_SIZE;
-	
-	// size_t res_s = zone + (align_s + block) * 100;
-	// size_t res_t = zone + (align_t + block) * 100;
-	// printf("calcul small:\n\t \
+// printf("align: %d\n", ALIGN8(4050));
+// size_t zone = sizeof(t_zone);
+// size_t block = sizeof(t_block);
+// size_t align_t = ALIGN8(TINY_MAX);
+// size_t align_s = ALIGN8(SMALL_MAX);
+// size_t page_size = PAGE_SIZE;
+
+// size_t res_s = zone + (align_s + block) * 100;
+// size_t res_t = zone + (align_t + block) * 100;
+// printf("calcul small:\n\t \
 	// 	  (t_zone)%ld\n\t \
 	// 	+ ((align)%ld + (t_block)%ld) \n\t \
 	// 	* 100\n\t \
 	// 	= align in memory %ld / 0x%zX / pages = %ld\n", zone, align_s, block, ALIGN_TO_PAGE(res_s), ALIGN_TO_PAGE(res_s), ALIGN_TO_PAGE(res_s) / PAGE_SIZE);
-	// printf("calcul tiny:\n\t \
+// printf("calcul tiny:\n\t \
 	// 	  (t_zone)%ld\n\t \
 	// 	+ ((align)%ld + (t_block)%ld) \n\t \
 	// 	* 100\n\t \
 	// 	= align in memory %ld / 0x%zX / pages = %ld\n", zone, align_t, block, ALIGN_TO_PAGE(res_t), ALIGN_TO_PAGE(res_t), ALIGN_TO_PAGE(res_t) / PAGE_SIZE);
 // }
 
-void test_threshold() {
+void test_threshold()
+{
 	// setenv("MALLOC_MMAP_THRESHOLD_", "100", 0);
 	// setenv("MALLOC_PERTURB_", "45", 0);
 	// char	*str = malloc(700);
-	
+
 	// printf("align : %zu, page align: %zu\n", ALIGN8(700), LARGE_ZONE_SIZE(700));
 	// printf("size of header: zone: %zu, block: %zu\n", sizeof(t_zone), sizeof(t_block));
-	
+
 	// str = memset(str, 'A', 700);
 	// show_alloc_mem_ex();
 	// free(str);
@@ -54,16 +55,17 @@ void test_threshold() {
 	// unsetenv("MALLOC_PERTURB_");
 }
 
-int	main(void) {
+int main(void)
+{
 	test_threshold();
-	char	*tiny;
-	char	*small;
-	char	*large;
-	char	*r;
-	void	*arr[32];
-	size_t	i;
+	char *tiny;
+	char *small;
+	char *large;
+	char *r;
+	void *arr[32];
+	size_t i;
 
-	printf(BLD_BLUE"\n== malloc test suite ==\n"RESET);
+	printf(BLD_BLUE "\n== malloc test suite ==\n" RESET);
 
 	/* Basic allocations: tiny, small, large */
 	tiny = malloc(32);
@@ -76,7 +78,7 @@ int	main(void) {
 	if (tiny)
 		memset(tiny, 'A', 32);
 	// if (small)
-		// strcpy(small, "small-block-data");
+	// strcpy(small, "small-block-data");
 	if (large)
 		memset(large, 'L', 6000);
 
@@ -121,7 +123,7 @@ int	main(void) {
 	}
 	report("stress alloc/free x32", 1);
 
-	printf(BLD_BLUE"\n== Detailed dump before cleanup ==\n"RESET);
+	printf(BLD_BLUE "\n== Detailed dump before cleanup ==\n" RESET);
 	show_alloc_mem_ex();
 
 	/* Cleanup */
@@ -132,11 +134,11 @@ int	main(void) {
 	if (large)
 		free(large);
 
-	printf(BLD_BLUE"\n== Detailed dump after cleanup ==\n"RESET);
+	printf(BLD_BLUE "\n== Detailed dump after cleanup ==\n" RESET);
 	show_alloc_mem_ex();
 
-	printf(BLD_WHITE"\nSummary: %lu passed, %lu failed\n"RESET,
-		(size_t)g_pass, (size_t)g_fail);
+	printf(BLD_WHITE "\nSummary: %lu passed, %lu failed\n" RESET,
+	       (size_t)g_pass, (size_t)g_fail);
 
 	return (g_fail != 0);
 }

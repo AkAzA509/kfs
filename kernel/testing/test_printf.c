@@ -49,11 +49,12 @@ static void check(const char *fmt, const char *expected, const char *got)
 	}
 }
 
-#define RUN(fmt, expected, ...) do { \
-	char buf[256]; \
-	snprintf(buf, sizeof(buf), fmt, __VA_ARGS__); \
-	check(fmt, expected, buf); \
-} while (0)
+#define RUN(fmt, expected, ...)                               \
+	do {                                                  \
+		char buf[256];                                \
+		snprintf(buf, sizeof(buf), fmt, __VA_ARGS__); \
+		check(fmt, expected, buf);                    \
+	} while (0)
 
 // -----------------------------------------------------------------------
 // Tests
@@ -77,9 +78,10 @@ static void test_signed(void)
 	RUN("%.0d", "", 0);
 	RUN("%8.5d", "   00042", 42);
 	RUN("%-8.5d", "00042   ", 42);
-	RUN("%8.5d", "   00042", 42);   // precision présente -> flag 0 ignoré
+	RUN("%8.5d", "   00042", 42); // precision présente -> flag 0 ignoré
 	RUN("%lld", "9223372036854775807", 9223372036854775807LL);
-	RUN("%lld", "-9223372036854775808", (long long)(-9223372036854775807LL - 1));
+	RUN("%lld", "-9223372036854775808",
+	    (long long)(-9223372036854775807LL - 1));
 	RUN("%hhd", "-56", (signed char)200);
 	RUN("%hd", "4464", (short)70000);
 	RUN("%ld", "123456789", 123456789L);
@@ -171,7 +173,8 @@ static void test_float(void)
 	RUN("%f", "-1.500000", -1.5);
 	RUN("%f", "3.141593", 3.14159265358979);
 	RUN("%.2f", "3.14", 3.14159265358979);
-	RUN("%.1f", "0.1", 0.15);           // 0.15 n'est pas exact en binaire, arrondi correct attendu
+	RUN("%.1f", "0.1",
+	    0.15); // 0.15 n'est pas exact en binaire, arrondi correct attendu
 	RUN("%.6f", "0.100000", 0.1);
 	RUN("%10.2f", "      3.14", 3.14159);
 	RUN("%-10.2f", "3.14      ", 3.14159);

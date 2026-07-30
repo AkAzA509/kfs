@@ -248,8 +248,8 @@ void keyboard_handler()
 	while (1) {
 		// 0x64 register give the port's status (ready or not, busy ...)
 		if (inb(0x64) & 0x01) {
-			u8_t scancode = inb(
-				0x60); // 0x60 register give the data (key press)
+			// 0x60 register give the data (key press)
+			u8_t scancode = inb(0x60);
 			read_scancode(scancode);
 		}
 	}

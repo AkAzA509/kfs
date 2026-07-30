@@ -21,7 +21,7 @@ u8_t make_color(t_color fg, t_color bg)
 	return fg | (bg << 4);
 }
 
-u32_t	color_to_rgb(t_color color)
+u32_t color_to_rgb(t_color color)
 {
 	static const u32_t palette[16] = {
 		0x000000, 0x0000AA, 0x00AA00, 0x00AAAA, 0xAA0000, 0xAA00AA,

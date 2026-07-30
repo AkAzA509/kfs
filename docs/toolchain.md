@@ -1,22 +1,34 @@
 # Toolchain build setup
 
 ## Overview
-To build this kernel you need to prepare a cross-comppiler who target i386 architecture,
- the step below to achieve this.
+To build this kernel you need a cross-compiler that targets the i386
+architecture (`i686-elf`). The steps below walk you through building one
+from source.
 
-## Environment Setup
-A cross-compilation toolchain is required. The following environment variables must be set before building:
+> **Time estimate:** building Binutils + GCC from source takes roughly
+> 20-40 minutes depending on your machine and number of CPU cores.
 
-```bash
-export PREFIX="$HOME/opt/cross"
-export TARGET=i686-elf
-export PATH="$PREFIX/bin:$PATH"
-export PATH="$HOME/opt/cross/bin:$PATH"
-```
+> **Prefer not to do this by hand?** A script that automates every step
+> below is available at [`scripts/setup-toolchain.sh`](../scripts/setup-toolchain.sh).
+> See the [Automated setup](#automated-setup) section at the bottom.
 
-You also need the following tools and libraries installed on your system:
+## Tested versions
 
-- GCC
+This project has been built and tested against:
+
+- **Binutils**: `2.42`
+- **GCC**: `13.3.0`
+
+Other versions may work, but Binutils/GCC compatibility isn't guaranteed
+across every combination — if you hit build errors, try matching these
+versions first before assuming your code is at fault.
+
+## Install system dependencies
+
+You need the following tools and libraries installed before building the
+toolchain itself:
+
+- GCC (your system's native compiler, used to build the cross-compiler)
 - Make
 - Bison
 - Flex
@@ -26,24 +38,67 @@ You also need the following tools and libraries installed on your system:
 - Texinfo
 - ISL
 
-Finally, you need the source archives for Binutils and GCC.
+**Debian / Ubuntu:**
+```bash
+sudo apt update
+sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo
+```
 
-Download the needed source code into a suitable directory such as `$HOME/src`:
+**Fedora:**
+```bash
+sudo dnf install gcc gcc-c++ make bison flex gmp-devel mpfr-devel libmpc-devel texinfo
+```
 
-- You can download the desired Binutils release by visiting the [Binutils website](https://www.gnu.org/software/binutils/).
+**Arch Linux:**
+```bash
+sudo pacman -S base-devel gmp mpc mpfr texinfo
+```
 
-- You can download the desired GCC release by visiting the [GCC website](https://www.gnu.org/software/gcc/).
+**macOS (Homebrew):**
+```bash
+brew install gmp mpfr libmpc texinfo
+```
+
+## Environment Setup
+
+The following environment variables must be set before building:
+
+```bash
+export PREFIX="$HOME/opt/cross"
+export TARGET=i686-elf
+export PATH="$PREFIX/bin:$PATH"
+```
+
+> These `export` lines only apply to your current shell session. Add them
+> to your `~/.bashrc` / `~/.zshrc` if you want them available every time
+> you open a new terminal.
+
+## Download sources
+
+Download the source archives for Binutils and GCC into a suitable
+directory such as `$HOME/src`:
+
+```bash
+mkdir -p $HOME/src && cd $HOME/src
+wget https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz
+wget https://ftp.gnu.org/gnu/gcc/gcc-13.3.0/gcc-13.3.0.tar.gz
+tar -xzf binutils-2.42.tar.gz
+tar -xzf gcc-13.3.0.tar.gz
+```
+
+(You can browse other releases on the [Binutils website](https://www.gnu.org/software/binutils/)
+or the [GCC website](https://www.gnu.org/software/gcc/) if you want a
+different version — see [Tested versions](#tested-versions) above first.)
 
 ## Toolchain Build
 
 ### Binutils
 ```bash
-# For Binutils
 cd $HOME/src
 
 mkdir build-binutils
 cd build-binutils
-../binutils-x.y.z/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror --enable-default-execstack=no
+../binutils-2.42/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror --enable-default-execstack=no
 make
 make install
 ```
@@ -57,15 +112,14 @@ make install
 
 ### GCC
 ```bash
-# For GCC cross compiling
 cd $HOME/src
 
-# The $PREFIX/bin dir _must_ be in the PATH. This cmd check that
+# The $PREFIX/bin dir _must_ be in the PATH. This cmd checks that.
 which -- $TARGET-as || echo $TARGET-as is not in the PATH
 
 mkdir build-gcc
 cd build-gcc
-../gcc-x.y.z/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c --without-headers --enable-initfini-array
+../gcc-13.3.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c --without-headers --enable-initfini-array
 make all-gcc
 make all-target-libgcc
 make install-gcc
@@ -79,7 +133,46 @@ make install-target-libgcc
 - `--without-headers` tells GCC not to depend on a target C library or runtime headers.
 - `--enable-initfini-array` enables support for the modern `.init_array` and `.fini_array` initialization model.
 
-### Compilation Flags
+## Verify the installation
+
+```bash
+$TARGET-gcc --version
+```
+
+You should see output similar to:
+```
+i686-elf-gcc (GCC) 13.3.0
+```
+
+If this command isn't found, double-check that `$PREFIX/bin` is in your
+`PATH` (see [Environment Setup](#environment-setup)).
+
+## Troubleshooting
+
+**`i686-elf-as: not found` / `which` check fails**
+`$PREFIX/bin` isn't in your `PATH`, or the Binutils build didn't
+`make install` successfully. Re-export the variables from
+[Environment Setup](#environment-setup) and confirm `ls $PREFIX/bin`
+shows `i686-elf-as`, `i686-elf-ld`, etc.
+
+**GCC configure fails complaining about ISL / GMP / MPFR / MPC**
+One of the required libraries is missing or too old. Re-run the
+[system dependencies](#install-system-dependencies) install command for
+your distro; on some systems you may need the `-dev`/`-devel` package
+variant specifically (headers, not just the runtime library).
+
+**`make all-gcc` fails partway through with an internal compiler error**
+This is almost always a version mismatch between Binutils and GCC, or a
+partially-completed previous build. Try `rm -rf build-gcc build-binutils`,
+recreate them, and rebuild using the exact [tested versions](#tested-versions)
+above.
+
+**Build succeeds but `$TARGET-gcc --version` shows the wrong version**
+You likely have a previous cross-compiler build under the same `$PREFIX`,
+or your system's native GCC is shadowing it in `PATH`. Check `which
+$TARGET-gcc` and confirm the path points into `$PREFIX/bin`.
+
+## Compilation Flags
 The kernel build uses the following compiler and linker flags:
 
 - `-fno-builtin`: disables optimizations that replace standard library calls with compiler built-ins.
@@ -88,4 +181,17 @@ The kernel build uses the following compiler and linker flags:
 - `-fno-rtti`: disables Run-Time Type Information generation for classes with virtual functions.
 - `-nostdlib`: prevents the use of standard startup files and libraries during linking.
 - `-nodefaultlibs`: prevents automatic linking against the default system libraries.
-- `-T linker.ld` : The own kernel linking indication
+- `-T linker.ld`: the kernel's own linker script.
+
+## Automated setup
+
+Instead of running each step above by hand, you can use:
+
+```bash
+./scripts/setup-toolchain.sh
+```
+
+The script performs the dependency check, download, build, and
+verification steps automatically. See the script's header comment for
+options (custom `$PREFIX`, skipping the download step if archives are
+already present, etc).

@@ -16,7 +16,7 @@ from source.
 
 This project has been built and tested against:
 
-- **Binutils**: `2.42`
+- **Binutils**: `2.46.1`
 - **GCC**: `13.3.0`
 
 Other versions may work, but Binutils/GCC compatibility isn't guaranteed
@@ -80,9 +80,9 @@ directory such as `$HOME/src`:
 
 ```bash
 mkdir -p $HOME/src && cd $HOME/src
-wget https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz
+wget https://ftp.gnu.org/gnu/binutils/binutils-2.46.1.tar.gz
 wget https://ftp.gnu.org/gnu/gcc/gcc-13.3.0/gcc-13.3.0.tar.gz
-tar -xzf binutils-2.42.tar.gz
+tar -xzf binutils-2.46.1.tar.gz
 tar -xzf gcc-13.3.0.tar.gz
 ```
 
@@ -98,7 +98,7 @@ cd $HOME/src
 
 mkdir build-binutils
 cd build-binutils
-../binutils-2.42/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror --enable-default-execstack=no
+../binutils-2.46.1/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror --enable-default-execstack=no
 make
 make install
 ```

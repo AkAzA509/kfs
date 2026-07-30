@@ -15,7 +15,7 @@
 # Options (environment variables, all optional):
 #   PREFIX        Install location for the toolchain (default: $HOME/opt/cross)
 #   SRC_DIR       Where sources are downloaded/extracted (default: $HOME/src)
-#   BINUTILS_VER  Binutils version to build (default: 2.42)
+#   BINUTILS_VER  Binutils version to build (default: 2.46.1)
 #   GCC_VER       GCC version to build (default: 13.3.0)
 #   JOBS          Parallel make jobs (default: number of CPU cores)
 #
@@ -29,7 +29,7 @@ set -euo pipefail
 PREFIX="${PREFIX:-$HOME/opt/cross}"
 SRC_DIR="${SRC_DIR:-$HOME/src}"
 TARGET=i686-elf
-BINUTILS_VER="${BINUTILS_VER:-2.42}"
+BINUTILS_VER="${BINUTILS_VER:-2.46.1}"
 GCC_VER="${GCC_VER:-13.3.0}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)}"
 

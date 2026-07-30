@@ -43,9 +43,9 @@ make re               # fclean + all
 ## Intern documentation
 Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) live in the [`docs/`](./docs/README.md) folder. This README only covers the project overview; refer to `docs/` for implementation details.
 
-## Documentations and ressources
+# Documentations and ressources
 
-# Generale ressources and inspiration
+## Generale ressources and inspiration
 - Fundamental Concepts and Structure of the Linux Kernel (old version v2.4.20) [here](https://www.irif.fr/~carton/Enseignement/Architecture/Cours/Virtual/linux.pdf)
 - Some real linux kernel docs [here](https://www.kernel.org/)
 - The OSdev documentations and guide [here](https://wiki.osdev.org/Expanded_Main_Page)
@@ -54,12 +54,12 @@ Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) li
 - Operating Systems: From 0 to 1 by tuhdo [here](https://github.com/tuhdo/os01/tree/master)
 - The little book about OS development by Erik Helin, Adam Renberg [here](https://littleosbook.github.io/)
 
-# Bootloader
+## Bootloader
 - Writing a Tiny x86 Bootloader in assembly [here](https://www.joe-bergeron.com/posts/Writing%20a%20Tiny%20x86%20Bootloader/)
 - GNU/GRUB multiboot doc [here](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
 - Boot sequence doc from OSdev [here](https://wiki.osdev.org/Boot_Sequence)
 
-# Keyboard and screen
+## Keyboard and screen
 - The little book about OS development by Erik Helin, Adam Renberg output section [here](https://littleosbook.github.io/#output)
 - Kernels 101 – Let’s write a Kernel by Arjun Sreedharan [here](https://arjunsreedharan.org/post/82710718100/kernels-101-lets-write-a-kernel)
 - Kernels 201 - Let’s write a Kernel with keyboard and screen support [here](https://arjunsreedharan.org/post/99370248137/kernels-201-lets-write-a-kernel-with-keyboard)
@@ -68,12 +68,12 @@ Detailed technical explanations (multiboot header, GRUB, memory layout, etc.) li
 - OSdev psf font [here](https://wiki.osdev.org/VGA_Fonts), [here](https://wiki.osdev.org/PC_Screen_Font)
 - OSdev keybord ps/2 [here](https://wiki.osdev.org/PS/2_Keyboard)
 
-# Code and file organisation
+## Code and file organisation
 - Kernel architecture with Meaty skeleton, by OSdev[here](https://wiki.osdev.org/Meaty_Skeleton)
 - Linux kernel architecture [here](https://www.kernel.org/)
 - The Newlib project [here](https://sourceware.org/newlib/)
 
-# GDT
+## GDT
 - OSdev gdt, descriptors and segment [gdt here](https://wiki.osdev.org/Global_Descriptor_Table), [gdt2 here](https://wiki.osdev.org/GDT_Tutorial), [segment here](https://wiki.osdev.org/Segmentation), [descriptor here](https://wiki.osdev.org/Descriptors)
 - Making an OS (x86) Chapter 6 - Entering Protected mode, GDT, Yt video [here](https://www.youtube.com/watch?v=Wh5nPn2U_1w)
 - Intel® 64 and IA-32 Architectures Software Developer’s Manual Combined Volumes: 1, 2A, 2B, 2C, 2D, 3A, 3B, 3C, 3D, and 4 [here](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)

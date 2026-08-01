@@ -1,4 +1,4 @@
-#include <arch/i386/console.h>
+#include <drivers/console.h>
 #include <kernel/common.h>
 #include <kernel/shell.h>
 #include <kernel/log.h>
@@ -171,5 +171,5 @@ void shell_execute(const char *input, size_t len)
 
 void print_prompt(void)
 {
-	printf("Tekos/root > ");
+	sys_write(1, "Tekos/root > ", 13);
 }

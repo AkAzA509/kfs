@@ -10,6 +10,6 @@ typedef struct {
 	size_t count; // total of char product for retrun value
 } out_target_t;
 
-int vprint_core(const char *restrict fmt, va_list *ap, out_target_t *target);
+int vprint_core(const char *restrict fmt, va_list ap, out_target_t *target);
 
 #endif // VPRINT_CORE_H

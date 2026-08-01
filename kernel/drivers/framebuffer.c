@@ -1,5 +1,5 @@
-#include <arch/i386/framebuffer.h>
-#include <arch/i386/console.h>
+#include <drivers/framebuffer.h>
+#include <drivers/console.h>
 #include <kernel/log.h>
 #include <string.h>
 

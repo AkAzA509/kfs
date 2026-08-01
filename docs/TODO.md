@@ -12,13 +12,11 @@ corresponding `<module>.md` file for context on why each item matters.
 - [ ] Dynamic screen allocation (`g_screens`, and eventually `back_buf`)
       once a physical frame allocator exists, currently fixed-size,
       statically allocated in `.bss` (`MAX_SCREENS = 4`).
-- [ ] IRQ-driven keyboard input (ring buffer) to decouple scancode capture
-      from character rendering. Currently polling `0x60` in a busy loop;
-      fast typing can outrun the 8042 hardware buffer and drop/delay
-      scancodes.
 - [x] Handle the backspace key in the keyboard driver (improve the driver overall)
 - [x] Add a psf2 font handler to be capable of rendering both psf1 and psf2 fonts
 - [ ] Handle the unicode lookup table if the font support it
+- [ ] Due to the fd implementation (FILE, vfs) printf does work well, and the prompt if write
+      with printf, display one the enter press (work with sys write but not optimal)
 
 ## Memory
 
@@ -39,6 +37,7 @@ corresponding `<module>.md` file for context on why each item matters.
   so the CPU knows which kernel stack (`SS0`/`ESP0`) to switch to on interrupt from ring 3.
 - [ ] `iret`-based jump into ring 3, once there is user code to jump to.
 - [x] Complete the asm update_gdt() function
+- [ ] move the gst setup in the bootloader
 
 ## Misc
 
@@ -56,14 +55,12 @@ corresponding `<module>.md` file for context on why each item matters.
 
 - [x] Line editor / input discipline: `input_boundary`, bounding backspace to
   the current prompt
-- [ ] Had `^L` handling.
-- [ ] Bring `screen_clear()` in line with the non-destructive design (reuse
-  `screen_newline()` instead of `memset`).
+- [x] Had `^L` handling.
 - [ ] Revisit tab-stop expansion when it crosses a line boundary mid-loop.
 - [x] Scroll mess TO FIX
 - [ ] when we switch screen the promt doesn't appear, unless i hit enter TO FIX
 - [x] delete erase 2 char at once and the cursor disapear
-- [ ] when screen switch the cursor is not restore at the right (and so the input) place maybe because
+- [x] when screen switch the cursor is not restore at the right (and so the input) place maybe because
       the switch not save the context of the current screen, and on another screen the previous data
       are overwriten by the current screen ?
 
@@ -71,3 +68,7 @@ corresponding `<module>.md` file for context on why each item matters.
 
 - [x] when the tty prompt has been implemented add a end/^a for deplacement in the command,
   and add arrow left/right cursor deplacement for modification 
+- [ ] IRQ-driven keyboard input (ring buffer) to decouple scancode capture
+      from character rendering. Currently polling `0x60` in a busy loop;
+      fast typing can outrun the 8042 hardware buffer and drop/delay
+      scancodes.

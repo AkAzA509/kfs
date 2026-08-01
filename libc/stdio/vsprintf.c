@@ -17,10 +17,9 @@ static void _vsprintf_e(void *ctx, char c)
 int vsprintf(char *restrict str, const char *restrict fmt, va_list ap)
 {
 	sprintf_ctx_t sc = { .buf = str, .pos = 0 };
-
 	out_target_t target = { .emit = _vsprintf_e, .ctx = &sc, .count = 0 };
 
-	vprint_core(fmt, &ap, &target);
+	vprint_core(fmt, ap, &target);
 
 	str[sc.pos] = '\0';
 	return (int)sc.pos;

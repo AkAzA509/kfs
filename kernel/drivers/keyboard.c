@@ -1,7 +1,7 @@
-#include "kernel/shell.h"
-#include <arch/i386/keyboard.h>
-#include <arch/i386/console.h>
+#include <drivers/keyboard.h>
+#include <drivers/console.h>
 #include <kernel/common.h>
+#include <kernel/shell.h>
 #include <kernel/log.h>
 #include <kernel/tty.h>
 #include <kernel/io.h>

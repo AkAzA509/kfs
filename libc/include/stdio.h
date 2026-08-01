@@ -1,13 +1,37 @@
 #ifndef STDIO_H
 #define STDIO_H
 
-#include <stdint.h>
+// #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
 
-#ifndef FILE
-#define FILE u8_t
-#endif // FILE
+#define BUFSIZ 1024
+
+#define _IOFBF 0 // Full buffering (flush when the buffer is full)
+#define _IOLBF 1 // Line buffering (flush each '\n')
+#define _IONBF 2 // No buffering
+
+typedef struct _IO_FILE {
+	int fd;					// Descripteur UNIX sous-jacent
+	char buffer[BUFSIZ];	// Buffer mémoire
+	size_t buf_pos;			// Position actuelle dans le buffer
+	int mode;				// _IOLBF, _IONBF, etc.
+} FILE;
+
+extern FILE *stdout;
+extern FILE *stdin;
+extern FILE *stderr;
+
+// --- Function declaration ---
+
+// fputc() writes the character c, cast to an unsigned char,
+// to stream.
+int fputc(int c, FILE *stream);
+
+// For output streams, fflush() forces a write of all user-space
+// buffered data for the given output or update stream via the
+// stream's underlying write function.
+int fflush(FILE *stream);
 
 // putchar(c) writes the character c to the standart output (stdout).
 int putchar(int c);

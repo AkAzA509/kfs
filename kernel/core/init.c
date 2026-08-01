@@ -1,7 +1,7 @@
-#include <arch/i386/framebuffer.h>
-#include <arch/i386/console.h>
+#include <drivers/framebuffer.h>
 #include <kernel/multiboot.h>
-#include <arch/i386/vga.h>
+#include <drivers/console.h>
+#include <drivers/vga.h>
 #include <kernel/init.h>
 #include <kernel/log.h>
 #include <stdbool.h>

@@ -3,9 +3,13 @@
 int dprintf(int fd, const char *restrict fmt, ...)
 {
 	va_list ap;
+	FILE tmp = {
+		.fd = fd,
+		.mode = _IOLBF,
+	};
 
 	va_start(ap, fmt);
-	int ret = vdprintf(fd, fmt, ap);
+	int ret = vfprintf(&tmp, fmt, ap);
 	va_end(ap);
 	return ret;
 }

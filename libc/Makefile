@@ -1,34 +1,30 @@
-# Ce Makefile ne connaît que ses propres sources.
-# CC, AR, CFLAGS, CPPFLAGS sont hérités (exportés) du Makefile racine.
-# OBJDIR est passé par le Makefile racine (release ou debug).
+# libc/Makefile
 
-OBJDIR		?= ../objs/libc
+export CC		?= $(TARGET)-gcc
+export AR		?= $(TARGET)-ar
+export CPPFLAGS	?= -I$(abspath libc/include)
+export CFLAGS	?= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror $(CPPFLAGS)
+export OBJDIR	?= $(CURDIR)/../objs/libc
 
-SRC			:= string/memcpy.c string/memmove.c string/memset.c string/strlen.c \
-			   string/strcmp.c string/strncmp.c \
-			   stdio/putchar.c stdio/vsnprintf.c stdio/vprintf.c stdio/vprint_core.c \
-			   stdio/vfprintf.c stdio/vdprintf.c stdio/vsprintf.c \
-			   stdio/printf.c stdio/sprintf.c stdio/dprintf.c stdio/snprintf.c stdio/fprintf.c \
-			   stdlib/labs.c
+SUBDIRS			:= stdio string unistd stdlib
+TARGET			:= $(OBJDIR)/libc.a
 
-OBJ			:= $(SRC:%.c=$(OBJDIR)/%.o)
+all: start_echo $(SUBDIRS) $(TARGET) reset_echo
 
-all: echo $(OBJDIR)/libc.a reset
-
-echo:
+start_echo:
 	@echo "\n\033[94mStart compiling libc sources\n"
 
-reset:
+reset_echo:
 	@echo "\033[0m"
 
-$(OBJDIR)/libc.a: $(OBJ)
-	$(AR) rcs $@ $(OBJ)
+$(SUBDIRS):
+	@$(MAKE) -C $@
 
-$(OBJDIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+$(TARGET): $(SUBDIRS)
+	@mkdir -p $(OBJDIR)
+	$(AR) rcs $@ $(shell find $(OBJDIR) -name "*.o")
 
 clean:
 	rm -rf $(OBJDIR)
 
-.PHONY: all clean
+.PHONY: all $(SUBDIRS) clean start_echo reset_echo

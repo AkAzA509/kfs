@@ -1,13 +1,10 @@
-#include <arch/i386/framebuffer.h>
-#include <arch/i386/console.h>
-#include <arch/i386/vga.h>
+#include <drivers/framebuffer.h>
+#include <drivers/console.h>
+#include <drivers/vga.h>
 #include <kernel/init.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-
-// #include "kernel/log.h"
 
 // ===== public API , dispatch via vtable ===== //
 

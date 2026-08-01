@@ -1,6 +1,5 @@
 #include <arch/i386/framebuffer.h>
 #include <arch/i386/console.h>
-#include <testing/testing.h>
 #include <kernel/init.h>
 #include <stdio.h>
 

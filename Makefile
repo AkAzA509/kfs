@@ -17,46 +17,40 @@ DEBUG_OBJDIR		:= $(abspath objs_debug)
 LINKER_SCRIPT		:= kernel/arch/i386/linker.ld
 GRUB_CFG			:= grub.cfg
 
-# Shared flags
-export CPPFLAGS		:= -I$(abspath libc/include) -I$(abspath kernel/include)
-export CFLAGS		:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror $(CPPFLAGS)
-DBGFLAGS			:= -DDEBUG=1 -g
+DBGFLAGS			:= -DDEBUG=1
+
+LIBC_INCLUDES		:= -I$(abspath libc/include)
+KERNEL_INCLUDES		:= -I$(abspath kernel/include) $(LIBC_INCLUDES)
+
+export CFLAGS		:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror
 
 # Rules
-.PHONY: all debug libc asm kernel debug-libc debug-asm debug-kernel clean fclean re up dev compile_commands
+.PHONY: all debug libc kernel debug-libc debug-kernel clean fclean re up dev compile_commands
 
 all: kernel $(BIN_NAME)
 
-# debug: DBGFLAGS := $(DBGFLAGS)
 debug: debug-kernel $(DEBUG_ISO_NAME)
 	@qemu-system-i386 -cdrom $(DEBUG_ISO_NAME) -serial stdio
 
 # --- release ---
 libc:
-	@$(MAKE) -C libc OBJDIR=$(OBJDIR)/libc
+	@$(MAKE) -C libc OBJDIR=$(OBJDIR)/libc CPPFLAGS="$(LIBC_INCLUDES)"
 
-asm:
-	@$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(OBJDIR)/asm
-	
-kernel: asm libc
-	@$(MAKE) -C kernel OBJDIR=$(OBJDIR)/kernel
+kernel: libc
+	@$(MAKE) -C kernel OBJDIR=$(OBJDIR)/kernel CPPFLAGS="$(KERNEL_INCLUDES)"
 
 # --- debug ---
 debug-libc:
-	@$(MAKE) -C libc OBJDIR=$(DEBUG_OBJDIR)/libc CFLAGS="$(CFLAGS) $(DBGFLAGS)"
+	@$(MAKE) -C libc OBJDIR="$(DEBUG_OBJDIR)/libc" CFLAGS="$(CFLAGS) $(DBGFLAGS)" CPPFLAGS="$(LIBC_INCLUDES)"
 
-debug-asm:
-	@$(MAKE) -C kernel/arch/i386/asm OBJDIR="$(DEBUG_OBJDIR)/asm"
-	
-debug-kernel: debug-asm debug-libc
-	@$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel CFLAGS="$(CFLAGS) $(DBGFLAGS)" DEBUG=1
+debug-kernel: debug-libc
+	@$(MAKE) -C kernel OBJDIR="$(DEBUG_OBJDIR)/kernel" CFLAGS="$(CFLAGS) $(DBGFLAGS)" CPPFLAGS="$(KERNEL_INCLUDES)"
 
 # --- final link ---
-$(BIN_NAME): kernel $(OBJDIR)/asm/asm.a $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
+$(BIN_NAME): kernel $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
-	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) \
-		-Wl,--start-group $(OBJDIR)/asm/asm.a \
-						  $(OBJDIR)/kernel/kernel.a \
+	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(CPPFLAGS) \
+		-Wl,--start-group $(OBJDIR)/kernel/kernel.a \
 						  $(OBJDIR)/libc/libc.a -Wl,--end-group -lgcc
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
@@ -64,10 +58,11 @@ $(BIN_NAME): kernel $(OBJDIR)/asm/asm.a $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc
 		echo "\033[91mthe file is not multiboot\033[0m"; \
 	fi
 
-$(DEBUG_NAME): $(DEBUG_OBJDIR)/asm/asm.a $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
+$(DEBUG_NAME): $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
-	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(DBGFLAGS) \
-		-Wl,--start-group $(DEBUG_OBJDIR)/asm/asm.a $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a -Wl,--end-group -lgcc
+	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(CPPFLAGS) $(DBGFLAGS) \
+		-Wl,--start-group $(DEBUG_OBJDIR)/kernel/kernel.a
+						  $(DEBUG_OBJDIR)/libc/libc.a -Wl,--end-group -lgcc
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
 	else \
@@ -95,19 +90,22 @@ up: $(ISO_NAME)
 dev: $(BIN_NAME)
 	@qemu-system-i386 -kernel $(BIN_NAME)
 
-compile_commands:
-	bear -- $(MAKE) re
+# --- Test ---
+test:
+	@$(MAKE) -C tests
 
 clean:
-	@$(MAKE) -C libc OBJDIR=$(OBJDIR)/libc clean
-	@$(MAKE) -C libc OBJDIR=$(DEBUG_OBJDIR)/libc clean
-	@$(MAKE) -C kernel OBJDIR=$(OBJDIR)/kernel clean
-	@$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel clean
-	@$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(OBJDIR)/asm clean
-	@$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(DEBUG_OBJDIR)/asm clean
+	# @$(MAKE) -C libc OBJDIR=$(OBJDIR)/libc clean
+	# @$(MAKE) -C libc OBJDIR=$(DEBUG_OBJDIR)/libc clean
+	# @$(MAKE) -C kernel OBJDIR=$(OBJDIR)/kernel clean
+	# @$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel clean
+	# @$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(OBJDIR)/asm clean
+	# @$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(DEBUG_OBJDIR)/asm clean
+	@$(MAKE) -C tests clean
 	rm -rf $(OBJDIR) $(DEBUG_OBJDIR)
 
 fclean: clean
 	rm -rf $(BIN) $(BUILD_DIR) $(DEBUG_BUILD_DIR)
 
-re: fclean all
+re: fclean
+	bear -- $(MAKE)

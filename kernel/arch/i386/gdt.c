@@ -1,4 +1,4 @@
-#include <arch/i386/console.h>
+#include <drivers/console.h>
 #include <stdint.h>
 #include <stdio.h>
 

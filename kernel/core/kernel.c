@@ -1,12 +1,13 @@
-#include <arch/i386/keyboard.h>
-#include <arch/i386/console.h>
 #include <kernel/multiboot.h>
+#include <drivers/keyboard.h>
+#include <drivers/console.h>
 #include <kernel/common.h>
 #include <kernel/shell.h>
 #include <kernel/init.h>
 #include <kernel/tty.h>
 #include <kernel/log.h>
 #include <stdbool.h>
+#include <fs/vfs.h>
 #include <stdio.h>
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */
@@ -24,8 +25,6 @@
 void kmain(void)
 {
 	// #ifdef DEBUG
-	// 	#include <testing/testing.h>
-	// 	// test_screen();
 	// 	debug_screen();
 	// 	debug_font();
 	// 	// test_printf_run();
@@ -84,6 +83,8 @@ void __kstart(unsigned long magic, unsigned long addr)
 		HALT_ERROR;
 
 	init_gdt();
+
+	init_vfs();
 
 	set_term_color(make_color(COLOR_LIGHT_MAGENTA, COLOR_WHITE));
 	ASCII_LOGO;

@@ -1,5 +1,5 @@
-#include <arch/i386/console.h>
-#include <arch/i386/vga.h>
+#include <drivers/console.h>
+#include <drivers/vga.h>
 #include <kernel/io.h>
 #include <string.h>
 

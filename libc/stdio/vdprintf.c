@@ -2,16 +2,22 @@
 #include <unistd.h>
 #include "vprint_core.h"
 
+typedef struct {
+	int fd;
+}	fd_ctx_t;
+
 static void _vdprint_e(void *ctx, char c)
 {
-	write((int)ctx, &c, 1);
+	fd_ctx_t *fdctx = (fd_ctx_t *)ctx;
+	write(fdctx->fd, &c, 1);
 }
 
 int vdprintf(int fd, const char *restrict fmt, va_list ap)
 {
-	out_target_t target = { .count = 0, .ctx = &fd, .emit = _vdprint_e };
+	fd_ctx_t fd_ctx = { .fd = fd, };
+	out_target_t target = { .count = 0, .ctx = &fd_ctx, .emit = _vdprint_e };
 
-	int ret = vprint_core(fmt, &ap, &target);
+	int ret = vprint_core(fmt, ap, &target);
 
 	return ret;
 }

@@ -1,35 +1,30 @@
-# Ce Makefile ne connaît que ses propres sources.
-# CC, CFLAGS, CPPFLAGS sont hérités (exportés) du Makefile racine.
-# OBJDIR est passé par le Makefile racine (release ou debug).
+# kernel/Makefile
 
-OBJDIR		?= ../objs/kernel
+export CC		?= $(TARGET)-gcc
+export AR		?= $(TARGET)-ar
+export CPPFLAGS	?= -I$(abspath libc/include) -I$(abspath kernel/include)
+export CFLAGS	?= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror $(CPPFLAGS)
+export OBJDIR	?= $(CURDIR)/../objs/kernel
 
-SRC			:= kernel/kernel.c kernel/io.c kernel/init.c kernel/kwrite.c kernel/tty.c \
-			   kernel/gdt.c kernel/log.c kernel/shell.c \
-			   arch/i386/console.c arch/i386/vga.c arch/i386/keyboard.c arch/i386/framebuffer.c \
+SUBDIRS			:= arch/i386 arch/i386/asm drivers fs syscall core
+TARGET			:= $(OBJDIR)/kernel.a
 
-ifdef DEBUG
-SRC			+= testing/test_printf.c testing/test_screen.c
-endif
+all: start_echo $(SUBDIRS) $(TARGET) reset_echo
 
-OBJ			:= $(SRC:%.c=$(OBJDIR)/%.o)
-
-all: echo $(OBJDIR)/kernel.a reset
-
-echo:
+start_echo:
 	@echo "\n\033[95mStart compiling kernel sources\n"
 
-reset:
+reset_echo:
 	@echo "\033[0m"
 
-$(OBJDIR)/kernel.a: $(OBJ)
-	$(AR) rcs $@ $(OBJ)
+$(SUBDIRS):
+	@$(MAKE) -C $@
 
-$(OBJDIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+$(TARGET): $(SUBDIRS)
+	@mkdir -p $(OBJDIR)
+	$(AR) rcs $@ $(shell find $(OBJDIR) -name "*.o")
 
 clean:
 	rm -rf $(OBJDIR)
 
-.PHONY: all clean
+.PHONY: all $(SUBDIRS) clean start_echo reset_echo

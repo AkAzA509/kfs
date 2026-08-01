@@ -15,10 +15,13 @@
 
 ```
 kernel/
-├── arch/        # architecture-specific code (x86)
-├── font/        # font file
+├── arch/         # architecture-specific code (x86)
+├── core/         # architecture-independent kernel code
+├── drivers/      # specific drivers file
+├── fs/           # file/virtual system
 ├── include/      # header declarations
-└── kernel/      # architecture-independent kernel code
+├── ressources/   # font file and other
+└── syscall       # syscall implementation
 libc/
 ├── include/     # public headers / libc-like reimplementation
 └── **/          # implementation matching the headers above
@@ -80,11 +83,10 @@ grub.cfg         # GRUB boot configuration
 make                   # build the kernel binary (bin/kernel)
 make up                # build the ISO and run it in QEMU
 make dev               # run the raw kernel binary directly in QEMU (no ISO)
-make compile_commande  # generate compile_commands.json for clangd (via bear)
 make debug             # build a debug ISO (-DDEBUG=1) and run it in QEMU with serial output
 make clean             # remove object files
 make fclean            # remove all build artifacts (binaries, ISOs)
-make re                # fclean + all
+make re                # fclean + generate compile_commands.json for clangd (via bear)
 ```
 
 ## Documentation

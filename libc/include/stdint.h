@@ -10,6 +10,7 @@ typedef signed char i8_t;
 typedef signed short i16_t;
 typedef signed int i32_t;
 
-typedef unsigned int uintptr_t;
+typedef __UINTPTR_TYPE__ uintptr_t;
+typedef __INTPTR_TYPE__ intptr_t;
 
 #endif // STDINT_H

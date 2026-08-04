@@ -3,18 +3,20 @@
 #include <stdint.h>
 #include <limits.h>
 
-t_allocator g_alloc = { .tiny = NULL,
-			.small = NULL,
-			.large = NULL,
-			// .mutex = PTHREAD_MUTEX_INITIALIZER,
-			.env.MALLOC_LOG_ = false,
-			.env.MALLOC_MMAP_MAX_ENABLE_ = false,
-			.env.MALLOC_PERTURB_ENABLE_ = false,
-			.env.MALLOC_MMAP_THRESHOLD_ENABLE_ = false,
-			.env.mmap_max = 0,
-			.counter.mmap_total = 0,
-			.counter.split_number = 0,
-			.counter.merge_number = 0 };
+t_allocator g_alloc = {
+	.tiny = NULL,
+	.small = NULL,
+	.large = NULL,
+	// .mutex = PTHREAD_MUTEX_INITIALIZER,
+	.env.MALLOC_LOG_ = false,
+	.env.MALLOC_MMAP_MAX_ENABLE_ = false,
+	.env.MALLOC_PERTURB_ENABLE_ = false,
+	.env.MALLOC_MMAP_THRESHOLD_ENABLE_ = false,
+	.env.mmap_max = 0,
+	.counter.mmap_total = 0,
+	.counter.split_number = 0,
+	.counter.merge_number = 0,
+};
 
 static bool is_space(char c)
 {

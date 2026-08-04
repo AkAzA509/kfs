@@ -18,7 +18,10 @@ void add_fd_entry(u8_t idx, fd_type_t type, int flags)
 	// }
 
 	kfile_table[idx] = (kfile_t){
-		.type = type, .flags = flags, .offset = 0, .priv_data = NULL
+		.type = type,
+		.flags = flags,
+		.offset = 0,
+		.priv_data = NULL,
 	};
 }
 

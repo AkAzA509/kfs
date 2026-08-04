@@ -299,8 +299,8 @@ static void conv_signed(format_spec_t *spec, va_list ap, out_target_t *target)
 			     pad_len);
 }
 
-static void conv_unsigned(format_spec_t *spec, va_list ap,
-			  out_target_t *target, int base, bool uppercase)
+static void conv_unsigned(format_spec_t *spec, va_list ap, out_target_t *target,
+			  int base, bool uppercase)
 {
 	unsigned long long val = get_uint_arg(spec, ap);
 
@@ -609,9 +609,11 @@ static void execute_conversion(format_spec_t *spec, va_list ap,
 static const char *parse_directive(const char *restrict fmt, va_list ap,
 				   out_target_t *target)
 {
-	format_spec_t spec = { .width = -1,
-			       .precision = -1,
-			       .length = LEN_NONE };
+	format_spec_t spec = {
+		.width = -1,
+		.precision = -1,
+		.length = LEN_NONE,
+	};
 
 	fmt = parse_flags(fmt, &spec);
 	fmt = parse_width(fmt, &spec, ap);

@@ -9,7 +9,11 @@ export OBJDIR	?= $(CURDIR)/../objs/kernel
 SUBDIRS			:= arch/i386 arch/i386/asm drivers fs syscall core
 TARGET			:= $(OBJDIR)/kernel.a
 
-all: start_echo $(SUBDIRS) $(TARGET) reset_echo
+ALL_OBJ			:= $(shell fin $(OBJDIR) -name "*.o" 2>/dev/null)
+
+all: start_echo $(SUBDIRS)
+	$(MAKE) $(TARGET)
+	$(MAKE) reset_echo
 
 start_echo:
 	@echo "\n\033[95mStart compiling kernel sources\n"
@@ -20,7 +24,7 @@ reset_echo:
 $(SUBDIRS):
 	@$(MAKE) -C $@
 
-$(TARGET): $(SUBDIRS)
+$(TARGET): $(ALL_OBJ)
 	@mkdir -p $(OBJDIR)
 	$(AR) rcs $@ $(shell find $(OBJDIR) -name "*.o")
 

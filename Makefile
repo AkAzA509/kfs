@@ -24,30 +24,19 @@ KERNEL_INCLUDES		:= -I$(abspath kernel/include) $(LIBC_INCLUDES)
 
 export CFLAGS		:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror
 
-# Rules
-.PHONY: all debug libc kernel debug-libc debug-kernel clean fclean re up dev compile_commands
+
+# --- Release ---
+.PHONY: all libc kernel up dev compile_commands
 
 all: kernel $(BIN_NAME)
 
-debug: debug-kernel $(DEBUG_ISO_NAME)
-	@qemu-system-i386 -cdrom $(DEBUG_ISO_NAME) -serial stdio
-
-# --- release ---
 libc:
 	@$(MAKE) -C libc OBJDIR=$(OBJDIR)/libc CPPFLAGS="$(LIBC_INCLUDES)"
 
 kernel: libc
 	@$(MAKE) -C kernel OBJDIR=$(OBJDIR)/kernel CPPFLAGS="$(KERNEL_INCLUDES)"
 
-# --- debug ---
-debug-libc:
-	@$(MAKE) -C libc OBJDIR="$(DEBUG_OBJDIR)/libc" CFLAGS="$(CFLAGS) $(DBGFLAGS)" CPPFLAGS="$(LIBC_INCLUDES)"
-
-debug-kernel: debug-libc
-	@$(MAKE) -C kernel OBJDIR="$(DEBUG_OBJDIR)/kernel" CFLAGS="$(CFLAGS) $(DBGFLAGS)" CPPFLAGS="$(KERNEL_INCLUDES)"
-
-# --- final link ---
-$(BIN_NAME): kernel $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
+$(BIN_NAME): $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
 	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(CPPFLAGS) \
 		-Wl,--start-group $(OBJDIR)/kernel/kernel.a \
@@ -57,6 +46,25 @@ $(BIN_NAME): kernel $(OBJDIR)/kernel/kernel.a $(OBJDIR)/libc/libc.a $(LINKER_SCR
 	else \
 		echo "\033[91mthe file is not multiboot\033[0m"; \
 	fi
+
+$(ISO_NAME): $(BIN_NAME) $(GRUB_CFG)
+	@rm -rf $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)/boot/grub
+	@cp $(BIN_NAME) $(BUILD_DIR)/boot/kernel
+	@cp $(GRUB_CFG) $(BUILD_DIR)/boot/grub/grub.cfg
+	@grub-mkrescue -o $@ $(BUILD_DIR)
+
+# --- Debug ---
+.PHONY: debug debug-libc debug-kernel
+
+debug: debug-kernel $(DEBUG_ISO_NAME)
+	@qemu-system-i386 -cdrom $(DEBUG_ISO_NAME) -serial stdio
+
+debug-libc:
+	@$(MAKE) -C libc OBJDIR="$(DEBUG_OBJDIR)/libc" CFLAGS="$(CFLAGS) $(DBGFLAGS)" CPPFLAGS="$(LIBC_INCLUDES)"
+
+debug-kernel: debug-libc
+	@$(MAKE) -C kernel OBJDIR="$(DEBUG_OBJDIR)/kernel" CFLAGS="$(CFLAGS) $(DBGFLAGS)" CPPFLAGS="$(KERNEL_INCLUDES)"
 
 $(DEBUG_NAME): $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
@@ -68,14 +76,6 @@ $(DEBUG_NAME): $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a $(LIN
 	else \
 		echo "\033[91mthe file is not multiboot\033[0m"; \
 	fi
-
-# --- ISO ---
-$(ISO_NAME): $(BIN_NAME) $(GRUB_CFG)
-	@rm -rf $(BUILD_DIR)
-	@mkdir -p $(BUILD_DIR)/boot/grub
-	@cp $(BIN_NAME) $(BUILD_DIR)/boot/kernel
-	@cp $(GRUB_CFG) $(BUILD_DIR)/boot/grub/grub.cfg
-	@grub-mkrescue -o $@ $(BUILD_DIR)
 
 $(DEBUG_ISO_NAME): $(DEBUG_NAME) $(GRUB_CFG)
 	@rm -rf $(DEBUG_BUILD_DIR)
@@ -91,8 +91,13 @@ dev: $(BIN_NAME)
 	@qemu-system-i386 -kernel $(BIN_NAME)
 
 # --- Test ---
+.PHONY: test
+
 test:
 	@$(MAKE) -C tests
+
+# --- Clean ---
+.PHONY: clean fclean re
 
 clean:
 	# @$(MAKE) -C libc OBJDIR=$(OBJDIR)/libc clean

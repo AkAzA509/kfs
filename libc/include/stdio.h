@@ -12,15 +12,19 @@
 #define _IONBF 2 // No buffering
 
 typedef struct _IO_FILE {
-	int fd;					// Descripteur UNIX sous-jacent
-	char buffer[BUFSIZ];	// Buffer mémoire
-	size_t buf_pos;			// Position actuelle dans le buffer
-	int mode;				// _IOLBF, _IONBF, etc.
+	int fd; // Descripteur UNIX sous-jacent
+	char buffer[BUFSIZ]; // Buffer mémoire
+	size_t buf_pos; // Position actuelle dans le buffer
+	int mode; // _IOLBF, _IONBF, .
 } FILE;
 
-extern FILE *stdout;
+extern FILE *stdout; // same as vterm1
 extern FILE *stdin;
 extern FILE *stderr;
+extern FILE *vterm1; // same as stdout
+extern FILE *vterm2;
+extern FILE *vterm3;
+extern FILE *vterm4;
 
 // --- Function declaration ---
 

@@ -7,10 +7,10 @@ void debug_screen(void);
 void debug_font(void);
 void debug_current_screen(void);
 
-typedef struct t_multiboot_info multiboot_info;
-
 void init_gdt(void);
 bool init_term(void);
+
+typedef struct t_multiboot_info multiboot_info;
 void init_display(multiboot_info *mbi);
 
 #endif // INIT_H

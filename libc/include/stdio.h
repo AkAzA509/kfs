@@ -7,15 +7,15 @@
 
 #define BUFSIZ 1024
 
-#define _IOFBF 0 // Full buffering (flush when the buffer is full)
-#define _IOLBF 1 // Line buffering (flush each '\n')
+#define _IOFBF 0 // Full buffering
+#define _IOLBF 1 // Line buffering
 #define _IONBF 2 // No buffering
 
 typedef struct _IO_FILE {
-	int fd; // Descripteur UNIX sous-jacent
-	char buffer[BUFSIZ]; // Buffer mémoire
-	size_t buf_pos; // Position actuelle dans le buffer
-	int mode; // _IOLBF, _IONBF, .
+	int fd;
+	char buffer[BUFSIZ];
+	size_t buf_pos;
+	int mode; // _IO*BF
 } FILE;
 
 extern FILE *stdout; // same as vterm1
@@ -26,15 +26,13 @@ extern FILE *vterm2;
 extern FILE *vterm3;
 extern FILE *vterm4;
 
-// --- Function declaration ---
-
 // fputc() writes the character c, cast to an unsigned char,
 // to stream.
 int fputc(int c, FILE *stream);
 
-// For output streams, fflush() forces a write of all user-space
-// buffered data for the given output or update stream via the
-// stream's underlying write function.
+// For output streams, fflush() forces a write of all buffered
+// data for the given output or update stream via the stream's
+// underlying write function.
 int fflush(FILE *stream);
 
 // putchar(c) writes the character c to the standart output (stdout).

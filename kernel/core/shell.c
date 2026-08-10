@@ -8,7 +8,10 @@
 
 #define CURRENT_YEAR 2026
 
-enum { cmos_address = 0x70, cmos_data = 0x71 };
+enum {
+	cmos_address = 0x70,
+	cmos_data = 0x71,
+};
 
 int get_update_in_progress_flag()
 {
@@ -147,15 +150,16 @@ static void cmd_help(void)
 	printf("clear              not yet available\n");
 }
 
-static const char *cmd_table[] = { "reboot", "halt",	 "plogo",
-				   "pstack", "shutdown", "date",
-				   "help",   "clear",	 NULL };
+static const char *cmd_table[] = {
+	"reboot", "halt", "plogo", "pstack", "shutdown",
+	"date",	  "help", "clear", NULL,
+};
 
 typedef void (*cmd_handler_t)(void);
-static const cmd_handler_t cmd_handlers[] = { cmd_reboot,     cmd_halt,
-					      cmd_print_logo, cmd_print_stack,
-					      cmd_shutdown,   cmd_date,
-					      cmd_help,	      cmd_clear };
+static const cmd_handler_t cmd_handlers[] = {
+	cmd_reboot,   cmd_halt, cmd_print_logo, cmd_print_stack,
+	cmd_shutdown, cmd_date, cmd_help,	cmd_clear,
+};
 
 void shell_execute(const char *input, size_t len)
 {
@@ -169,6 +173,7 @@ void shell_execute(const char *input, size_t len)
 	printf("commande not found: %.*s\n", (int)len, input);
 }
 
+// to fix the error when add a FILE and fd gestion
 void print_prompt(void)
 {
 	sys_write(1, "Tekos/root > ", 13);

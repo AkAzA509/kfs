@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ===== public API , dispatch via vtable ===== //
-
 void set_term_color(u8_t color)
 {
 	g_screens[current_screen].color = color;
@@ -35,7 +33,7 @@ inline bool line_visible(t_screen_data *s, u32_t line)
 	       line < s->view_offset + g_screen.total_rows;
 }
 
-// check if the current line is on the last current screen frame's col
+// check if the current line is on the last current screen frame's row
 inline bool pinned_to_bottom(t_screen_data *s)
 {
 	return s->view_offset + g_screen.total_rows - 1 == s->head;
@@ -46,7 +44,6 @@ inline u8_t get_current_col(void)
 	return g_screens[current_screen].col;
 }
 
-// clear and reinitialize the line when a '\n'
 static void clear_line(t_screen_data *s, u32_t line)
 {
 	u32_t idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;

@@ -6,7 +6,7 @@
 ![Architecture](https://img.shields.io/badge/arch-i686--elf-8A8A8A?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-GPLv3-3DA639?style=for-the-badge)
 ![Status](https://img.shields.io/badge/status-in%20progress-F2C94C?style=for-the-badge)
-![CI](https://img.shields.io/github/actions/workflow/status/AkAzA509/kfs/test.yaml?style=for-the-badge&label=CI)
+![CI](https://img.shields.io/github/actions/workflow/status/AkAzA509/kfs/test.yaml?branch=gdt&style=for-the-badge&label=CI)
 
 `kfs` (Kernel From Scratch) is a custom x86 kernel project written as part of
 42's systems programming curriculum. The goal is about building each subsystem

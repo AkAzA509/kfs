@@ -68,3 +68,5 @@ subject/
 compile_commands.json
 
 .cache
+.zed
+.gitignore

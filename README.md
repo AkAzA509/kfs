@@ -2,10 +2,11 @@
 
 > A 32-bit x86 kernel built from scratch.
 
-![C](https://img.shields.io/badge/language-C-blue)
-![Architecture](https://img.shields.io/badge/arch-i686--elf-lightgrey)
-![License](https://img.shields.io/badge/license-GPLv3-green)
-![Status](https://img.shields.io/badge/status-in%20progress-yellow)
+![Language](https://img.shields.io/badge/language-C-00599C?style=for-the-badge)
+![Architecture](https://img.shields.io/badge/arch-i686--elf-8A8A8A?style=for-the-badge)
+![License](https://img.shields.io/badge/license-GPLv3-3DA639?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-in%20progress-F2C94C?style=for-the-badge)
+![CI](https://img.shields.io/github/actions/workflow/status/AkAzA509/kfs/test.yaml?style=for-the-badge&label=CI)
 
 `kfs` (Kernel From Scratch) is a custom x86 kernel project written as part of
 42's systems programming curriculum. The goal is about building each subsystem

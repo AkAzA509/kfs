@@ -12,8 +12,8 @@ LIBC_DIR		:= ../libc
 LIBC_INC		:= $(LIBC_DIR)/include
 BUILD_DIR		:= objs
 
-STUB_SRCS := $(wildcard stubs/*.c)
-STUB_OBJS := $(patsubst stubs/%.c,$(BUILD_DIR)/stubs/%.o,$(STUB_SRCS))
+STUB_SRCS		:= $(wildcard stubs/*.c)
+STUB_OBJS		:= $(patsubst stubs/%.c,$(BUILD_DIR)/stubs/%.o,$(STUB_SRCS))
 
 LIBC_SRCS		:= $(wildcard $(LIBC_DIR)/stdio/*.c)
 LIBC_SRCS		+= $(wildcard $(LIBC_DIR)/string/*.c)
@@ -30,7 +30,7 @@ OBJCOPY			:= objcopy
 KFS_CFLAGS		:= -Wall -Wextra -Werror -ffreestanding -fno-builtin -nostdinc \
 				   -I$(LIBC_INC) -O2
 
-HOST_CFLAGS := -Wall -Wextra -g #-I$(LIBC_INC)
+HOST_CFLAGS		:= -Wall -Wextra -g #-I$(LIBC_INC)
 
 # --- Rules ---
 .PHONY: all test clean

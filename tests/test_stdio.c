@@ -1,28 +1,6 @@
-#define _GNU_SOURCE
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <stdarg.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-extern int kfs_vprintf(const char *restrict fmt, va_list ap)
-	__attribute__((format(printf, 1, 0)));
-
-extern int kfs_vfprintf(FILE *restrict stream, const char *restrict fmt, va_list ap)
-	__attribute__((nonnull(1), format(printf, 2, 0)));
-
-extern int kfs_vdprintf(int fd, const char *restrict fmt, va_list ap)
-	__attribute__((format(printf, 2, 0)));
-
-extern int kfs_vsprintf(char *restrict str, const char *restrict fmt, va_list ap)
-	__attribute__((nonnull(1), format(printf, 2, 0)));
-
-extern int kfs_vsnprintf(char *restrict str, size_t size, const char *restrict fmt, va_list ap)
-	__attribute__((format(printf, 3, 0)));
-
+#include "include/test_common.h"
 
 static void t_print(const char *s)
 {
@@ -52,149 +30,71 @@ static void t_print_int(int n)
 static int g_pass = 0;
 static int g_fail = 0;
 
-static void check_results(const char *fmt, int ret_libc, int ret_kfs,
-                          const char *buf_libc, const char *buf_kfs)
-{
-	if (ret_libc == ret_kfs && strcmp(buf_libc, buf_kfs) == 0) {
-		g_pass++;
-		t_print("[OK]   ");
-		t_print(fmt);
-		t_print("\n");
-	} else {
-		g_fail++;
-		t_print("[FAIL] ");
-		t_print(fmt);
-		t_print("  libc_ret=");
-		t_print_int(ret_libc);
-		t_print(" kfs_ret=");
-		t_print_int(ret_kfs);
-		t_print("  libc_str=\"");
-		t_print(buf_libc);
-		t_print("\"  kfs_str=\"");
-		t_print(buf_kfs);
-		t_print("\"\n");
-	}
-}
-
-typedef void (*test_runner_t)(const char *fmt, ...);
+typedef void (*test_runner_t)(const char *expected, const char *fmt, ...);
 
 // --- Runner ---
 
-static void run_sprintf(const char *fmt, ...)
+static void run_sprintf(const char *expected, const char *fmt, ...)
 {
-	char b_libc[512] = {0}, b_kfs[512] = {0};
-	va_list a1, a2;
-	va_start(a1, fmt); va_copy(a2, a1);
-	int r_libc = vsprintf(b_libc, fmt, a1);
-	int r_kfs = kfs_vsprintf(b_kfs, fmt, a2);
-	va_end(a1); va_end(a2);
-	check_results(fmt, r_libc, r_kfs, b_libc, b_kfs);
-}
+	char b_kfs[512] = { 0 };
+	va_list a1;
 
-static void run_snprintf(const char *fmt, ...)
-{
-	char b_libc[512] = {0}, b_kfs[512] = {0};
-	va_list a1, a2;
-	va_start(a1, fmt); va_copy(a2, a1);
-	int r_libc = vsnprintf(b_libc, sizeof(b_libc), fmt, a1);
-	int r_kfs = kfs_vsnprintf(b_kfs, sizeof(b_kfs), fmt, a2);
-	va_end(a1); va_end(a2);
-	check_results(fmt, r_libc, r_kfs, b_libc, b_kfs);
-}
-
-static void run_dprintf(const char *fmt, ...)
-{
-	char b_libc[512] = {0}, b_kfs[512] = {0};
-	FILE *f1 = tmpfile(), *f2 = tmpfile();
-	int fd1 = fileno(f1), fd2 = fileno(f2);
-	va_list a1, a2;
-
-	va_start(a1, fmt); va_copy(a2, a1);
-	int r_libc = vdprintf(fd1, fmt, a1);
-	int r_kfs = kfs_vdprintf(fd2, fmt, a2);
-	va_end(a1); va_end(a2);
-
-	rewind(f1); rewind(f2);
-	size_t dummy1 = fread(b_libc, 1, sizeof(b_libc) - 1, f1); (void)dummy1;
-	size_t dummy2 = fread(b_kfs, 1, sizeof(b_kfs) - 1, f2); (void)dummy2;
-	fclose(f1); fclose(f2);
-
-	check_results(fmt, r_libc, r_kfs, b_libc, b_kfs);
-}
-
-static void run_fprintf(const char *fmt, ...)
-{
-	char b_libc[512] = {0};
-	char b_kfs[512] = {0};
-	
-	// 1. On crée un pipe UNIX pour intercepter le write() de ton Kernel
-	int pipefd[2];
-	if (pipe(pipefd) < 0) return;
-
-	// 2. Pour la libc hôte : on utilise tmpfile() normalement
-	FILE *f1 = tmpfile();
-
-	va_list a1, a2;
 	va_start(a1, fmt);
-	va_copy(a2, a1);
+	int r_kfs = vsprintf(b_kfs, fmt, a1);
+	va_end(a1);
 
-	// --- Exécution LIBC ---
-	int r_libc = vfprintf(f1, fmt, a1);
-	fflush(f1);
-	rewind(f1);
-	fread(b_libc, 1, sizeof(b_libc) - 1, f1);
-	fclose(f1);
+	assert(expected, );
+}
 
-	// --- Exécution KFS ---
-	// Ton code fait *stream pour récupérer le FD, donc on lui passe &pipefd[1] !
-	int fake_stream = pipefd[1]; 
-	int r_kfs = kfs_vfprintf((FILE *)&fake_stream, fmt, a2);
+static void run_snprintf(const char *expected, const char *fmt, ...)
+{
+	char b_kfs[512] = { 0 };
+	va_list a1;
+
+	va_start(a1, fmt);
+	int r_kfs = vsnprintf(b_kfs, sizeof(b_kfs), fmt, a1);
+	va_end(a1);
+
+	assert();
+}
+
+static void run_dprintf(const char *expected, const char *fmt, ...)
+{
+	char b_kfs[512] = { 0 };
+	va_list a1;
+
+	va_start(a1, fmt);
+	int r_kfs = vdprintf(1, fmt, a1);
+	va_end(a1);
+
+	assert();
+}
+
+static void run_fprintf(const char *expected, const char *fmt, ...)
+{
+	char b_kfs[512] = { 0 };
+
+	va_list a1;
+	va_start(a1, fmt);
+
+	int r_kfs = vfprintf(stdout, fmt, a1);
 
 	va_end(a1);
-	va_end(a2);
 
-	// On ferme le côté écriture du pipe pour débloquer la lecture
-	close(pipefd[1]);
-
-	// On lit ce que ton _vfprint_e() a écrit via write()
-	ssize_t bytes_read = read(pipefd[0], b_kfs, sizeof(b_kfs) - 1);
-	if (bytes_read > 0)
-		b_kfs[bytes_read] = '\0';
-	close(pipefd[0]);
-
-	// --- Comparaison ---
-	check_results(fmt, r_libc, r_kfs, b_libc, b_kfs);
+	assert();
 }
 
-static void run_printf(const char *fmt, ...)
+static void run_printf(const char *expected, const char *fmt, ...)
 {
-	char b_libc[512] = {0}, b_kfs[512] = {0};
-	FILE *f1 = tmpfile(), *f2 = tmpfile();
-	int stdout_backup = dup(STDOUT_FILENO);
-	va_list a1, a2;
+	char b_kfs[512] = { 0 };
+	va_list a1;
 
-	va_start(a1, fmt); va_copy(a2, a1);
+	va_start(a1, fmt);
+	int r_kfs = vprintf(fmt, a1);
 
-	fflush(stdout);
-	dup2(fileno(f1), STDOUT_FILENO);
-	int r_libc = vprintf(fmt, a1);
-	fflush(stdout);
+	va_end(a1);
 
-	dup2(fileno(f2), STDOUT_FILENO);
-	int r_kfs = kfs_vprintf(fmt, a2);
-	fflush(stdout);
-
-	dup2(stdout_backup, STDOUT_FILENO);
-	close(stdout_backup);
-
-	va_end(a1); va_end(a2);
-
-	rewind(f1); rewind(f2);
-	size_t dummy1 = fread(b_libc, 1, sizeof(b_libc) - 1, f1); (void)dummy1;
-	size_t dummy2 = fread(b_kfs, 1, sizeof(b_kfs) - 1, f2); (void)dummy2;
-	fclose(f1); fclose(f2);
-
-	check_results(fmt, r_libc, r_kfs, b_libc, b_kfs);
+	assert(expected);
 }
 
 // --- Testing blocs ---
@@ -305,9 +205,9 @@ static void run_suite(test_runner_t runner, const char *suite_name)
 
 void test_printf()
 {
-	t_print(BLUE"========================================\n");
+	t_print(BLUE "========================================\n");
 	t_print(" PRINTF TEST SUITE\n");
-	t_print("========================================\n"RESET);
+	t_print("========================================\n" RESET);
 	// t_print(RESET);
 	run_suite(run_printf, "printf");
 	run_suite(run_fprintf, "fprintf");
@@ -321,7 +221,7 @@ void test_printf()
 	t_print_int(g_pass);
 	t_print("   TOTAL FAIL: ");
 	t_print_int(g_fail);
-	t_print("\n========================================\n"RESET);
+	t_print("\n========================================\n" RESET);
 	// t_print(RESET);
 }
 

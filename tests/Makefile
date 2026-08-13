@@ -7,18 +7,21 @@ BUILD_DIR		:= objs
 STUB_SRCS		:= $(wildcard stubs/*.c)
 STUB_OBJS		:= $(patsubst stubs/%.c,$(BUILD_DIR)/stubs/%.o,$(STUB_SRCS))
 
-LIBC_SRCS		:= $(wildcard $(LIBC_DIR)/stdio/*.c)
-LIBC_SRCS		+= $(wildcard $(LIBC_DIR)/string/*.c)
-# LIBC_SRCS		:= $(shell find $(LIBC_DIR) -name '*.c' -not -path '*/testing/*')
-LIBC_OBJS		:= $(patsubst $(LIBC_DIR)/%.c,$(BUILD_DIR)/%.o,$(LIBC_SRCS))
+LIBC_SRCS		:= $(wildcard $(LIBC_DIR)/stdio/*.c) \
+				   $(wildcard $(LIBC_DIR)/string/*.c) \
+				   # $(wildcard $(LIBC_DIR)/stdlib/*.c) \
+				   # $(wildcard $(LIBC_DIR)/unistd/*.c)
 
-TEST_SRCS		:= test_stdio.c test_string.c
+LIBC_OBJS		:= $(patsubst $(LIBC_DIR)/%.c,$(BUILD_DIR)/libc/%.o,$(LIBC_SRCS))
+
+TEST_SRCS		:= test_stdio.c
 TEST_BINS		:= $(patsubst %.c,$(BUILD_DIR)/%,$(TEST_SRCS))
 
 CXX				:= gcc
 
-CXXFLAGS		:= -Wall -Wextra -Werror -ffreestanding -fno-builtin -nostdinc \
-				   -I$(LIBC_INC) -O2
+CXXFLAGS		:= -Wall -Wextra \
+				   -fno-builtin \
+				   -I. -Iinclude -I$(LIBC_INC) -g3
 
 
 # --- Rules ---
@@ -37,17 +40,18 @@ test: $(TEST_BINS)
 	done; \
 	exit $$status
 
-$(BUILD_DIR)/%: %.c $(STUB_OBJS)
-	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CXXFLAGS) $< $(STUB_OBJS) -o $@
-
-$(BUILD_DIR)/%.o: $(LIBC_DIR)/%.c
+$(BUILD_DIR)/libc/%.o: $(LIBC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(KFS_CFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# 2. Règle pour compiler les STUBS
 $(BUILD_DIR)/stubs/%.o: stubs/%.c
 	@mkdir -p $(dir $@)
-	$(CCX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%: %.c $(STUB_OBJS) $(LIBC_OBJS)
+	@mkdir -p $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)	

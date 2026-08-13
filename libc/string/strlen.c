@@ -6,14 +6,14 @@ size_t strlen(const char *str)
 {
 	const char *start = str;
 
-	while (IS_ALIGN_PTR(start)) {
+	while (!IS_ALIGN_PTR(str)) {
 		if (!*str)
 			return str - start;
 		str++;
 	}
 
 	const u32_t *s32 = (const u32_t *)str;
-	while (IS_NULL_TERM(*s32))
+	while (!IS_NULL_TERM(*s32))
 		s32++;
 
 	str = (const char *)s32;

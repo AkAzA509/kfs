@@ -1,19 +1,11 @@
 #ifndef TEST_COMMON_H
 #define TEST_COMMON_H
 
-#include <stdbool.h>
-#include <string.h>
-#include <stdio.h>
+#include "../../libc/include/string.h"
 
-#define assert(expected, result, line, function)                                          \
-	{                                                                                 \
-		if (strcmp(expected, result)) {                                           \
-			fprintf(stderr,                                                   \
-				"assertion failed in %s on line %s: %s differ from %s\n", \
-				function, line, reslut, expected);                        \
-			return false;                                                     \
-		}                                                                         \
-		return true;                                                              \
-	}
+long write(int fd, const void *buf, size_t count);
+const char *stub_get_written_data(void);
+void stub_clear(void);
+void real_write(const char *str, size_t len);
 
 #endif // TEST_COMMON_H

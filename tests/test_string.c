@@ -42,11 +42,11 @@ void string_suite(test_runner_t run, const char *suite_name)
 	run(12, "Hello world!");
 	// run(NULL);
 	run(0, "\n");
-	run(36, "                                   ");
-	run(77,
+	run(35, "                                   ");
+	run(76,
 	    "0000000000000000000000000000000000000000000000000000000000000000000000000000");
 	run(0, "");
-	run(33, "\tev\34\42\23\34\5h\65\tg\edcsdf\\g\\g\\dfsdcdcsd");
+	run(32, "\tev\34\42\23\34\5h\65\tg\edcsdf\\g\\g\\dfsdcdcsd");
 }
 
 // --- Blobal tester ---

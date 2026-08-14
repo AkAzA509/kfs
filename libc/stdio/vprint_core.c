@@ -61,6 +61,10 @@ static const char *parse_width(const char *restrict fmt, format_spec_t *spec,
 {
 	if (*fmt == '*') {
 		spec->width = va_arg(ap, int);
+		if (spec->width < 0) {
+			spec->minus = true;
+			spec->width = -spec->width;
+		}
 		fmt++;
 	} else if (*fmt >= '1' && *fmt <= '9') {
 		int w = 0;

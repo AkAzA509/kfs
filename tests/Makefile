@@ -44,7 +44,6 @@ $(BUILD_DIR)/libc/%.o: $(LIBC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# 2. Règle pour compiler les STUBS
 $(BUILD_DIR)/stubs/%.o: stubs/%.c
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@

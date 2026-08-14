@@ -45,6 +45,7 @@ static void checker(const char *fmt, const char *expected, const char *result,
 		t_print("  res len=");
 		t_print_int(ret);
 		t_print("\"\n");
+		return;
 	}
 	g_pass++;
 	t_print("[OK]   ");
@@ -203,6 +204,7 @@ static void test_dynamic(test_runner_t run)
 {
 	t_print("\n--- Dynamic Width & Precision (*)---\n");
 	run("      42", "%*d", 8, 42);
+	run("42      ", "%*d", -8, 42);
 	run("00042", "%.*d", 5, 42);
 	run("42      ", "%-*d", 8, 42);
 }

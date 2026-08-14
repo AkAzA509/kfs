@@ -69,8 +69,8 @@ debug-kernel: debug-libc
 $(DEBUG_NAME): $(DEBUG_OBJDIR)/kernel/kernel.a $(DEBUG_OBJDIR)/libc/libc.a $(LINKER_SCRIPT)
 	@mkdir -p $(BIN)
 	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(CPPFLAGS) $(DBGFLAGS) \
-		-Wl,--start-group $(DEBUG_OBJDIR)/kernel/kernel.a
-						  $(DEBUG_OBJDIR)/libc/libc.a -Wl,--end-group -lgcc
+		-Wl,--start-group $(DEBUG_OBJDIR)/kernel/kernel.a \
+		                  $(DEBUG_OBJDIR)/libc/libc.a -Wl,--end-group -lgcc
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
 	else \

@@ -9,7 +9,7 @@ export OBJDIR	?= $(CURDIR)/../objs/kernel
 SUBDIRS			:= arch/i386 arch/i386/asm drivers fs syscall core
 TARGET			:= $(OBJDIR)/kernel.a
 
-ALL_OBJ			:= $(shell fin $(OBJDIR) -name "*.o" 2>/dev/null)
+ALL_OBJ			:= $(shell find $(OBJDIR) -name "*.o" 2>/dev/null)
 
 all: start_echo $(SUBDIRS)
 	$(MAKE) $(TARGET)

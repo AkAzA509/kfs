@@ -9,7 +9,7 @@ export OBJDIR	?= $(CURDIR)/../objs/libc
 SUBDIRS			:= stdio string unistd stdlib
 TARGET			:= $(OBJDIR)/libc.a
 
-ALL_OBJ			:= $(shell fin $(OBJDIR) -name "*.o" 2>/dev/null)
+ALL_OBJ			:= $(shell find $(OBJDIR) -name "*.o" 2>/dev/null)
 
 all: start_echo $(SUBDIRS)
 	$(MAKE) $(TARGET)

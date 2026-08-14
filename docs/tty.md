@@ -125,14 +125,11 @@ either edge of the input (`edit_pos == 0` going left, or the bound check
 below going right), and does nothing for `direction == 0`.
 
 **Worth double-checking:** the right-edge guard compares
-`edit_pos == g_screen.total_cols` (the *screen's* width), not
-`edit_pos == len` (the *input's* length). Those only coincide if the
-input line happens to be exactly as long as the screen is wide. As
-written, this looks like it should bound movement against `len`, the
-same way `editor_delete` does; left as-is here since it's a code
-question rather than a documentation one, but flagging it since it's
-the kind of thing that only shows up once someone types a line short
-enough to hit the wrong edge first.
+`edit_pos == g_screen.total_cols` (the screen width), not `edit_pos ==
+len` (the input length). Those only match when the input line is exactly
+as wide as the visible row. This is a code question rather than a
+documentation one, but it is worth flagging because the bound probably
+belongs to the editor buffer, not the display width.
 
 ## Command dispatch: `shell.c`
 
@@ -145,9 +142,9 @@ prefix matches (`"hal"` must not match `"halt"`).
 
 Commands currently table-driven: `reboot`, `halt`, `print logo`,
 `print stack`, `shutdown`. Unknown input is silently ignored (the error
-path is commented out); this is presumably deliberate for now rather
-than an oversight, but is worth a second look before this ships, since a
-silent no-op on typos is a rougher UX than the rest of this layer.
+path is commented out); this is probably deliberate for now, but it is
+worth revisiting before this ships, because a silent no-op on typos is a
+rougher UX than the rest of this layer.
 
 `print_prompt()` also lives here rather than in tty.c proper, since the
 prompt string itself (`"Tekos/root > "`) is shell-identity, not

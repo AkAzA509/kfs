@@ -97,7 +97,7 @@ framebuffer, PSF fonts, etc.) live in [`docs/`](./docs/README.md).
 
 A curated list of resources used while building this project (OSDev wiki,
 Intel SDM, reference kernels, books) is available in
-[`docs/resources.md`](./docs/resources.md).
+[`docs/ressources.md`](./docs/ressources.md).
 
 ## License
 

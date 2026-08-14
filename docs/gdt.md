@@ -1,4 +1,4 @@
-# Global Descriptor Table ([gdt.c](../kernel/kernel/gdt.c))
+# Global Descriptor Table ([gdt.c](../kernel/arch/i386/gdt.c))
 
 ## Overview
 

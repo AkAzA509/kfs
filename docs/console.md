@@ -29,7 +29,7 @@ t_display_driver (display_d)      (display.md: dumb physical drawing)
 The backend never sees a logical line number. This layer never touches a
 pixel or an I/O port directly.
 
-## What this layer do
+## What this layer does
 
 | Role | Owner | Field(s) | Changes when |
 |------|-------|----------|--------------|
@@ -279,13 +279,11 @@ The two differ only in what happens *after* the screen is pushed:
   reason, but nothing currently calls it in response to `^L`, the key
   itself isn't wired up yet. Still future work.
 
-**Current status:** `screen_clear(bool full)` as implemented still does
-a direct `memset` (full clear) or a `clear_line()` loop over the visible
-rows (partial clear) rather than reusing `screen_newline()`, so both
-paths remain destructive: history is not preserved, `full` additionally
-resets `head`/`view_offset`/`col` to `0`, which throws away scrollback
-entirely rather than pushing it further back in the ring buffer. Flagged
-in [Future work](#future-work).
+**Current status:** `screen_clear()` as implemented still does a direct
+`memset` over the visible area rather than reusing `screen_newline()`, so
+the clear path remains destructive: history is not preserved and the
+current view is wiped instead of being pushed back into scrollback.
+Flagged in [Future work](#future-work).
 
 ## Multi-screen management
 

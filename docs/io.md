@@ -1,18 +1,21 @@
-# I/O Ports ([io.c](../kernel/kernel/io.c))
+# I/O Ports ([io.c](../kernel/core/io.c))
 
 ## Overview
 
 How the kernel talks to hardware devices through the x86 I/O address
-space, and the technical behavior of the `in`/`out` instruction family
-used to do so.
+space, and what the `in`/`out` instruction family actually does at the
+hardware boundary.
 
-## Reminder
+## Mental model
 
-Registers are a hardware component for high-speed data access and communication with other hardware devices. Registers allow software to
-control hardware directly by writing to registers of a device, or receive information from hardware device when reading from registers of a device.
-Not all registers are used for communication with other devices. In a CPU, most registers are used as high-speed storage for temporary data. Other devices that a CPU can communicate always have a set of registers for interfacing with the CPU.
+An I/O port is a numbered endpoint exposed by a device for control or
+status exchange. Unlike regular memory, ports do not live in the RAM
+address space; they are accessed through dedicated CPU instructions.
 
-Port is a specialized register in a hardware device used for communication with other devices. When data are written to a port, it causes a hardware device to perform some operation according to values written to the port. The different between a port and a register is that port does not store data, but delegate data to some other circuit.
+The term "register" is broader: a device often exposes one or more
+registers through its ports, and the CPU itself also has registers. Here
+we care about the device-facing meaning: a port usually selects which
+device register or action is being addressed.
 
 ## Why it exists
 
@@ -33,56 +36,48 @@ ACPI power-management chipset.
 
 These three functions wrap the `out` instruction, one per width: a byte
 (8 bits), a word (16 bits), and a long (32 bits). Each takes a port
-number and a value, and writes that value onto the I/O bus at the given
+number and a value, then writes that value to the I/O space at that
 port, nothing more. The width only determines how many bits are moved
-in a single write and which sub-register the value comes from
-internally; it doesn't change the underlying mechanism.
+in a single write; it does not change the mechanism.
 
-Electrically/logically, the write does not touch RAM at all. It is placed
-directly on the I/O bus, and whichever device (real or emulated) has
-registered itself as the listener for that port number is the one that
-reacts to it. In an emulator like QEMU, "reacting" means the hypervisor
-intercepts the instruction during CPU emulation and runs whatever
-callback it associated with that port, there is no real hardware bus,
-but the CPU-facing behavior is preserved.
+Electrically and logically, the write does not touch RAM. It is routed to
+the I/O side of the machine, and whichever device (real or emulated)
+listens on that port is the one that reacts. In QEMU, that reaction is
+implemented by the emulator intercepting the instruction and calling the
+device model associated with the port.
 
-The port number itself is always a 16-bit value, regardless of the
-value's own width or the CPU's operating mode, because the I/O address
-space is only 64 KB no matter whether the CPU is running in 16, 32, or
-64-bit mode.
+The port number itself is always a 16-bit value, regardless of the value
+width or the CPU's operating mode, because the I/O address space is only
+64 KB.
 
 ## `inb` / `inw` / `inl`
 
 These are the mirror of the `out` functions, one per width again. Each
 takes a port number and returns the value currently held by whatever
-device answers on that port, instead of writing one. This is how the
-kernel polls hardware state, for example, reading a byte a device has
-placed in its output buffer, or reading a status register to know
-whether it's safe to read or write next.
+device answers on that port. This is how the kernel polls hardware state,
+for example, reading a byte the keyboard controller placed in its output
+buffer, or checking a status register before the next read or write.
 
 Which width to call depends entirely on what the target device expects;
-using the wrong one either reads/writes more or fewer bits than the
-device's register actually holds, and produces garbage or partial data.
+using the wrong one either reads or writes too many or too few bits, and
+produces garbage or partial data.
 
 ## Privilege and access control
 
-Executing `in`/`out` is not unconditionally allowed at every privilege
-level. The CPU checks the current I/O privilege level (a field in the
-flags register) and, for less-privileged code, an I/O permission bitmap
-associated with the running task. Code running at the highest privilege
-level (ring 0, where the kernel runs) is always allowed unrestricted
-access to every port, with no bitmap check performed. This matters if the
-kernel later grows a user mode: any user-level code that needs to touch
-hardware directly would need this access explicitly granted, rather than
-inheriting it automatically.
+Executing `in`/`out` is not allowed at every privilege level. The CPU
+checks the current I/O privilege level (a field in the flags register)
+and, for less-privileged code, an I/O permission bitmap associated with
+the running task. Code running at ring 0, where the kernel lives, is
+allowed unrestricted access to every port. If the kernel later grows a
+user mode, any user-level code that needs direct hardware access will
+need that access granted explicitly.
 
 ## Why this matters for the kernel
 
-Almost every piece of legacy PC hardware the kernel talks to directly: 
-keyboard, PIC, PIT, RTC, and QEMU's virtual ACPI device, is only
-reachable through this port-based interface, not through memory-mapped
-registers. Any driver or subsystem that touches such a device will
+Almost every piece of legacy PC hardware the kernel talks to directly,
+including the keyboard, PIC, PIT, RTC, and QEMU's virtual ACPI device,
+is only reachable through this port-based interface, not through
+memory-mapped registers. Any driver that touches such a device will
 ultimately reduce to a handful of `in`/`out` calls on specific, well-known
-port numbers. Understanding this mechanism once, at this level, avoids
-having to re-explain the same read/write conventions in every subsystem's
-own doc.
+port numbers. Understanding the mechanism once avoids having to repeat
+the same conventions in every subsystem's own doc.

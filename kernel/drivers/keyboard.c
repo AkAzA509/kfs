@@ -204,10 +204,9 @@ static void print_code(u8_t code)
 	if (!val)
 		return;
 
-	if (shift && !caps_lock)
-		val = keycode_shift[code];
-	else if ((caps_lock && shift && (val < 'a' || val > 'z')) ||
-		 (caps_lock && !shift && val >= 'a' && val <= 'z'))
+	if ((caps_lock && shift && (val < 'a' || val > 'z')) ||
+	    (caps_lock && !shift && val >= 'a' && val <= 'z') ||
+	    (shift && !caps_lock))
 		val = keycode_shift[code];
 
 	if (!line_visible(&g_screens[current_screen],
@@ -221,8 +220,7 @@ static void read_scancode(u8_t scancode)
 #ifdef DEBUG
 	// serial_print_hex(scancode);
 #endif
-	if (scancode == EXTEND_CODE || scancode == LEFT_CTRL ||
-	    scancode == RIGHT_CTRL) {
+	if (scancode == EXTEND_CODE || scancode == LEFT_CTRL) {
 		extended_pending = true;
 		return;
 	}

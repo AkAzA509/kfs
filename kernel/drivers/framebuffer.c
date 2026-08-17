@@ -59,7 +59,7 @@ static void draw_cursor(int cx, int cy, u32_t color)
 void update_cursor_fb(void)
 {
 	t_screen_data *s = &g_screens[current_screen];
-	int col = s->col;
+	int col = (int)s->col;
 	int row = s->head - s->view_offset;
 
 	u8_t bg_index = (s->color >> 4) & 0x0F;

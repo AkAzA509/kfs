@@ -1,0 +1,103 @@
+# Run manually with:
+#   clang-tidy -p . kernel/kernel/foo.c
+# Or on the whole tree:
+#   find kernel libc -regex '.*\.\(c\|h\)' | xargs clang-tidy -p .
+#
+# Requires compile_commands.json (already generated via `make re`).
+
+Checks: >
+  -*,
+
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+
+  clang-analyzer-*,
+  -clang-analyzer-security.insecureAPI.*,
+
+  performance-*,
+
+  readability-else-after-return,
+  readability-redundant-declaration,
+  readability-misleading-indentation,
+  readability-inconsistent-declaration-parameter-name,
+
+  misc-redundant-expression,
+  misc-static-assert,
+
+  cert-err34-c,
+  cert-flp30-c
+
+# ---------------------------------------------------------------------------
+# Why these families:
+#
+# bugprone-*
+#   Catches classic real-bug patterns: suspicious integer comparisons,
+#   pointer arithmetic mistakes, use of uninitialized values, dangerous
+#   implicit conversions. Directly relevant to kernel code that does a lot
+#   of raw pointer / memory-address manipulation.
+#
+#   Disabled: bugprone-easily-swappable-parameters
+#     Extremely noisy on low-level C APIs where many functions legitimately
+#     take several same-typed parameters (e.g. (uint32_t base, uint32_t
+#     limit, uint8_t access) for a GDT entry). Not a real bug source here.
+#
+# clang-analyzer-*
+#   Clang's real static analyzer (path-sensitive): null dereferences, dead
+#   stores, memory leaks, use-after-free. High-value, low-noise.
+#
+# performance-*
+#   Mostly about avoiding unnecessary copies / inefficient patterns. Less
+#   critical than bugprone/clang-analyzer but cheap to keep on and still
+#   relevant in a kernel context.
+#
+# readability-* (cherry-picked, not readability-*)
+#   The full readability-* family assumes idiomatic modern C++ (e.g.
+#   pushing for auto, range-for, STL containers) which makes no sense in
+#   freestanding C. Only a few checks are kept because they catch real
+#   mistakes regardless of language style:
+#     - else-after-return: flags needless else after a return, improves
+#       control-flow readability (relevant for state-machine-like code,
+#       e.g. your tty/console layers).
+#     - redundant-declaration: catches duplicate declarations, easy to
+#       introduce with multiple headers in a kernel + libc split.
+#     - misleading-indentation: catches indentation that doesn't match
+#       actual block structure — a real bug magnet in C without braces.
+#     - braces-around-statements: enforces braces on single-line if/for/
+#       while, prevents a classic C footgun (dangling-else style bugs).
+#     - inconsistent-declaration-parameter-name: catches header/.c
+#       parameter name mismatches, useful across your kernel/libc split.
+#
+# misc-redundant-expression / misc-static-assert
+#   Catches copy-paste mistakes (e.g. `x == x`, `a && a`) and encourages
+#   compile-time assertions over runtime checks where possible — cheap
+#   wins, no false-positive risk in freestanding code.
+#
+# cert-err34-c / cert-flp30-c
+#   Only two CERT checks kept, both C-specific and freestanding-safe:
+#     - err34-c: flags unchecked return values from string-to-number
+#       conversions (relevant if/when you touch parsing code).
+#     - flp30-c: flags floating-point loop counters (relevant given your
+#       IEEE 754 printf work — floating-point comparisons/loops are a
+#       real correctness trap).
+#   The rest of cert-* assumes a hosted libc (malloc/free lifetime rules,
+#   POSIX APIs, etc.) and doesn't apply to freestanding kernel code.
+#
+# Explicitly NOT included (and why):
+#   modernize-*    — assumes C++ (auto, constexpr, override, STL). N/A in C.
+#   cppcoreguidelines-* — C++ Core Guidelines, not applicable to C.
+#   fuchsia-*, google-*, llvm-*, zircon-*, abseil-*, boost-*, mpi-*, objc-*,
+#                  — style guides / libraries for other projects entirely.
+#   readability-magic-numbers — kernel code legitimately uses raw hex
+#                  constants (port numbers, flags, masks); would be pure
+#                  noise without a huge allowlist.
+#   readability-identifier-length — too aggressive for typical low-level
+#                  idioms (i, j, fd, gp, sp as short-lived variable names).
+# ---------------------------------------------------------------------------
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '(kernel|libc)/.*'
+FormatStyle: file
+
+CheckOptions:
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '1'

@@ -22,7 +22,7 @@ DBGFLAGS			:= -DDEBUG=1
 LIBC_INCLUDES		:= -I$(abspath libc/include)
 KERNEL_INCLUDES		:= -I$(abspath kernel/include) $(LIBC_INCLUDES)
 
-export CFLAGS		:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror
+export CFLAGS		:= -std=gnu11 -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror
 
 
 # --- Release ---

@@ -8,7 +8,7 @@ int memcmp(const void *s1, const void *s2, size_t len)
 	for (size_t i = 0; i < len; i++) {
 		if (a[i] < b[i])
 			return -1;
-		else if (b[i] < a[i])
+		if (b[i] < a[i])
 			return 1;
 	}
 

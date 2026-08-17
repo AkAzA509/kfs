@@ -500,7 +500,7 @@ static void conv_float(format_spec_t *spec, va_list ap, out_target_t *target)
 	double_bits_t u;
 	u.d = val;
 
-	int sign_bit = (u.bits >> 63) & 0x1;
+	u64_t sign_bit = (u.bits >> 63) & 0x1;
 	int exp_stored = (u.bits >> 52) & 0x7FF;
 	u64_t mantissa_bits = u.bits & 0xFFFFFFFFFFFFF;
 	int exponent = exp_stored - 1023;
@@ -595,10 +595,7 @@ static void execute_conversion(format_spec_t *spec, va_list ap,
 	case 'p':
 		conv_pointer(spec, ap, target);
 		break;
-	case 'f':
-		conv_float(spec, ap, target);
-		break;
-	case 'F':
+	case 'f' || "F":
 		conv_float(spec, ap, target);
 		break;
 	default:

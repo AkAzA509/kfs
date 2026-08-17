@@ -5,8 +5,8 @@
 
 #define IS_NULL_TERM(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
 #define IS_ALIGN_PTR(x) ((uintptr_t)(x) & (sizeof(uintptr_t) - 1))
-#define UNALIGNED_X_Y(X, Y) \
-	(((long)X & (sizeof(long) - 1)) | ((long)Y & (sizeof(long) - 1)))
+#define UNALIGNED_X_Y(x, y) \
+	(((long)(x) & (sizeof(long) - 1)) | ((long)(y) & (sizeof(long) - 1)))
 
 // The strlen() function calculates the length of the string pointed to
 // by str, excluding the terminating null byte ('\0').

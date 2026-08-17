@@ -100,7 +100,7 @@ u32_t color_to_rgb(t_color color);
 int screen_putchar(char c);
 void screen_switch(int new_id);
 void screen_snap(void);
-void screen_scroll(int delta);
+void screen_scroll(int step);
 void screen_clear();
 
 void move_cursor_to(size_t col);

@@ -100,12 +100,6 @@ test:
 .PHONY: clean fclean re
 
 clean:
-	# @$(MAKE) -C libc OBJDIR=$(OBJDIR)/libc clean
-	# @$(MAKE) -C libc OBJDIR=$(DEBUG_OBJDIR)/libc clean
-	# @$(MAKE) -C kernel OBJDIR=$(OBJDIR)/kernel clean
-	# @$(MAKE) -C kernel OBJDIR=$(DEBUG_OBJDIR)/kernel clean
-	# @$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(OBJDIR)/asm clean
-	# @$(MAKE) -C kernel/arch/i386/asm OBJDIR=$(DEBUG_OBJDIR)/asm clean
 	@$(MAKE) -C tests clean
 	rm -rf $(OBJDIR) $(DEBUG_OBJDIR)
 

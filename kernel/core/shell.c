@@ -173,8 +173,7 @@ void shell_execute(const char *input, size_t len)
 	printf("commande not found: %.*s\n", (int)len, input);
 }
 
-// to fix the error when add a FILE and fd gestion
 void print_prompt(void)
 {
-	sys_write(1, "Tekos/root > ", 13);
+	printf("Tekos/root > ");
 }

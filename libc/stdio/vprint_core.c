@@ -595,7 +595,8 @@ static void execute_conversion(format_spec_t *spec, va_list *ap,
 	case 'p':
 		conv_pointer(spec, ap, target);
 		break;
-	case 'f' || "F":
+	case 'f':
+	case 'F':
 		conv_float(spec, ap, target);
 		break;
 	default:

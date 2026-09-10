@@ -12,9 +12,9 @@ void debug_editor(void)
 {
 	t_line_editor *le = &g_screens[current_screen].editor;
 	klog("line_editor debug:\n");
-	klog("\tlen      : %lu\n", le->.len);
-	klog("\tedist_pos: %lu\n", le->.edit_pos);
-	klog("\tinput_bnd: %u\n", le->.input_boundary_col);
+	klog("\tlen      : %lu\n", le->len);
+	klog("\tedist_pos: %lu\n", le->edit_pos);
+	klog("\tinput_bnd: %u\n", le->input_boundary_col);
 }
 #endif // DEBUG
 

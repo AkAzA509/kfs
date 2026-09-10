@@ -116,7 +116,7 @@ void scroll_physical_fb(void)
 	memset(back + g_screen.width * (g_screen.height - font_height), 0,
 	       row_pixels * sizeof(u32_t));
 
-	flush_screen_fb(); // un seul sync, pas un par ligne
+	flush_screen_fb();
 }
 
 // clear the back buf who been swap with the front

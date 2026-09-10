@@ -10,6 +10,7 @@ Checks: >
 
   bugprone-*,
   -bugprone-easily-swappable-parameters,
+  -bugprone-reserved-identifier,
 
   clang-analyzer-*,
   -clang-analyzer-security.insecureAPI.*,

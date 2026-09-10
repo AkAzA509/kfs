@@ -21,7 +21,7 @@ int vsnprintf(char *restrict str, size_t size, const char *restrict fmt,
 	snprintf_ctx_t sc = { .buf = str, .size = size, .pos = 0 };
 	out_target_t target = { .emit = _vsnprintf_e, .ctx = &sc, .count = 0 };
 
-	vprint_core(fmt, ap, &target);
+	vprint_core(fmt, &ap, &target);
 
 	if (size > 0)
 		str[sc.pos < size ? sc.pos : size - 1] = '\0';

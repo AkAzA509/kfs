@@ -57,10 +57,10 @@ static const char *parse_flags(const char *restrict fmt, format_spec_t *spec)
 }
 
 static const char *parse_width(const char *restrict fmt, format_spec_t *spec,
-			       va_list ap)
+			       va_list *ap)
 {
 	if (*fmt == '*') {
-		spec->width = va_arg(ap, int);
+		spec->width = va_arg(*ap, int);
 		if (spec->width < 0) {
 			spec->minus = true;
 			spec->width = -spec->width;
@@ -79,7 +79,7 @@ static const char *parse_width(const char *restrict fmt, format_spec_t *spec,
 }
 
 static const char *parse_precision(const char *restrict fmt,
-				   format_spec_t *spec, va_list ap)
+				   format_spec_t *spec, va_list *ap)
 {
 	if (*fmt != '.')
 		return fmt;
@@ -87,7 +87,7 @@ static const char *parse_precision(const char *restrict fmt,
 	fmt++;
 
 	if (*fmt == '*') {
-		spec->precision = va_arg(ap, int);
+		spec->precision = va_arg(*ap, int);
 		fmt++;
 	} else {
 		int p = 0;
@@ -127,39 +127,39 @@ static const char *parse_length(const char *restrict fmt, format_spec_t *spec)
 
 // ----- Lenght getter ----- //
 
-static long long get_int_arg(format_spec_t *spec, va_list ap)
+static long long get_int_arg(format_spec_t *spec, va_list *ap)
 {
 	switch (spec->length) {
 	case LEN_HH:
-		return (signed char)va_arg(ap, int);
+		return (signed char)va_arg(*ap, int);
 	case LEN_H:
-		return (short)va_arg(ap, int);
+		return (short)va_arg(*ap, int);
 	case LEN_L:
-		return va_arg(ap, long);
+		return va_arg(*ap, long);
 	case LEN_LL:
-		return va_arg(ap, long long);
+		return va_arg(*ap, long long);
 	case LEN_Z:
-		return va_arg(ap, size_t);
+		return va_arg(*ap, size_t);
 	default:
-		return va_arg(ap, int);
+		return va_arg(*ap, int);
 	}
 }
 
-static unsigned long long get_uint_arg(format_spec_t *spec, va_list ap)
+static unsigned long long get_uint_arg(format_spec_t *spec, va_list *ap)
 {
 	switch (spec->length) {
 	case LEN_HH:
-		return (unsigned char)va_arg(ap, int);
+		return (unsigned char)va_arg(*ap, int);
 	case LEN_H:
-		return (unsigned short)va_arg(ap, int);
+		return (unsigned short)va_arg(*ap, int);
 	case LEN_L:
-		return va_arg(ap, unsigned long);
+		return va_arg(*ap, unsigned long);
 	case LEN_LL:
-		return va_arg(ap, unsigned long long);
+		return va_arg(*ap, unsigned long long);
 	case LEN_Z:
-		return va_arg(ap, size_t);
+		return va_arg(*ap, size_t);
 	default:
-		return va_arg(ap, unsigned int);
+		return va_arg(*ap, unsigned int);
 	}
 }
 
@@ -274,7 +274,7 @@ static char *uint_to_str(unsigned long long val, char *buf_end, int base,
 	return p;
 }
 
-static void conv_signed(format_spec_t *spec, va_list ap, out_target_t *target)
+static void conv_signed(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
 	long long val = get_int_arg(spec, ap);
 
@@ -303,8 +303,8 @@ static void conv_signed(format_spec_t *spec, va_list ap, out_target_t *target)
 			     pad_len);
 }
 
-static void conv_unsigned(format_spec_t *spec, va_list ap, out_target_t *target,
-			  int base, bool uppercase)
+static void conv_unsigned(format_spec_t *spec, va_list *ap,
+			  out_target_t *target, int base, bool uppercase)
 {
 	unsigned long long val = get_uint_arg(spec, ap);
 
@@ -325,9 +325,9 @@ static void conv_unsigned(format_spec_t *spec, va_list ap, out_target_t *target,
 			     pad_len);
 }
 
-static void conv_string(format_spec_t *spec, va_list ap, out_target_t *target)
+static void conv_string(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	const char *str = va_arg(ap, const char *);
+	const char *str = va_arg(*ap, const char *);
 	if (str == NULL)
 		str = "(null)";
 
@@ -350,9 +350,9 @@ static void conv_string(format_spec_t *spec, va_list ap, out_target_t *target)
 			out_char(target, ' ');
 }
 
-static void conv_char(format_spec_t *spec, va_list ap, out_target_t *target)
+static void conv_char(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	char c = (char)va_arg(ap, int);
+	char c = (char)va_arg(*ap, int);
 
 	int pad_len = (spec->width > 1) ? spec->width - 1 : 0;
 
@@ -367,9 +367,9 @@ static void conv_char(format_spec_t *spec, va_list ap, out_target_t *target)
 			out_char(target, ' ');
 }
 
-static void conv_pointer(format_spec_t *spec, va_list ap, out_target_t *target)
+static void conv_pointer(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	void *ptr = va_arg(ap, void *);
+	void *ptr = va_arg(*ap, void *);
 
 	if (ptr == NULL) {
 		const char *nil_str = "(nil)";
@@ -494,9 +494,9 @@ static void emit_special_float(out_target_t *target, format_spec_t *spec,
 			out_char(target, ' ');
 }
 
-static void conv_float(format_spec_t *spec, va_list ap, out_target_t *target)
+static void conv_float(format_spec_t *spec, va_list *ap, out_target_t *target)
 {
-	double val = va_arg(ap, double);
+	double val = va_arg(*ap, double);
 	double_bits_t u;
 	u.d = val;
 
@@ -566,7 +566,7 @@ static void conv_float(format_spec_t *spec, va_list ap, out_target_t *target)
 			out_char(target, ' ');
 }
 
-static void execute_conversion(format_spec_t *spec, va_list ap,
+static void execute_conversion(format_spec_t *spec, va_list *ap,
 			       out_target_t *target)
 {
 	switch (spec->conv) {
@@ -607,7 +607,7 @@ static void execute_conversion(format_spec_t *spec, va_list ap,
 	}
 }
 
-static const char *parse_directive(const char *restrict fmt, va_list ap,
+static const char *parse_directive(const char *restrict fmt, va_list *ap,
 				   out_target_t *target)
 {
 	format_spec_t spec = {
@@ -629,7 +629,7 @@ static const char *parse_directive(const char *restrict fmt, va_list ap,
 	return fmt;
 }
 
-int vprint_core(const char *restrict fmt, va_list ap, out_target_t *target)
+int vprint_core(const char *restrict fmt, va_list *ap, out_target_t *target)
 {
 	while (*fmt) {
 		if (*fmt != '%') {

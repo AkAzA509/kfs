@@ -4,7 +4,7 @@
 
 typedef struct {
 	FILE *stream;
-}	fd_ctx_t;
+} fd_ctx_t;
 
 static void _vfprint_e(void *ctx, char c)
 {
@@ -14,10 +14,13 @@ static void _vfprint_e(void *ctx, char c)
 
 int vfprintf(FILE *restrict stream, const char *restrict fmt, va_list ap)
 {
-	fd_ctx_t fd = { .stream = stream, };
+	fd_ctx_t fd = {
+		.stream = stream,
+	};
 	out_target_t target = { .count = 0, .ctx = &fd, .emit = _vfprint_e };
 
-	int ret = vprint_core(fmt, ap, &target);
+	int ret = vprint_core(fmt, &ap, &target);
 
+	fflush(stream);
 	return ret;
 }

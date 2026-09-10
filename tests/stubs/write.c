@@ -32,8 +32,8 @@ long write(int fd, const void *buf, size_t count)
 void real_write(const char *str, size_t len)
 {
 	long ret;
-	__asm__ volatile("syscall"
+	__asm__ volatile("int $0x80"
 			 : "=a"(ret)
-			 : "a"(1), "D"(2), "S"(str), "d"(len)
-			 : "rcx", "r11", "memory");
+			 : "a"(4), "b"(1), "c"(str), "d"(len)
+			 : "memory");
 }

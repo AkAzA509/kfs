@@ -54,6 +54,9 @@ $(ISO_NAME): $(BIN_NAME) $(GRUB_CFG)
 	@cp $(GRUB_CFG) $(BUILD_DIR)/boot/grub/grub.cfg
 	@grub-mkrescue -o $@ $(BUILD_DIR)
 
+compile_commands:
+	bear -- $(MAKE) re
+
 # --- Debug ---
 .PHONY: debug debug-libc debug-kernel
 
@@ -106,5 +109,4 @@ clean:
 fclean: clean
 	rm -rf $(BIN) $(BUILD_DIR) $(DEBUG_BUILD_DIR)
 
-re: fclean
-	bear -- $(MAKE)
+re: fclean all

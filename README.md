@@ -87,7 +87,8 @@ make dev               # run the raw kernel binary directly in QEMU (no ISO)
 make debug             # build a debug ISO (-DDEBUG=1) and run it in QEMU with serial output
 make clean             # remove object files
 make fclean            # remove all build artifacts (binaries, ISOs)
-make re                # fclean + generate compile_commands.json for clangd (via bear)
+make re                # fclean + all
+make compile_command   # generate compile_commands.json for clangd (via bear)
 ```
 
 ## Documentation

@@ -167,7 +167,8 @@ void shell_execute(const char *input, size_t len)
 		return;
 
 	for (u16_t i = 0; cmd_table[i]; i++) {
-		if (strncmp(input, cmd_table[i], len) == 0) {
+		if (strncmp(input, cmd_table[i], len) == 0 &&
+		    strlen(cmd_table[i]) == len) {
 			cmd_handlers[i]();
 			return;
 		}

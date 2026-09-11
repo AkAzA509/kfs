@@ -147,7 +147,7 @@ static void cmd_help(void)
 	printf("                   add a positive val to chose the number of element displayed\n");
 	printf("date               display the current date in UTC+2 format\n");
 	printf("help               display this informations\n");
-	printf("clear              not yet available\n");
+	printf("clear              clear the current screen\n");
 }
 
 static const char *cmd_table[] = {
@@ -163,9 +163,11 @@ static const cmd_handler_t cmd_handlers[] = {
 
 void shell_execute(const char *input, size_t len)
 {
+	if (len <= 0)
+		return;
+
 	for (u16_t i = 0; cmd_table[i]; i++) {
-		if (strncmp(input, cmd_table[i], len) == 0 &&
-		    cmd_table[i][len] == '\0') {
+		if (strncmp(input, cmd_table[i], len) == 0) {
 			cmd_handlers[i]();
 			return;
 		}

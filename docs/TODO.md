@@ -44,6 +44,8 @@ corresponding `<module>.md` file for context on why each item matters.
 - [x] Create a bootloader.md doc
 - [x] rewrite the print API (kwrite, kputchar, kprint ...) its not well organise adn not enough clear to me
       and add a public api for printf and all is family that i can handle now, not the fd specific version.
+- [ ] Add a early boot logging system (more robust than the actual panic_print()) with a com1 serial init
+      and a minimal embedded font for fb printing wihtout fb driver (in error case)
 
 ## FPU handling
 - [x] Remove the fpu init from the bootloader and make a init file, for gdt and paging too

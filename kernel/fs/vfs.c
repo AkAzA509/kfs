@@ -2,7 +2,6 @@
 #include <kernel/log.h>
 #include <fs/vfs.h>
 #include <stdint.h>
-#include <stdio.h>
 
 kfile_t kfile_table[MAX_FD] = { 0 };
 

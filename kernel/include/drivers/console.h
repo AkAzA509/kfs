@@ -9,6 +9,8 @@
 // typedef enum e_color t_color;
 
 #define BOOT_LOG "[system] "
+#define BOOT_TEST "[ ] "
+#define BOOT_OK "[x] "
 
 typedef enum e_color {
 	COLOR_BLACK = 0,
@@ -58,7 +60,7 @@ typedef struct s_screen_data {
 	size_t col; // write cursor column on the "head" line
 	u32_t head; // logical line index currently being written to, monotonically increasing, never decremented
 	u32_t view_offset; // logical line index rendered at the top of the screen, independent from head,
-		// only changed by manual scroll or explicit snap-to-bottom
+	// only changed by manual scroll or explicit snap-to-bottom
 	u8_t color;
 	t_line_editor editor;
 } t_screen_data;

@@ -34,8 +34,4 @@ void init_vfs(void)
 	add_fd_entry(4, FD_TYPE_CONSOLE, O_WRONLY); // 2nd vterm
 	add_fd_entry(5, FD_TYPE_CONSOLE, O_WRONLY); // 3rd vterm
 	add_fd_entry(6, FD_TYPE_CONSOLE, O_WRONLY); // 4th vterm
-
-	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
-	printf(BOOT_LOG "fd initialized\n");
-	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 }

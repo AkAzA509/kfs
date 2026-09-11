@@ -41,15 +41,6 @@ void kmain(void)
 	keyboard_handler();
 }
 
-static void panic_print(char *str)
-{
-	char *vga = (char *)0xB8000;
-	for (int i = 0; str[i]; i++) {
-		vga[i * 2] = str[i];
-		vga[i * 2 + 1] = 0x4F;
-	}
-}
-
 static bool check_multiboot(multiboot_info *mbi, unsigned long magic)
 {
 	if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
@@ -79,12 +70,7 @@ void __kstart(unsigned long magic, unsigned long addr)
 
 	init_display(mbi);
 
-	if (!init_term())
-		HALT_ERROR;
-
 	init_gdt();
-
-	init_vfs();
 
 	set_term_color(make_color(COLOR_LIGHT_MAGENTA, COLOR_WHITE));
 	ASCII_LOGO;

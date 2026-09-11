@@ -68,3 +68,12 @@ int klog(const char *restrict fmt, ...)
 	va_end(ap);
 	return ret;
 }
+
+void panic_print(char *str)
+{
+	char *vga = (char *)0xB8000;
+	for (int i = 0; str[i]; i++) {
+		vga[i * 2] = str[i];
+		vga[i * 2 + 1] = 0x4F;
+	}
+}

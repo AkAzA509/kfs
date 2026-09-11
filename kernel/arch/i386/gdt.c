@@ -63,6 +63,8 @@ static void create_gdt_entry(u8_t idx, u32_t base, u32_t limit, u8_t access,
 
 void init_gdt()
 {
+	set_term_color(make_color(COLOR_BLUE, COLOR_BLACK));
+	printf(BOOT_TEST "loading gdt ...\n");
 	gdt_addr.addr = (u32_t)gdt;
 	gdt_addr.limit = (sizeof(struct s_gdt_entry) * GDT_ENTRIES) - 1;
 
@@ -76,7 +78,8 @@ void init_gdt()
 
 	update_gdt((u32_t)&gdt_addr);
 
-	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
+	printf(BOOT_OK "gdt sucessfully load\n");
+	set_term_color(make_color(COLOR_LIGHT_GREEN, COLOR_BLACK));
 	printf(BOOT_LOG "gdt initialized\n");
 	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 }

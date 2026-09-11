@@ -1,12 +1,14 @@
 #include <drivers/framebuffer.h>
 #include <kernel/multiboot.h>
 #include <drivers/console.h>
+#include <kernel/common.h>
 #include <drivers/vga.h>
 #include <kernel/init.h>
 #include <kernel/log.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <fs/vfs.h>
 #include <stdio.h>
 
 int current_screen = 0;
@@ -117,15 +119,25 @@ static bool init_font(void)
 
 static bool init_frambuffer(void)
 {
-	init_font();
+	bool ret = init_font();
 
 	if (g_screen.width > FB_MAX_WIDTH || g_screen.height > FB_MAX_HEIGHT)
 		return false;
 
-	// le curseur s'ecrit pas au demarage
 	display_d->clear();
-
 	display_d->cursor_update();
+
+	set_term_color(make_color(COLOR_BLUE, COLOR_BLACK));
+	printf(BOOT_TEST "loading font ...\n");
+	if (ret) {
+		set_term_color(make_color(COLOR_BLUE, COLOR_BLACK));
+		printf(BOOT_OK "font sucessfully load\n");
+		set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
+	} else {
+		panic_print("fond load failed halt the process\n");
+		HALT_ERROR;
+	}
+
 	return true;
 }
 
@@ -137,9 +149,6 @@ bool init_term(void)
 	} else
 		ini_vga();
 
-	set_term_color(make_color(COLOR_LIGHT_RED, COLOR_BLACK));
-	printf(BOOT_LOG "terminal initialized\n");
-	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 	return true;
 }
 
@@ -206,4 +215,14 @@ void init_display(multiboot_info *mbi)
 		memset(g_screens[i].color_buf, g_screens[i].color,
 		       sizeof(g_screens[i].color_buf));
 	}
+
+	init_vfs();
+
+	if (!init_term())
+		HALT_ERROR;
+
+	set_term_color(make_color(COLOR_LIGHT_GREEN, COLOR_BLACK));
+	printf(BOOT_LOG "fd initialized\n");
+	printf(BOOT_LOG "terminal initialized\n");
+	set_term_color(make_color(COLOR_WHITE, COLOR_BLACK));
 }

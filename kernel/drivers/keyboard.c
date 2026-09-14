@@ -63,16 +63,16 @@ static void handle_screen_switch(u8_t code)
 {
 	switch (code) {
 	case 0x3b:
-		screen_switch(0);
+		editor_switch(0);
 		return; // f1
 	case 0x3c:
-		screen_switch(1);
+		editor_switch(1);
 		return; // f2
 	case 0x3d:
-		screen_switch(2);
+		editor_switch(2);
 		return; // f3
 	case 0x3e:
-		screen_switch(3);
+		editor_switch(3);
 		return; // f4
 	default:
 		break;
@@ -151,7 +151,7 @@ static void handle_extended_key(u8_t code, bool is_release)
 		editor_delete();
 	if (code == 0x26 && !is_release) {
 		screen_clear(&g_screens[current_screen]);
-		print_prompt();
+		editor_start();
 	}
 }
 

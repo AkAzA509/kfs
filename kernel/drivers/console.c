@@ -280,8 +280,6 @@ int screen_putchar(char c)
 
 void screen_switch(int new_id)
 {
-	if (new_id < 0 || new_id >= MAX_SCREENS || new_id == current_screen)
-		return;
 	current_screen = new_id;
 	screen_redraw(&g_screens[current_screen]);
 }

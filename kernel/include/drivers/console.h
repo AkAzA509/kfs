@@ -49,6 +49,7 @@ typedef struct s_line_editor {
 	size_t len;
 	size_t edit_pos;
 	u8_t input_boundary_col;
+	bool prompt_displayed;
 } t_line_editor;
 
 // multiscreen struct

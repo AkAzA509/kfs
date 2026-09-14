@@ -53,7 +53,7 @@ void debug_font(void)
 }
 #endif // DEBUG
 
-static void ini_vga(void)
+static void init_vga_console(void)
 {
 	display_d->clear();
 	display_d->cursor_update();
@@ -117,7 +117,7 @@ static bool init_font(void)
 	return true;
 }
 
-static bool init_frambuffer(void)
+static bool init_frambuffer_console(void)
 {
 	bool ret = init_font();
 
@@ -144,10 +144,10 @@ static bool init_frambuffer(void)
 bool init_term(void)
 {
 	if (g_screen.mode == 0) {
-		if (!init_frambuffer())
+		if (!init_frambuffer_console())
 			return false;
 	} else
-		ini_vga();
+		init_vga_console();
 
 	return true;
 }
@@ -172,7 +172,7 @@ t_display_driver fb_driver = {
 	.flush_screen = flush_screen_fb,
 };
 
-static void init_fb(multiboot_info *mbi)
+static void init_fb_struct(multiboot_info *mbi)
 {
 	g_screen.mode = 0;
 	g_screen.buf = (void *)(u32_t)mbi->framebuffer_addr;
@@ -183,7 +183,7 @@ static void init_fb(multiboot_info *mbi)
 	g_screen.bpp = mbi->framebuffer_bpp;
 }
 
-static void init_vga(void)
+static void init_vga_struct(void)
 {
 	g_screen.mode = 1;
 	g_screen.buf = (void *)0xB8000;
@@ -198,10 +198,10 @@ void init_display(multiboot_info *mbi)
 {
 	if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO &&
 	    mbi->framebuffer_type == 1) {
-		init_fb(mbi);
+		init_fb_struct(mbi);
 		display_d = &fb_driver;
 	} else {
-		init_vga();
+		init_vga_struct();
 		display_d = &vga_driver;
 	}
 
@@ -214,6 +214,12 @@ void init_display(multiboot_info *mbi)
 		       sizeof(g_screens[i].text_buf));
 		memset(g_screens[i].color_buf, g_screens[i].color,
 		       sizeof(g_screens[i].color_buf));
+		memset(g_screens[i].editor.buffer, '0',
+		       sizeof(g_screens[i].editor.buffer));
+		g_screens[i].editor.edit_pos = 0;
+		g_screens[i].editor.input_boundary_col = 0;
+		g_screens[i].editor.len = 0;
+		g_screens[i].editor.prompt_displayed = false;
 	}
 
 	init_vfs();

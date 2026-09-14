@@ -71,12 +71,22 @@ void move_cursor(e_editor_move editor_move)
 	move_cursor_to(le->input_boundary_col + le->edit_pos);
 }
 
+void editor_switch(int new_id)
+{
+	if (new_id < 0 || new_id >= MAX_SCREENS || new_id == current_screen)
+		return;
+	screen_switch(new_id);
+	if (!g_screens[current_screen].editor.prompt_displayed)
+		editor_start();
+}
+
 void editor_start(void)
 {
 	print_prompt();
 	g_screens[current_screen].editor.len = 0;
 	g_screens[current_screen].editor.edit_pos = 0;
 	g_screens[current_screen].editor.input_boundary_col = get_current_col();
+	g_screens[current_screen].editor.prompt_displayed = true;
 }
 
 static void handle_tab(void)

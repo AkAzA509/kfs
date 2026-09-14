@@ -99,8 +99,8 @@ void set_term_color(u8_t color);
 u8_t make_color(t_color fg, t_color bg);
 u32_t color_to_rgb(t_color color);
 
-int screen_puts(const char *s);
-int screen_fputs(const char *s, int screen);
+int screen_puts(const char *s, size_t count);
+int screen_fputs(const char *s, int screen, size_t count);
 int screen_putchar(char c);
 void screen_switch(int new_id);
 void screen_snap(t_screen_data *s);

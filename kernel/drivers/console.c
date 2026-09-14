@@ -2,6 +2,7 @@
 #include <drivers/console.h>
 #include <drivers/vga.h>
 #include <kernel/init.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -209,6 +210,8 @@ static int vterm_putchar(char c, int screen)
 		while (s->col < next && s->col < g_screen.total_cols) {
 			s->text_buf[idx] = ' ';
 			s->color_buf[idx] = s->color;
+			s->col++;
+			idx++;
 			// screen_putchar(' ');
 		}
 		return 1;
@@ -222,28 +225,18 @@ static int vterm_putchar(char c, int screen)
 	return 1;
 }
 
-int screen_puts(const char *s)
+int screen_puts(const char *s, size_t count)
 {
-	int count = 0;
-
-	while (s) {
+	for (size_t i = 0; i < count; ++i, s++)
 		screen_putchar(*s);
-		s++;
-		count++;
-	}
-	return count;
+	return (int)count;
 }
 
-int screen_fputs(const char *s, int screen)
+int screen_fputs(const char *s, int screen, size_t count)
 {
-	int count = 0;
-
-	while (s) {
+	for (size_t i = 0; i < count; ++i, s++)
 		vterm_putchar(*s, screen);
-		s++;
-		count++;
-	}
-	return count;
+	return (int)count;
 }
 
 int screen_putchar(char c)

@@ -12,13 +12,13 @@ static int console_write(kfile_t *file, int fd, const void *buf, size_t count)
 	case 0:
 		return -EBADF;
 	case 1:
-		screen_puts(data);
+		screen_puts(data, count);
 		break;
 	case 3:
 	case 4:
 	case 5:
 	case 6:
-		screen_fputs(data, fd);
+		screen_fputs(data, fd, count);
 		break;
 	default:
 		return -1;

@@ -52,7 +52,7 @@ stack_top:
 section .rodata
 global font_data
 font_data:
-	incbin "../../../ressources/fonts/Lat15-VGA16.psf"	; add the binary into the kernel blob with
+	incbin "kernel/ressources/fonts/Lat15-VGA16.psf"	; add the binary into the kernel blob with
 											; the font_data name, that we can retreive in the c
 
 ; The linker script specifies _start as the entry point to the kernel and the

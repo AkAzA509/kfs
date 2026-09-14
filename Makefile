@@ -17,7 +17,7 @@ DEBUG_OBJDIR		:= $(abspath objs_debug)
 LINKER_SCRIPT		:= kernel/arch/i386/linker.ld
 GRUB_CFG			:= grub.cfg
 
-DBGFLAGS			:= -DDEBUG=1
+DBGFLAGS			:= -DDEBUG=1 -g3
 
 LIBC_INCLUDES		:= -I$(abspath libc/include)
 KERNEL_INCLUDES		:= -I$(abspath kernel/include) $(LIBC_INCLUDES)
@@ -57,8 +57,19 @@ $(ISO_NAME): $(BIN_NAME) $(GRUB_CFG)
 compile_commands:
 	bear -- $(MAKE) re
 
+up: $(ISO_NAME)
+	@qemu-system-i386 -cdrom $(ISO_NAME)
+
+dev: $(BIN_NAME)
+	@qemu-system-i386 -kernel $(BIN_NAME)
+
 # --- Debug ---
-.PHONY: debug debug-libc debug-kernel
+.PHONY: gdb debug debug-libc debug-kernel
+
+# gdb: debug-kernel $(DEBUG_ISO_NAME)
+gdb: debug-kernel $(DEBUG_ISO_NAME)
+	@qemu-system-i386 -cdrom $(DEBUG_ISO_NAME) -serial file:serial.log -s -S &
+	gdb -x .gdbinit bin/kernel_debug
 
 debug: debug-kernel $(DEBUG_ISO_NAME)
 	@qemu-system-i386 -cdrom $(DEBUG_ISO_NAME) -serial stdio
@@ -86,12 +97,6 @@ $(DEBUG_ISO_NAME): $(DEBUG_NAME) $(GRUB_CFG)
 	@cp $(DEBUG_NAME) $(DEBUG_BUILD_DIR)/boot/kernel
 	@cp $(GRUB_CFG) $(DEBUG_BUILD_DIR)/boot/grub/grub.cfg
 	@grub-mkrescue -o $@ $(DEBUG_BUILD_DIR)
-
-up: $(ISO_NAME)
-	@qemu-system-i386 -cdrom $(ISO_NAME)
-
-dev: $(BIN_NAME)
-	@qemu-system-i386 -kernel $(BIN_NAME)
 
 # --- Test ---
 .PHONY: test

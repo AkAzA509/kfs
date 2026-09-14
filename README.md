@@ -12,6 +12,10 @@
 42's systems programming curriculum. The goal is about building each subsystem
 (GDT, framebuffer, drivers, memory management, ...) of a kernel, part by part.
 
+<p align="center">
+  <img src="asset/homescreen.png" alt="home_screenshot" width=auto>
+</p>
+
 ## Project structure
 
 ```

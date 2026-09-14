@@ -37,6 +37,7 @@ void kmain(void)
 	// printf("Hello world!\n");
 	// screen_switch(1);
 	// screen_switch(0);
+	klog("main\n");
 	editor_start();
 	keyboard_handler();
 }

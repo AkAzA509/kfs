@@ -91,21 +91,22 @@ static void handle_scroll_key(u8_t code, bool is_release)
 	if (is_release)
 		return;
 
+	t_screen_data *s = &g_screens[current_screen];
 	switch (code) {
 	case ARROW_UP:
-		screen_scroll(-1);
+		screen_scroll(-1, s);
 		break;
 	case ARROW_DOWN:
-		screen_scroll(1);
+		screen_scroll(1, s);
 		break;
 	case PAGE_UP:
-		screen_scroll(-(int)g_screen.total_rows);
+		screen_scroll(-(int)g_screen.total_rows, s);
 		break;
 	case PAGE_DOWN:
-		screen_scroll((int)g_screen.total_rows);
+		screen_scroll((int)g_screen.total_rows, s);
 		break;
 	case HOME:
-		screen_snap();
+		screen_snap(s);
 		break;
 	default:
 		break;
@@ -149,7 +150,7 @@ static void handle_extended_key(u8_t code, bool is_release)
 	if (code == DELETE && !is_release)
 		editor_delete();
 	if (code == 0x26 && !is_release) {
-		screen_clear();
+		screen_clear(&g_screens[current_screen]);
 		print_prompt();
 	}
 }
@@ -209,9 +210,9 @@ static void print_code(u8_t code)
 	    (shift && !caps_lock))
 		val = keycode_shift[code];
 
-	if (!line_visible(&g_screens[current_screen],
-			  g_screens[current_screen].head))
-		screen_snap();
+	t_screen_data *s = &g_screens[current_screen];
+	if (!line_visible(s, s->head))
+		screen_snap(s);
 	editor_putchar(val);
 }
 

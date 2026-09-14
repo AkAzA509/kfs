@@ -51,23 +51,21 @@ static void clear_line(t_screen_data *s, u32_t line)
 	memset(&s->color_buf[idx], s->color, g_screen.total_cols);
 }
 
-void screen_redraw(void)
+static void screen_redraw(t_screen_data *s)
 {
-	t_screen_data *d = &g_screens[current_screen];
-
 	display_d->clear();
 
 	for (u16_t r = 0; r < g_screen.total_rows; r++) {
-		u32_t line = d->view_offset + r;
-		if (line > d->head)
+		u32_t line = s->view_offset + r;
+		if (line > s->head)
 			break;
 
 		u32_t idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;
 		for (u16_t c = 0; c < g_screen.total_cols; c++) {
-			if (d->text_buf[idx + c] == '\0')
+			if (s->text_buf[idx + c] == '\0')
 				continue;
-			display_d->putchar_at(d->text_buf[idx + c],
-					      d->color_buf[idx + c], c, r);
+			display_d->putchar_at(s->text_buf[idx + c],
+					      s->color_buf[idx + c], c, r);
 		}
 	}
 
@@ -75,9 +73,9 @@ void screen_redraw(void)
 	display_d->cursor_update();
 }
 
-void screen_snap(void)
+void screen_snap(t_screen_data *s)
 {
-	t_screen_data *s = &g_screens[current_screen];
+	// t_screen_data *s = &g_screens[current_screen];
 	u32_t new_offset = (s->head + 1 >= g_screen.total_rows) ?
 				   s->head - g_screen.total_rows + 1 :
 				   0;
@@ -85,7 +83,7 @@ void screen_snap(void)
 	if (new_offset == s->view_offset)
 		return;
 	s->view_offset = new_offset;
-	screen_redraw();
+	screen_redraw(s);
 	// t_screen_data *s = &g_screens[current_screen];
 
 	// 	if (line_visible(s, s->head))
@@ -115,7 +113,7 @@ static void screen_newline(t_screen_data *s)
 		s->view_offset++;
 		g_screen.cursor_col = g_screen.cursor_row = -1;
 	} else if (s->view_offset != old_offset)
-		screen_redraw();
+		screen_redraw(s);
 }
 
 static void partial_shift(t_screen_data *s, int delta)
@@ -159,9 +157,8 @@ static void partial_shift(t_screen_data *s, int delta)
 		display_d->cursor_update();
 }
 
-void screen_scroll(int step)
+void screen_scroll(int step, t_screen_data *s)
 {
-	t_screen_data *s = &g_screens[current_screen];
 	u32_t old_offset = s->view_offset;
 	long new_off = (long)old_offset + step;
 
@@ -183,20 +180,70 @@ void screen_scroll(int step)
 
 	s->view_offset = (u32_t)new_off;
 	if (labs(delta) >= g_screen.total_rows)
-		screen_redraw();
+		screen_redraw(s);
 	else
 		partial_shift(s, delta);
 }
 
-void screen_clear()
+void screen_clear(t_screen_data *s)
 {
-	t_screen_data *s = &g_screens[current_screen];
-
 	memset(s->text_buf, ' ', sizeof(s->text_buf));
 	memset(s->color_buf, s->color, sizeof(s->color_buf));
 	s->head = s->view_offset = s->col = 0;
 	display_d->clear();
 	display_d->cursor_update();
+}
+
+static int vterm_putchar(char c, int screen)
+{
+	t_screen_data *s = &g_screens[screen];
+	u32_t idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + s->col;
+
+	if (c == '\n') {
+		screen_newline(s);
+		// display_d->cursor_update();
+		return 1;
+	}
+	if (c == '\t') {
+		u16_t next = (s->col + 8) & ~7U;
+		while (s->col < next && s->col < g_screen.total_cols) {
+			s->text_buf[idx] = ' ';
+			s->color_buf[idx] = s->color;
+			// screen_putchar(' ');
+		}
+		return 1;
+	}
+
+	s->text_buf[idx] = c;
+	s->color_buf[idx] = s->color;
+	s->col++;
+	if (s->col >= g_screen.total_cols)
+		screen_newline(s);
+	return 1;
+}
+
+int screen_puts(const char *s)
+{
+	int count = 0;
+
+	while (s) {
+		screen_putchar(*s);
+		s++;
+		count++;
+	}
+	return count;
+}
+
+int screen_fputs(const char *s, int screen)
+{
+	int count = 0;
+
+	while (s) {
+		vterm_putchar(*s, screen);
+		s++;
+		count++;
+	}
+	return count;
 }
 
 int screen_putchar(char c)
@@ -243,7 +290,7 @@ void screen_switch(int new_id)
 	if (new_id < 0 || new_id >= MAX_SCREENS || new_id == current_screen)
 		return;
 	current_screen = new_id;
-	screen_redraw();
+	screen_redraw(&g_screens[current_screen]);
 }
 
 // This function set a cursor to the requested position

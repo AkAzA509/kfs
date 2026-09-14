@@ -12,20 +12,13 @@ static int console_write(kfile_t *file, int fd, const void *buf, size_t count)
 	case 0:
 		return -EBADF;
 	case 1:
+		screen_puts(data);
+		break;
 	case 3:
-		// vterm_write(&vterm[0], data, count);
-		// break;
 	case 4:
-		// vterm_write(&vterm[1], data, count);
-		// break;
 	case 5:
-		// vterm_write(&vterm[2], data, count);
-		// break;
 	case 6:
-		// vterm_write(&vterm[2], data, count);
-		// break;
-		for (size_t i = 0; i < count; i++)
-			screen_putchar(data[i]);
+		screen_fputs(data, fd);
 		break;
 	default:
 		return -1;

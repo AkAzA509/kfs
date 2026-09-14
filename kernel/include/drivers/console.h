@@ -99,11 +99,13 @@ void set_term_color(u8_t color);
 u8_t make_color(t_color fg, t_color bg);
 u32_t color_to_rgb(t_color color);
 
+int screen_puts(const char *s);
+int screen_fputs(const char *s, int screen);
 int screen_putchar(char c);
 void screen_switch(int new_id);
-void screen_snap(void);
-void screen_scroll(int step);
-void screen_clear();
+void screen_snap(t_screen_data *s);
+void screen_scroll(int step, t_screen_data *s);
+void screen_clear(t_screen_data *s);
 
 void move_cursor_to(size_t col);
 void overwrite_at(size_t col, char c);
@@ -113,6 +115,6 @@ u8_t get_current_col(void);
 bool line_visible(t_screen_data *s, u32_t line);
 bool pinned_to_bottom(t_screen_data *s);
 
-void screen_redraw(void);
+// void screen_redraw(void);
 
 #endif // CONSOLE_H

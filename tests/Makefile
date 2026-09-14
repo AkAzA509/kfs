@@ -18,11 +18,7 @@ TEST_SRCS		:= test_stdio.c
 TEST_BINS		:= $(patsubst %.c,$(BUILD_DIR)/%,$(TEST_SRCS))
 
 CXX				:= gcc
-# CXX				:= $(TARGET)-gcc
-
-CXXFLAGS		:= -std=gnu11 -Wall -Wextra \
-				   -fno-builtin \
-				   -I. -Iinclude -I$(LIBC_INC) -g3 -m32
+CXXFLAGS		:= -std=gnu11 -Wall -Wextra -fno-builtin -I. -Iinclude -I$(LIBC_INC) -g3 -m32
 
 
 # --- Rules ---
@@ -54,4 +50,4 @@ $(BUILD_DIR)/%: %.c $(STUB_OBJS) $(LIBC_OBJS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 clean:
-	rm -rf $(BUILD_DIR)	
+	$(RM) -r $(BUILD_DIR)

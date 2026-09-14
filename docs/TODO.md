@@ -67,6 +67,7 @@ corresponding `<module>.md` file for context on why each item matters.
 - [ ] when we switch screen the promt doesn't appear, unless i hit enter TO FIX
 - [ ] Optimisation/fluidity when the screen is fresh, print is instantaneous but a the first 
       scroll line each print will be significantly slower (dunno why)
+- [ ] the cursor on fb mode block at 114 or 115 char and block the writing but not the shortcut (dunno why)
 
 ## Keyboard
 

@@ -43,6 +43,7 @@ bin/
 *.su
 *.idb
 *.pdb
+*.log
 
 # Kernel Module Compile Results
 *.mod*
@@ -69,4 +70,3 @@ compile_commands.json
 
 .cache
 .zed
-.gitignore

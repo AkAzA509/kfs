@@ -42,7 +42,7 @@ extern int current_screen;
 #define SCREEN_ROWS 63
 #define SCROLLBACK_LINES 1024
 
-#define MAX_LINE 100
+#define MAX_LINE 200
 
 typedef struct s_line_editor {
 	char buffer[MAX_LINE];

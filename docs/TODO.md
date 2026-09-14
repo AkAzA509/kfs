@@ -64,7 +64,7 @@ corresponding `<module>.md` file for context on why each item matters.
       the switch not save the context of the current screen, and on another screen the previous data
       are overwriten by the current screen ?
 - [ ] Revisit tab-stop expansion when it crosses a line boundary mid-loop.
-- [ ] when we switch screen the promt doesn't appear, unless i hit enter TO FIX
+- [x] when we switch screen the promt doesn't appear, unless i hit enter TO FIX
 - [ ] Optimisation/fluidity when the screen is fresh, print is instantaneous but a the first 
       scroll line each print will be significantly slower (dunno why)
 - [ ] the cursor on fb mode block at 114 or 115 char and block the writing but not the shortcut (dunno why)

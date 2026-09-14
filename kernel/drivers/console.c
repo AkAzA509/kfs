@@ -76,7 +76,6 @@ static void screen_redraw(t_screen_data *s)
 
 void screen_snap(t_screen_data *s)
 {
-	// t_screen_data *s = &g_screens[current_screen];
 	u32_t new_offset = (s->head + 1 >= g_screen.total_rows) ?
 				   s->head - g_screen.total_rows + 1 :
 				   0;
@@ -85,12 +84,6 @@ void screen_snap(t_screen_data *s)
 		return;
 	s->view_offset = new_offset;
 	screen_redraw(s);
-	// t_screen_data *s = &g_screens[current_screen];
-
-	// 	if (line_visible(s, s->head))
-	// 		return ; // déjà sur le direct, rien à faire
-	// 	s->view_offset = s->head - g_screen.total_rows + 1;
-	// 	screen_redraw();
 }
 
 // Detect the line position and from that handle de differents case:
@@ -202,7 +195,6 @@ static int vterm_putchar(char c, int screen)
 
 	if (c == '\n') {
 		screen_newline(s);
-		// display_d->cursor_update();
 		return 1;
 	}
 	if (c == '\t') {
@@ -212,7 +204,6 @@ static int vterm_putchar(char c, int screen)
 			s->color_buf[idx] = s->color;
 			s->col++;
 			idx++;
-			// screen_putchar(' ');
 		}
 		return 1;
 	}

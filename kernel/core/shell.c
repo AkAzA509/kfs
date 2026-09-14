@@ -174,7 +174,6 @@ void shell_execute(const char *input, size_t len)
 		}
 	}
 	printf("commande not found: %.*s\n", (int)len, input);
-	// sys_write(4, "coucou\n", 7);
 }
 
 void print_prompt(void)

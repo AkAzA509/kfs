@@ -18,7 +18,7 @@ static int console_write(kfile_t *file, int fd, const void *buf, size_t count)
 	case 4:
 	case 5:
 	case 6:
-		screen_fputs(data, fd, count);
+		screen_fputs(data, fd - 3, count);
 		break;
 	default:
 		return -1;

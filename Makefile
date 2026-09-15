@@ -1,102 +1,110 @@
-# Global part
-BIN					:= bin
-BUILD_DIR			:= iso
-ISO_NAME			:= $(BIN)/kfs.iso
-BIN_NAME			:= $(BIN)/kernel
-DEBUG_NAME			:= $(BIN)/kernel_debug
-DEBUG_BUILD_DIR		:= iso_debug
-DEBUG_ISO_NAME		:= $(BIN)/kfs_debug.iso
-UP_DIR				:= $(BIN)/boot/grub
+# Makefile
 
-OBJDIR				:= objs/
-DEBUG_OBJDIR		:= objs_debug/
+.DEFAULT_GOAL := all
+.DELETE_ON_ERROR:
 
-# C part
-CXX					:= $(TARGET)-gcc
-CXXFLAGS			:= -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Iinclude
-DBGFLAGS			:= -DDEBUG=1
+TARGET			?= i386-elf
+ASM				:= nasm
+CC				:= $(TARGET)-gcc
+AR				:= $(TARGET)-ar
+RM				:= rm -rf
 
-CSRC				:= kernel/kernel.c kernel/io.c kernel/init.c kernel/terminal.c \
-					   kernel/drivers/keyboard.c kernel/drivers/vga.c kernel/drivers/framebuffer.c \
-					   helpers/kprint/kprint.c helpers/kprint/utils.c helpers/kprint/convert_format.c \
-					   helpers/memcpy.c helpers/memset.c helpers/memmove.c helpers/strlen.c helpers/kputchar.c helpers/kwrite.c
+DEBUG			?= 0
 
-OBJC				:= $(CSRC:%.c=$(OBJDIR)%.o)
-DEBUG_OBJC			:= $(CSRC:%.c=$(DEBUG_OBJDIR)%.o)
+BIN_DIR			:= bin
+BUILD_DIR		:= $(if $(filter 1,$(DEBUG)),objs_debug,objs)
+ISO_DIR			:= $(if $(filter 1,$(DEBUG)),iso_debug,iso)
 
-# ASM part
-ASMXX				:= nasm
-ASMFLGS				:= -f elf32 -g
-LDXX				:= ld
-LDFLGS				:= -m elf_i386
+BIN_NAME		:= $(BIN_DIR)/kernel$(if $(filter 1,$(DEBUG)),_debug,)
+ISO_NAME		:= $(BIN_DIR)/kfs$(if $(filter 1,$(DEBUG)),_debug,).iso
 
-ASMSRC				:= bootloader/bootloader.s
+KERNEL_A		:= $(BUILD_DIR)/kernel/kernel.a
+LIBC_A			:= $(BUILD_DIR)/libc/libc.a
 
-OBJASM				:= $(ASMSRC:%.s=$(OBJDIR)%.o)
-DEBUG_OBJASM		:= $(ASMSRC:%.s=$(DEBUG_OBJDIR)%.o)
+LINKER_SCRIPT	:= kernel/arch/i386/linker.ld
+GRUB_CFG		:= grub.cfg
 
-# Rules
-# base rule, build the kernel binary
+CPPFLAGS		:= -Ilibc/include -Ikernel/include -MMD -MP
+CFLAGS			:= -std=gnu11 -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror #-O2
+ASMFLAGS		:= -f elf32 -I.
+LDFLAGS			:= -T $(LINKER_SCRIPT) -Wl,--start-group $(KERNEL_A) $(LIBC_A) -Wl,--end-group -lgcc
+
+ifeq ($(DEBUG),1)
+	CPPFLAGS	+= -DDEBUG=1
+	CFLAGS		+= -g3 -O0
+	ASMFLAGS	+= -g -F stabs
+endif
+
+MAKEFLAGS		+= --no-print-directory
+
+# --- Sources & Objects ---
+# LIBC_SRCS_C		:= $(shell find libc -type f -name '*.c' 2>/dev/null)
+LIBC_SRCS_C		:= $(filter-out libc/stdlib/%, $(shell find libc -type f -name '*.c' 2>/dev/null)) \
+				libc/stdlib/labs.c
+KERNEL_SRCS_C	:= $(shell find kernel -type f -name '*.c' 2>/dev/null)
+KERNEL_SRCS_S	:= $(shell find kernel -type f -name '*.s' 2>/dev/null)
+
+LIBC_OBJS		:= $(patsubst libc/%.c,$(BUILD_DIR)/libc/%.o,$(LIBC_SRCS_C))
+KERNEL_OBJS		:= $(patsubst kernel/%.c,$(BUILD_DIR)/kernel/%.o,$(KERNEL_SRCS_C)) \
+				   $(patsubst kernel/%.s,$(BUILD_DIR)/kernel/%.o,$(KERNEL_SRCS_S))
+
+ALL_OBJS		:= $(LIBC_OBJS) $(KERNEL_OBJS)
+DEPS			:= $(ALL_OBJS:.o=.d)
+
+# --- Targets ---
+.PHONY: all libc kernel
+
 all: $(BIN_NAME)
 
-# add the flag for the debug mode, call the iso rule and launch it
-debug: CXXFLAGS += $(DBGFLAGS)
-debug: $(DEBUG_ISO_NAME)
-	@qemu-system-i386 -cdrom $(DEBUG_ISO_NAME) -serial stdio
+libc: $(LIBC_A)
 
-# call the objects rules, link and check the multiboot config
-$(BIN_NAME): $(OBJASM) $(OBJC) linker.ld
-	@mkdir -p $(BIN)
-	$(CXX) -T linker.ld -o $@ $(CXXFLAGS) $(OBJASM) $(OBJC)
+kernel: $(KERNEL_A)
+
+$(BUILD_DIR)/libc/%.o: libc/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/kernel/%.o: kernel/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/kernel/%.o: kernel/%.s
+	@mkdir -p $(dir $@)
+	$(ASM) $(ASMFLAGS) $< -o $@
+
+$(LIBC_A): $(LIBC_OBJS)
+	@mkdir -p $(dir $@)
+	@echo "\n\033[94mPacking libc sources\n"
+	$(AR) rcs $@ $(LIBC_OBJS)
+	@echo "\033[0m"
+
+$(KERNEL_A): $(KERNEL_OBJS)
+	@mkdir -p $(dir $@)
+	@echo "\n\033[95mPacking kernel sources\n"
+	$(AR) rcs $@ $(KERNEL_OBJS)
+	@echo "\033[0m"
+
+$(BIN_NAME): $(KERNEL_A) $(LIBC_A) $(LINKER_SCRIPT)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
 	else \
-		echo "\033[91mthe file is not multiboot\033[0m"; \
+		echo "\033[91mthe file is not multiboot\033[0m"; exit 1; \
 	fi
 
-# call the debug objects rules, link and check the multiboot config
-$(DEBUG_NAME): $(DEBUG_OBJASM) $(DEBUG_OBJC) linker.ld
-	@mkdir -p $(BIN)
-	$(CXX) -T linker.ld -o $@ $(CXXFLAGS) $(DEBUG_OBJASM) $(DEBUG_OBJC)
-	@if grub-file --is-x86-multiboot $@; then \
-		echo "\033[92mmultiboot confirmed\033[0m"; \
-	else \
-		echo "\033[91mthe file is not multiboot\033[0m"; \
-	fi
+$(ISO_NAME): $(BIN_NAME) $(GRUB_CFG)
+	@$(RM) $(ISO_DIR)
+	@mkdir -p $(ISO_DIR)/boot/grub
+	@cp $(BIN_NAME) $(ISO_DIR)/boot/kernel
+	@cp $(GRUB_CFG) $(ISO_DIR)/boot/grub/grub.cfg
+	@grub-mkrescue -o $@ $(ISO_DIR)
 
-# create the bin objects
-$(OBJDIR)%.o: %.s
-	@mkdir -p $(dir $@)
-	$(ASMXX) $(ASMFLGS) -I$(OBJDIR) $< -o $@
+# --- Execution & Utility ---
+.PHONY: up dev compile_commands
 
-$(OBJDIR)%.o: %.c $(CONFIG_H)
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# create the debug objects
-$(DEBUG_OBJDIR)%.o: %.s
-	@mkdir -p $(dir $@)
-	$(ASMXX) $(ASMFLGS) -I$(DEBUG_OBJDIR) $< -o $@
-
-$(DEBUG_OBJDIR)%.o: %.c $(CONFIG_H)
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# create the iso and is tree
-$(ISO_NAME): $(BIN_NAME) grub.cfg
-	@rm -rf $(BUILD_DIR)
-	@mkdir -p $(BUILD_DIR)/boot/grub
-	@cp $(BIN_NAME) $(BUILD_DIR)/boot/kernel
-	@cp grub.cfg $(BUILD_DIR)/boot/grub/grub.cfg
-	@grub-mkrescue -o $@ $(BUILD_DIR)
-
-# create the debug iso and is tree
-$(DEBUG_ISO_NAME): $(DEBUG_NAME) grub.cfg
-	@rm -rf $(DEBUG_BUILD_DIR)
-	@mkdir -p $(DEBUG_BUILD_DIR)/boot/grub
-	@cp $(DEBUG_NAME) $(DEBUG_BUILD_DIR)/boot/kernel
-	@cp grub.cfg $(DEBUG_BUILD_DIR)/boot/grub/grub.cfg
-	@grub-mkrescue -o $@ $(DEBUG_BUILD_DIR)
+compile_commands:
+	bear -- $(MAKE) re
 
 up: $(ISO_NAME)
 	@qemu-system-i386 -cdrom $(ISO_NAME)
@@ -104,12 +112,56 @@ up: $(ISO_NAME)
 dev: $(BIN_NAME)
 	@qemu-system-i386 -kernel $(BIN_NAME)
 
+# --- Debug Commands ---
+.PHONY: gdb debug debug-libc debug-kernel
+
+debug:
+	@$(MAKE) all DEBUG=1
+
+debug-libc:
+	@$(MAKE) libc DEBUG=1
+
+debug-kernel:
+	@$(MAKE) kernel DEBUG=1
+
+debug-iso:
+	@$(MAKE) $(BIN_DIR)/kfs_debug.iso DEBUG=1
+
+debug-up: debug-iso
+	@qemu-system-i386 -cdrom $(BIN_DIR)/kfs_debug.iso -serial stdio
+gdb:
+	@$(MAKE) $(ISO_NAME) DEBUG=1
+	@qemu-system-i386 -cdrom $(BIN_DIR)/kfs_debug.iso -serial file:serial.log -s -S &
+	gdb -x .gdbinit $(BIN_DIR)/kernel_debug
+
+# --- Linting / Formatting ---
+.PHONY: format lint
+
+format:
+	clang-format -i $(KERNEL_SRCS_C) $(LIBC_SRCS_C)
+
+lint:
+	clang-tidy $(KERNEL_SRCS_C) $(LIBC_SRCS_C) -- $(CPPFLAGS) $(CFLAGS)
+
+# --- Tests ---
+.PHONY: test
+
+test:
+	@if [ -d tests ]; then $(MAKE) -C tests; fi
+
+# --- Cleaning ---
+.PHONY: clean fclean re
+
 clean:
-	rm -rf $(OBJDIR) $(DEBUG_OBJDIR)
+	@if [ -d tests ]; then $(MAKE) -C tests clean; fi
+	$(RM) objs objs_debug
 
 fclean: clean
-	rm -rf $(BIN) $(BUILD_DIR) $(DEBUG_BUILD_DIR)
+	$(RM) $(BIN_DIR) iso iso_debug
 
 re: fclean all
 
-.PHONY: up dev clean fclean re debug all
+# --- Automatic Dependencies Inclusion ---
+ifeq (,$(filter clean fclean re,$(MAKECMDGOALS)))
+-include $(DEPS)
+endif

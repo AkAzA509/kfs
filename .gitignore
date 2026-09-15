@@ -43,6 +43,7 @@ bin/
 *.su
 *.idb
 *.pdb
+*.log
 
 # Kernel Module Compile Results
 *.mod*
@@ -62,5 +63,10 @@ iso_debug/
 
 # PDF
 *.pdf
+subject/
 
-test*
+#clangd
+compile_commands.json
+
+.cache
+.zed

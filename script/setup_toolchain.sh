@@ -51,17 +51,17 @@ fail() { printf '\033[1;31m[toolchain]\033[0m %s\n' "$1" >&2; exit 1; }
 check_dependencies() {
 	log "Checking required tools..."
 	local missing=()
-	for tool in gcc make bison flex wget tar; do
+	for tool in gcc make bison flex wget tar nasm; do
 		command -v "$tool" >/dev/null 2>&1 || missing+=("$tool")
 	done
 
 	if [ ${#missing[@]} -ne 0 ]; then
 	fail "Missing required tools: ${missing[*]}
 Install them first, e.g.:
-  Debian/Ubuntu: sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo wget
-  Fedora:        sudo dnf install gcc gcc-c++ make bison flex gmp-devel mpfr-devel libmpc-devel texinfo wget
-  Arch:          sudo pacman -S base-devel gmp mpc mpfr texinfo wget
-  macOS:         brew install gmp mpfr libmpc texinfo wget"
+  Debian/Ubuntu: sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo wget gcc-multilib nasm
+  Fedora:        sudo dnf install gcc gcc-c++ make bison flex gmp-devel mpfr-devel libmpc-devel texinfo wget nasm
+  Arch:          sudo pacman -S base-devel gmp mpc mpfr texinfo wget nasm
+  macOS:         brew install gmp mpfr libmpc texinfo wget nasm"
 	fi
 	ok "All required tools found."
 }

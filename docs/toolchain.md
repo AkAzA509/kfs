@@ -29,6 +29,7 @@ You need the following tools and libraries installed before building the
 toolchain itself:
 
 - GCC (your system's native compiler, used to build the cross-compiler)
+- NASM (ASM compiler)
 - Make
 - Bison
 - Flex
@@ -41,22 +42,22 @@ toolchain itself:
 **Debian / Ubuntu:**
 ```bash
 sudo apt update
-sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo
+sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo gcc-multilib nasm
 ```
 
 **Fedora:**
 ```bash
-sudo dnf install gcc gcc-c++ make bison flex gmp-devel mpfr-devel libmpc-devel texinfo
+sudo dnf install gcc gcc-c++ make bison flex gmp-devel mpfr-devel libmpc-devel texinfo nasm
 ```
 
 **Arch Linux:**
 ```bash
-sudo pacman -S base-devel gmp mpc mpfr texinfo
+sudo pacman -S base-devel gmp mpc mpfr texinfo nasm
 ```
 
 **macOS (Homebrew):**
 ```bash
-brew install gmp mpfr libmpc texinfo
+brew install gmp mpfr libmpc texinfo nasm
 ```
 
 ## Environment Setup

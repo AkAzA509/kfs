@@ -50,10 +50,11 @@ corresponding `<module>.md` file for context on why each item matters.
 - [x] Scroll mess TO FIX
 - [x] delete erase 2 char at once and the cursor disapear
 - [x] when screen switch the cursor is not restore at the right (and so the input) place maybe because the switch not save the context of the current screen, and on another screen the previous data are overwriten by the current screen ?
-- [ ] Revisit tab-stop expansion when it crosses a line boundary mid-loop.
 - [x] when we switch screen the promt doesn't appear, unless i hit enter TO FIX
+- [ ] Revisit tab-stop expansion when it crosses a line boundary mid-loop.
 - [ ] Optimisation/fluidity when the screen is fresh, print is instantaneous but a the first scroll line each print will be significantly slower (dunno why)
 - [ ] when a print is done into another fd (another screen than the active one) it is mix with the prompt or miss a new line to redisplay the prompt after the print
+- [ ] fix the line editor wrapping (we can write MAX_LINE in a single prompt even if its longer than the line size)
 
 ## Keyboard
 

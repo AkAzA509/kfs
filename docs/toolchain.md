@@ -6,7 +6,7 @@ architecture (`i686-elf`). The steps below walk you through building one
 from source.
 
 > **Time estimate:** building Binutils + GCC from source takes roughly
-> 20-40 minutes depending on your machine and number of CPU cores.
+> 15-30 minutes depending on your machine and number of CPU cores.
 
 > **Prefer not to do this by hand?** A script that automates every step
 > below is available at [`scripts/setup-toolchain.sh`](../scripts/setup-toolchain.sh).
@@ -17,7 +17,7 @@ from source.
 This project has been built and tested against:
 
 - **Binutils**: `2.46.1`
-- **GCC**: `13.3.0`
+- **GCC**: `15.3.0`
 
 Other versions may work, but Binutils/GCC compatibility isn't guaranteed
 across every combination — if you hit build errors, try matching these
@@ -28,7 +28,7 @@ versions first before assuming your code is at fault.
 You need the following tools and libraries installed before building the
 toolchain itself:
 
-- GCC (your system's native compiler, used to build the cross-compiler)
+- GCC v15+ (C compiler)
 - NASM (ASM compiler)
 - Make
 - Bison
@@ -82,9 +82,9 @@ directory such as `$HOME/src`:
 ```bash
 mkdir -p $HOME/src && cd $HOME/src
 wget https://ftp.gnu.org/gnu/binutils/binutils-2.46.1.tar.gz
-wget https://ftp.gnu.org/gnu/gcc/gcc-13.3.0/gcc-13.3.0.tar.gz
+wget https://ftp.gnu.org/gnu/gcc/gcc-13.3.0/gcc-15.3.0.tar.gz
 tar -xzf binutils-2.46.1.tar.gz
-tar -xzf gcc-13.3.0.tar.gz
+tar -xzf gcc-15.3.0.tar.gz
 ```
 
 (You can browse other releases on the [Binutils website](https://www.gnu.org/software/binutils/)
@@ -120,7 +120,7 @@ which -- $TARGET-as || echo $TARGET-as is not in the PATH
 
 mkdir build-gcc
 cd build-gcc
-../gcc-13.3.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c --without-headers --enable-initfini-array
+../gcc-15.3.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c --without-headers --enable-initfini-array
 make all-gcc
 make all-target-libgcc
 make install-gcc
@@ -142,7 +142,7 @@ $TARGET-gcc --version
 
 You should see output similar to:
 ```
-i686-elf-gcc (GCC) 13.3.0
+i686-elf-gcc (GCC) 15.3.0
 ```
 
 If this command isn't found, double-check that `$PREFIX/bin` is in your

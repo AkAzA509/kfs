@@ -10,7 +10,7 @@ typedef struct {
 static void _vsnprintf_e(void *ctx, char c)
 {
 	snprintf_ctx_t *sc = (snprintf_ctx_t *)ctx;
-	if (sc->pos < sc->size - 1)
+	if (sc->size > 0 && sc->pos < sc->size - 1)
 		sc->buf[sc->pos] = c;
 	sc->pos++;
 }

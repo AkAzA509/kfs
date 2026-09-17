@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-#define BUFSIZ 1024
+#define BUFSIZE 1024
 
 #define _IOFBF 0 // Full buffering
 #define _IOLBF 1 // Line buffering
@@ -13,7 +13,7 @@
 
 typedef struct _IO_FILE {
 	int fd;
-	char buffer[BUFSIZ];
+	char buffer[BUFSIZE];
 	size_t buf_pos;
 	int mode; // _IO*BF
 } FILE;

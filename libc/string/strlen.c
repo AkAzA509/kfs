@@ -6,17 +6,18 @@
 {
 	const char *start = str;
 
-	while (!IS_ALIGN_PTR(str)) {
+	while (IS_ALIGN_PTR(str)) {
 		if (!*str)
 			return str - start;
 		str++;
 	}
 
 	const u32_t *s32 = (const u32_t *)str;
-	while (!IS_NULL_TERM(*s32))
+	while (!HAS_ZERO_BYTE(*s32))
 		s32++;
 
 	str = (const char *)s32;
+
 	while (*str)
 		str++;
 

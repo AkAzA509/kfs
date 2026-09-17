@@ -16,6 +16,9 @@ struct [[gnu::packed]] s_gdt_addr {
 	u32_t addr;
 };
 
+static_assert(sizeof(struct s_gdt_entry) == 8);
+static_assert(sizeof(struct s_gdt_addr) == 6);
+
 #define GDT_ENTRIES 7
 #define GDT_ADDR 0x00000800
 

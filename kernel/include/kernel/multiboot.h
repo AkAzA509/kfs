@@ -94,6 +94,8 @@ struct multiboot_header {
 	u32_t depth;
 };
 
+static_assert(sizeof(struct multiboot_header) == 48);
+
 /* The symbol table for a.out. */
 typedef struct t_multiboot_aout_symbol_table {
 	u32_t tabsize;
@@ -102,6 +104,8 @@ typedef struct t_multiboot_aout_symbol_table {
 	u32_t reserved;
 } multiboot_aout_symbol_table;
 
+static_assert(sizeof(multiboot_aout_symbol_table) == 16);
+
 /* The section header table for ELF. */
 typedef struct t_multiboot_elf_section_header_table {
 	u32_t num;
@@ -109,6 +113,8 @@ typedef struct t_multiboot_elf_section_header_table {
 	u32_t addr;
 	u32_t shndx;
 } multiboot_elf_section_header_table;
+
+static_assert(sizeof(multiboot_elf_section_header_table) == 16);
 
 typedef struct t_multiboot_info {
 	/* Multiboot info version number */
@@ -200,6 +206,7 @@ typedef struct [[gnu::packed]] t_multiboot_mmap_entry {
 #define MULTIBOOT_MEMORY_BADRAM 5
 	u32_t type;
 } multiboot_mmap_entry;
+static_assert(sizeof(multiboot_mmap_entry) == 24);
 // typedef struct  multiboot_memory_map_t;
 
 typedef struct t_multiboot_mod_list {

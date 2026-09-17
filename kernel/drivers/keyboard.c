@@ -5,7 +5,6 @@
 #include <kernel/log.h>
 #include <kernel/tty.h>
 #include <kernel/io.h>
-#include <stdbool.h>
 #include <stdio.h>
 
 // Single scancode

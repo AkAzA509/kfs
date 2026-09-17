@@ -2,7 +2,6 @@
 #define CONSOLE_H
 
 #include <kernel/init.h>
-// #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 

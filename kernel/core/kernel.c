@@ -6,7 +6,6 @@
 #include <kernel/init.h>
 #include <kernel/tty.h>
 #include <kernel/log.h>
-#include <stdbool.h>
 #include <fs/vfs.h>
 #include <stdio.h>
 

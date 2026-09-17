@@ -5,7 +5,6 @@
 #include <drivers/vga.h>
 #include <kernel/init.h>
 #include <kernel/log.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <fs/vfs.h>

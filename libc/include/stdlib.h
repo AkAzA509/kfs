@@ -5,16 +5,16 @@
 
 // The labs() function compute the absolute value of
 // the argument x of the appropriate long type for the function.
-long labs(long x);
+long labs(long x) [[reproducible]];
 
 // The abs() function compute the absolute value of
 // the argument x of the appropriate int type for the function.
-int abs(int x);
+int abs(int x) [[reproducible]];
 
 // The malloc() function allocates size bytes and returns a pointer to
 // the allocated memory. The memory is not initialized. If size is 0,
 // then malloc() returns NULL.
-void *malloc(size_t size) __attribute__((malloc, warn_unused_result));
+[[gnu::malloc, gnu::warn_unused_result]] void *malloc(size_t size);
 
 // The free() function frees the memory space pointed to by ptr, which
 // must have been returned by a previous call to malloc() or related

@@ -12,6 +12,7 @@ static void _vdprint_e(void *ctx, char c)
 	write(fdctx->fd, &c, 1);
 }
 
+[[gnu::format(printf, 2, 0)]]
 int vdprintf(int fd, const char *restrict fmt, va_list ap)
 {
 	fd_ctx_t fd_ctx = {

@@ -1,9 +1,10 @@
-long labs(long x)
+
+long labs(long x) [[reproducible]]
 {
 	return x < 0 ? -x : x;
 }
 
-int abs(int x)
+int abs(int x) [[reproducible]]
 {
 	return x < 0 ? -x : x;
 }

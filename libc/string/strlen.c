@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stddef.h>
 
-size_t strlen(const char *str)
+[[gnu::nonnull(1)]] size_t strlen(const char *str) [[reproducible]]
 {
 	const char *start = str;
 

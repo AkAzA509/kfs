@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <string.h>
 
-int strncmp(const char *s1, const char *s2, size_t n)
+[[gnu::nonnull(1, 2)]] int strncmp(const char *s1, const char *s2, size_t n)
 {
 	unsigned long *a1;
 	unsigned long *a2;

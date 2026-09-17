@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+[[gnu::format(printf, 1, 2)]]
 int printf(const char *restrict fmt, ...)
 {
 	va_list ap;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+[[gnu::format(printf, 3, 4)]]
 int snprintf(char *restrict str, size_t size, const char *restrict fmt, ...)
 {
 	va_list ap;

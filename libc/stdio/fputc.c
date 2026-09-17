@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
+[[gnu::nonnull(2)]]
 int fputc(int c, FILE *stream)
 {
-	if (!stream)
-		return -1;
+	// if (!stream)
+	// 	return -1;
 
 	if (stream->mode == _IONBF) {
 		char ch = (char)c;

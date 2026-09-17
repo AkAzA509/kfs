@@ -13,9 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install build tools
-        run: sudo apt-get update
-
       - name: Install GCC 15
         run: |
              sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y

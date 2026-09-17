@@ -118,11 +118,13 @@ static void partial_shift(t_screen_data *s, int delta)
 	if (g_screen.mode == 1) {
 		u16_t *vga = (u16_t *)g_screen.buf;
 		if (delta > 0)
-			memmove(vga, vga + delta * g_screen.width,
-				moved * g_screen.width * sizeof(u16_t));
+			memmove(vga, vga + (size_t)delta * g_screen.width,
+				(unsigned long)moved * g_screen.width *
+					sizeof(u16_t));
 		else
-			memmove(vga - delta * g_screen.width, vga,
-				moved * g_screen.width * sizeof(u16_t));
+			memmove(vga - (size_t)delta * g_screen.width, vga,
+				(unsigned long)moved * g_screen.width *
+					sizeof(u16_t));
 	} else {
 		u32_t *back = g_screen.back_buf;
 		u32_t row_px = g_screen.width * font_info.height;
@@ -285,7 +287,7 @@ void move_cursor_to(size_t col)
 	display_d->cursor_update();
 }
 
-void overwrite_at(size_t col, char c)
+void overwrite_at(u32_t col, char c)
 {
 	t_screen_data *s = &g_screens[current_screen];
 	u32_t idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + col;

@@ -38,9 +38,9 @@ extern int current_screen;
 #define MAX_SCREENS 4
 #define FB_MAX_WIDTH 1680
 #define FB_MAX_HEIGHT 1000
-#define SCREEN_COLS 210
-#define SCREEN_ROWS 63
-#define SCROLLBACK_LINES 1024
+#define SCREEN_COLS 210U
+#define SCREEN_ROWS 63U
+#define SCROLLBACK_LINES 1024U
 
 #define MAX_LINE 200
 
@@ -58,7 +58,7 @@ typedef struct s_line_editor {
 typedef struct s_screen_data {
 	char text_buf[SCREEN_COLS * SCROLLBACK_LINES];
 	u8_t color_buf[SCREEN_COLS * SCROLLBACK_LINES];
-	size_t col; // write cursor column on the "head" line
+	u32_t col; // write cursor column on the "head" line
 	u32_t head; // logical line index currently being written to, monotonically increasing, never decremented
 	u32_t view_offset; // logical line index rendered at the top of the screen, independent from head,
 	// only changed by manual scroll or explicit snap-to-bottom
@@ -109,7 +109,7 @@ void screen_scroll(int step, t_screen_data *s);
 void screen_clear(t_screen_data *s);
 
 void move_cursor_to(size_t col);
-void overwrite_at(size_t col, char c);
+void overwrite_at(u32_t col, char c);
 
 u8_t get_current_col(void);
 

@@ -9,7 +9,7 @@
 void log_stack(size_t len);
 
 // klog() is a printf function who log on the serial port
-int klog(const char *restrict fmt, ...) __attribute__((format(printf, 1, 2)));
+[[gnu::format(printf, 1, 2)]] int klog(const char *restrict fmt, ...);
 
 // serial_print_hex() write on the serial port in hexadecimal format
 void serial_print_hex(u32_t val);

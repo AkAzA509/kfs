@@ -42,6 +42,6 @@ void *calloc(size_t nmeb, size_t size);
 // values of size.
 // If size is equal to zero, and ptr is not NULL, then the call is equiv‐
 // alent to free(ptr).
-void *realloc(void *ptr, size_t size) __attribute__(());
+void *realloc(void *ptr, size_t size);
 
 #endif // STDLIB_H

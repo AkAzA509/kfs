@@ -189,7 +189,7 @@ struct multiboot_color {
 	u8_t blue;
 };
 
-typedef struct t_multiboot_mmap_entry {
+typedef struct [[gnu::packed]] t_multiboot_mmap_entry {
 	u32_t size;
 	u64_t addr;
 	u64_t len;
@@ -199,7 +199,7 @@ typedef struct t_multiboot_mmap_entry {
 #define MULTIBOOT_MEMORY_NVS 4
 #define MULTIBOOT_MEMORY_BADRAM 5
 	u32_t type;
-} __attribute__((packed)) multiboot_mmap_entry;
+} multiboot_mmap_entry;
 // typedef struct  multiboot_memory_map_t;
 
 typedef struct t_multiboot_mod_list {

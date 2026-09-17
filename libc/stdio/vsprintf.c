@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include "vprint_core.h"
+#include <limits.h>
+#include <stdio.h>
 
 typedef struct {
 	char *buf;
@@ -23,5 +24,5 @@ int vsprintf(char *restrict str, const char *restrict fmt, va_list ap)
 	vprint_core(fmt, &ap, &target);
 
 	str[sc.pos] = '\0';
-	return (int)sc.pos;
+	return sc.pos > (size_t)INT_MAX ? -1 : (int)sc.pos;
 }

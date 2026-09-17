@@ -11,9 +11,6 @@ int fputc(int c, FILE *stream)
 		return c;
 	}
 
-	if (stream->buf_pos >= BUFSIZE && fflush(stream) < 0)
-		return -1;
-
 	stream->buffer[stream->buf_pos++] = (char)c;
 
 	if ((stream->mode == _IOLBF && (char)c == '\n') ||

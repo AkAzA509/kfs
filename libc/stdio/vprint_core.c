@@ -1,4 +1,5 @@
 #include "vprint_core.h"
+#include <limits.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -645,5 +646,6 @@ int vprint_core(const char *restrict fmt, va_list *ap, out_target_t *target)
 		}
 		fmt = parse_directive(fmt, ap, target);
 	}
-	return (int)target->count;
+
+	return target->count > (size_t)INT_MAX ? -1 : (int)target->count;
 }

@@ -25,7 +25,7 @@ LINKER_SCRIPT	:= kernel/arch/i386/linker.ld
 GRUB_CFG		:= grub.cfg
 
 CPPFLAGS		:= -Ilibc/include -Ikernel/include -MMD -MP
-CFLAGS			:= -std=gnu11 -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror #-O2
+CFLAGS			:= -std=gnu23 -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror #-O2
 ASMFLAGS		:= -f elf32 -I.
 LDFLAGS			:= -T $(LINKER_SCRIPT) -Wl,--start-group $(KERNEL_A) $(LIBC_A) -Wl,--end-group -lgcc
 

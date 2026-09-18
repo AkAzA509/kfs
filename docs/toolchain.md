@@ -82,7 +82,7 @@ directory such as `$HOME/src`:
 ```bash
 mkdir -p $HOME/src && cd $HOME/src
 wget https://ftp.gnu.org/gnu/binutils/binutils-2.46.1.tar.gz
-wget https://ftp.gnu.org/gnu/gcc/gcc-13.3.0/gcc-15.3.0.tar.gz
+wget https://ftp.gnu.org/gnu/gcc/gcc-15.3.0/gcc-15.3.0.tar.gz
 tar -xzf binutils-2.46.1.tar.gz
 tar -xzf gcc-15.3.0.tar.gz
 ```

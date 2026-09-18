@@ -16,7 +16,7 @@
 #   PREFIX        Install location for the toolchain (default: $HOME/opt/cross)
 #   SRC_DIR       Where sources are downloaded/extracted (default: $HOME/src)
 #   BINUTILS_VER  Binutils version to build (default: 2.46.1)
-#   GCC_VER       GCC version to build (default: 13.3.0)
+#   GCC_VER       GCC version to build (default: 15.3.0)
 #   JOBS          Parallel make jobs (default: number of CPU cores)
 #
 # Example:

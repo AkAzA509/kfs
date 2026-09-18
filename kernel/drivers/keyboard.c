@@ -60,29 +60,31 @@ static bool extended_pending = false;
 
 static void handle_screen_switch(u8_t code)
 {
-	switch (code) {
-	case 0x3b:
-		editor_switch(0);
-		return; // f1
-	case 0x3c:
-		editor_switch(1);
-		return; // f2
-	case 0x3d:
-		editor_switch(2);
-		return; // f3
-	case 0x3e:
-		editor_switch(3);
-		return; // f4
-	default:
-		break;
+	u8_t f_index[] = { 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
+			   0x40, 0x41, 0x42, 0x43, 0x44 };
+
+	int i = 0;
+	while (f_index[i]) {
+		if (f_index[i] == code)
+			break;
+		++i;
 	}
+
+	if (i > MAX_SCREENS)
+		fprintf(stdout,
+			"Error: the virtual screen %d selected does not exist\n",
+			i);
+	else
+		editor_switch(i);
 }
 
 // Fake exit, to modify when the kernel has memory
+[[noreturn]]
 void handle_exit(void)
 {
 	printf("Shuting down ...\n");
 	SHUTDOWN;
+	HALT_ERROR;
 }
 
 static void handle_scroll_key(u8_t code, bool is_release)
@@ -187,7 +189,7 @@ static bool handle_single_key(u8_t code, bool is_release)
 		handle_exit();
 		return false;
 	}
-	if (code >= 0x3b && code <= 0x3e) {
+	if (code >= 0x3b && code <= 0x44) {
 		handle_screen_switch(code);
 		return false;
 	}

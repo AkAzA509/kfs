@@ -34,7 +34,15 @@ typedef enum e_color {
 extern unsigned char font_data[];
 extern int current_screen;
 
+#ifndef MAX_SCREENS
 #define MAX_SCREENS 4
+#endif
+
+#if MAX_SCREENS > 10
+#undef MAX_SCREENS
+#define MAX_SCREENS 4
+#endif
+
 #define FB_MAX_WIDTH 1680
 #define FB_MAX_HEIGHT 1000
 #define SCREEN_COLS 210U

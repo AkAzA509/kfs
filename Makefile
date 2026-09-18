@@ -149,7 +149,7 @@ format:
 	clang-format -i $(KERNEL_SRCS_C) $(LIBC_SRCS_C)
 
 lint:
-	clang-tidy $(KERNEL_SRCS_C) $(LIBC_SRCS_C) -- $(CPPFLAGS) $(CFLAGS)
+	clang-tidy -p . $(KERNEL_SRCS_C) $(LIBC_SRCS_C)
 
 # --- Tests ---
 .PHONY: test

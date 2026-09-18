@@ -20,7 +20,7 @@ static u32_t g_fb_back_buffer[FB_MAX_WIDTH * FB_MAX_HEIGHT];
 void debug_current_screen(void)
 {
 	klog("current_screen debug:\n");
-	klog("\tcol         : %lu\n", g_screens[current_screen].col);
+	klog("\tcol         : %u\n", g_screens[current_screen].col);
 	klog("\tcolor       : %d\n", g_screens[current_screen].color);
 	klog("\thead        : %u\n", g_screens[current_screen].head);
 	klog("\tview_offset : %d\n", g_screens[current_screen].view_offset);

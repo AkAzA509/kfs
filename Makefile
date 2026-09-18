@@ -25,9 +25,15 @@ LINKER_SCRIPT	:= kernel/arch/i386/linker.ld
 GRUB_CFG		:= grub.cfg
 
 CPPFLAGS		:= -Ilibc/include -Ikernel/include -MMD -MP
-CFLAGS			:= -std=gnu23 -ffreestanding -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Wextra -Werror #-O2
+
+CFLAGS			:= -std=gnu23 -ffreestanding -fno-builtin \
+				   -fno-stack-protector -nostdlib -nodefaultlibs \
+				   -Wall -Wextra -Werror -DMAX_SCREENS=10 #-O2
+
 ASMFLAGS		:= -f elf32 -I.
-LDFLAGS			:= -T $(LINKER_SCRIPT) -Wl,--start-group $(KERNEL_A) $(LIBC_A) -Wl,--end-group -lgcc
+
+LDFLAGS			:= -T $(LINKER_SCRIPT) -Wl,--start-group \
+				   $(KERNEL_A) $(LIBC_A) -Wl,--end-group -lgcc
 
 ifeq ($(DEBUG),1)
 	CPPFLAGS	+= -DDEBUG=1
@@ -113,7 +119,7 @@ dev: $(BIN_NAME)
 	@qemu-system-i386 -kernel $(BIN_NAME)
 
 # --- Debug Commands ---
-.PHONY: gdb debug debug-libc debug-kernel
+.PHONY: gdb debug debug-libc debug-kernel debug-iso debug-up debug-re
 
 debug:
 	@$(MAKE) all DEBUG=1
@@ -133,6 +139,8 @@ gdb:
 	@$(MAKE) $(ISO_NAME) DEBUG=1
 	@qemu-system-i386 -cdrom $(BIN_DIR)/kfs_debug.iso -serial file:serial.log -s -S &
 	gdb -x .gdbinit $(BIN_DIR)/kernel_debug
+
+debug-re: fclean debug-up
 
 # --- Linting / Formatting ---
 .PHONY: format lint

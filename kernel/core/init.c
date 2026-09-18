@@ -174,7 +174,7 @@ t_display_driver fb_driver = {
 static void init_fb_struct(multiboot_info *mbi)
 {
 	g_screen.mode = 0;
-	g_screen.buf = (void *)(u32_t)mbi->framebuffer_addr;
+	g_screen.buf = (void *)(uintptr_t)mbi->framebuffer_addr;
 	g_screen.back_buf = g_fb_back_buffer;
 	g_screen.width = mbi->framebuffer_width;
 	g_screen.height = mbi->framebuffer_height;

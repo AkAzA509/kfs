@@ -143,7 +143,7 @@ static void partial_shift(t_screen_data *s, int delta)
 		u32_t idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;
 		for (u16_t c = 0; c < g_screen.total_cols; c++) {
 			char ch = s->text_buf[idx + c];
-			display_d->putchar_at(ch ? ch : ' ',
+			display_d->putchar_at((char)(ch ? ch : ' '),
 					      s->color_buf[idx + c], c, r);
 		}
 	}
@@ -158,7 +158,7 @@ void screen_scroll(int step, t_screen_data *s)
 	u32_t old_offset = s->view_offset;
 	long new_off = (long)old_offset + step;
 
-	long min_off = (long)s->head - SCROLLBACK_LINES + 1;
+	long min_off = (long)s->head - (long)SCROLLBACK_LINES + 1;
 	if (min_off < 0)
 		min_off = 0;
 

@@ -62,7 +62,7 @@ static bool check_multiboot(multiboot_info *mbi, unsigned long magic)
 
 void __kstart(unsigned long magic, unsigned long addr)
 {
-	multiboot_info *mbi = (multiboot_info *)addr;
+	multiboot_info *mbi = (multiboot_info *)(uintptr_t)addr;
 
 	if (!check_multiboot(mbi, magic))
 		HALT_ERROR;

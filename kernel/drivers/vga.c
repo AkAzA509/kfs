@@ -23,8 +23,8 @@ static void set_cursor(int x, int y)
 void update_cursor_vga(void)
 {
 	t_screen_data *s = &g_screens[current_screen];
-	int col = s->col;
-	int row = s->head - s->view_offset;
+	int col = (int)s->col;
+	int row = (int)(s->head - s->view_offset);
 
 	set_cursor(col, row);
 }

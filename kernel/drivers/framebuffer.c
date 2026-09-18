@@ -21,8 +21,8 @@ static void swap_rect(u32_t x, u32_t y, u32_t width, u32_t height)
 
 static void draw_cursor(int cx, int cy, u32_t color)
 {
-	const int start_x = cx * font_info.width;
-	const int start_y = cy * font_info.height + 14;
+	const int start_x = (int)(cx * font_info.width);
+	const int start_y = (int)(cy * font_info.height + 14);
 
 	// klog("draw_cursor READ: &cursor_col=%p\n", (void *)&g_screen.cursor_col);
 	// klog("draw_cursor: cx=%d cy=%d | old_col=%d old_row=%d\n", cx, cy, g_screen.cursor_col, g_screen.cursor_row);
@@ -60,7 +60,7 @@ void update_cursor_fb(void)
 {
 	t_screen_data *s = &g_screens[current_screen];
 	int col = (int)s->col;
-	int row = s->head - s->view_offset;
+	int row = (int)(s->head - s->view_offset);
 
 	u8_t bg_index = (s->color >> 4) & 0x0F;
 	u32_t bg_rgb = color_to_rgb((t_color)bg_index);

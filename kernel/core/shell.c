@@ -28,7 +28,7 @@ unsigned char get_RTC_register(int reg)
 void read_rtc()
 {
 	int century_register = 0x00;
-	unsigned char century;
+	unsigned char century = 0;
 	unsigned char last_second, second;
 	unsigned char last_minute, minute;
 	unsigned char last_hour, hour;
@@ -80,7 +80,6 @@ void read_rtc()
 
 	// Convert BCD to binary values if necessary
 	if (!(registerB & 0x04)) {
-		second = (second & 0x0F) + ((second / 16) * 10);
 		minute = (minute & 0x0F) + ((minute / 16) * 10);
 		hour = ((hour & 0x0F) + (((hour & 0x70) / 16) * 10)) |
 		       (hour & 0x80);

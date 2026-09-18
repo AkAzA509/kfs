@@ -23,7 +23,7 @@ void log_stack(size_t len)
 
 	for (size_t i = 0; i != nb_words; i++) {
 		u32_t addr = top - (i * 4) - 4;
-		printf("0x%08x: 0x%08x\n", addr, *(u32_t *)addr);
+		printf("0x%08x: 0x%08x\n", addr, *(u32_t *)(uintptr_t)addr);
 	}
 }
 

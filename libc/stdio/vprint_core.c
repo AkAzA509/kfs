@@ -134,12 +134,12 @@ static long long get_int_arg(format_spec_t *spec, va_list *ap)
 		return (signed char)va_arg(*ap, int);
 	case LEN_H:
 		return (short)va_arg(*ap, int);
+	case LEN_Z:
+		[[fallthrough]];
 	case LEN_L:
 		return va_arg(*ap, long);
 	case LEN_LL:
 		return va_arg(*ap, long long);
-	case LEN_Z:
-		return va_arg(*ap, size_t);
 	default:
 		return va_arg(*ap, int);
 	}
@@ -152,12 +152,12 @@ static unsigned long long get_uint_arg(format_spec_t *spec, va_list *ap)
 		return (unsigned char)va_arg(*ap, int);
 	case LEN_H:
 		return (unsigned short)va_arg(*ap, int);
+	case LEN_Z:
+		[[fallthrough]];
 	case LEN_L:
 		return va_arg(*ap, unsigned long);
 	case LEN_LL:
 		return va_arg(*ap, unsigned long long);
-	case LEN_Z:
-		return va_arg(*ap, size_t);
 	default:
 		return va_arg(*ap, unsigned int);
 	}
@@ -473,7 +473,7 @@ static int extract_frac_digits_rounded(u64_t frac_num, int n, int precision,
 		(*int_part)++;
 
 	for (int j = 0; j < precision; j++)
-		out[j] = '0' + digits[j];
+		out[j] = (char)('0' + digits[j]);
 	return precision;
 }
 
@@ -501,7 +501,7 @@ static void conv_float(format_spec_t *spec, va_list *ap, out_target_t *target)
 	u.d = val;
 
 	u64_t sign_bit = (u.bits >> 63) & 0x1;
-	int exp_stored = (u.bits >> 52) & 0x7FF;
+	int exp_stored = (int)((u.bits >> 52) & 0x7FF);
 	u64_t mantissa_bits = u.bits & 0xFFFFFFFFFFFFF;
 	int exponent = exp_stored - 1023;
 

@@ -14,7 +14,7 @@ int abs(int x) [[reproducible]];
 // The malloc() function allocates size bytes and returns a pointer to
 // the allocated memory. The memory is not initialized. If size is 0,
 // then malloc() returns NULL.
-[[gnu::malloc, gnu::warn_unused_result]] void *malloc(size_t size);
+[[gnu::malloc, nodiscard]] void *malloc(size_t size);
 
 // The free() function frees the memory space pointed to by ptr, which
 // must have been returned by a previous call to malloc() or related

@@ -1,5 +1,6 @@
 #include <stddef.h>
 
+[[gnu::nonnull(1, 2)]]
 void *memcpy(void *restrict dst, const void *restrict src, size_t len)
 {
 	unsigned char *d = (unsigned char *)dst;

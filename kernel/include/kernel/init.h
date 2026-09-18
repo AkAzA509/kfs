@@ -1,8 +1,6 @@
 #ifndef INIT_H
 #define INIT_H
 
-#include <stdbool.h>
-
 void debug_screen(void);
 void debug_font(void);
 void debug_current_screen(void);

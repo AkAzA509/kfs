@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include "vprint_core.h"
+#include <limits.h>
+#include <stdio.h>
 
 typedef struct {
 	char *buf;
@@ -10,11 +11,12 @@ typedef struct {
 static void _vsnprintf_e(void *ctx, char c)
 {
 	snprintf_ctx_t *sc = (snprintf_ctx_t *)ctx;
-	if (sc->pos < sc->size - 1) // garder de la place pour le \0
+	if (sc->size > 0 && sc->pos < sc->size - 1)
 		sc->buf[sc->pos] = c;
-	sc->pos++; // continue à compter même si on n'écrit plus
+	sc->pos++;
 }
 
+[[gnu::format(printf, 3, 0)]]
 int vsnprintf(char *restrict str, size_t size, const char *restrict fmt,
 	      va_list ap)
 {
@@ -25,5 +27,6 @@ int vsnprintf(char *restrict str, size_t size, const char *restrict fmt,
 
 	if (size > 0)
 		str[sc.pos < size ? sc.pos : size - 1] = '\0';
-	return (int)sc.pos;
+
+	return sc.pos > (size_t)INT_MAX ? -1 : (int)sc.pos;
 }

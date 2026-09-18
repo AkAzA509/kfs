@@ -1,7 +1,6 @@
 #ifndef FRAMEBUFFER_H
 #define FRAMEBUFFER_H
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 

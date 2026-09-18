@@ -12,6 +12,7 @@ static void _vfprint_e(void *ctx, char c)
 	fputc(c, fdctx->stream);
 }
 
+[[gnu::format(printf, 2, 0), gnu::nonnull(1)]]
 int vfprintf(FILE *restrict stream, const char *restrict fmt, va_list ap)
 {
 	fd_ctx_t fd = { .stream = stream };

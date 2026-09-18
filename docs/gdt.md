@@ -79,17 +79,17 @@ across CPU generations without ever being cleaned up, so `base` and
 | `lim_attr` | 8 bits  | bits 0-3: limit, bits 16-19 · bits 4-7: flags (G, D/B, L, AVL) |
 | `base_3`   | 8 bits  | base, bits 24-31                                              |
 
-`__attribute__((packed))` is required, without it the compiler is free to
+`[[gnu::packed]]` is required, without it the compiler is free to
 insert padding for alignment, which would break the exact 8-byte layout
 the CPU expects.
 
 ### `s_gdt_addr` the GDTR operand
 
 ```c
-struct s_gdt_addr {
+struct [[gnu::packed]] s_gdt_addr {
 	u16_t	limit;   // size of the table in bytes, minus 1
 	u32_t	addr;    // linear address of the table
-} __attribute__((packed));
+};
 ```
 
 Passed to `lgdt` (inside `update_gdt`, see [Loading the GDT into the

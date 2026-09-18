@@ -18,7 +18,7 @@ TEST_SRCS		:= test_stdio.c
 TEST_BINS		:= $(patsubst %.c,$(BUILD_DIR)/%,$(TEST_SRCS))
 
 CXX				:= gcc
-CXXFLAGS		:= -std=gnu11 -Wall -Wextra -fno-builtin -I. -Iinclude -I$(LIBC_INC) -g3 -m32
+CXXFLAGS		:= -std=gnu23 -Wall -Wextra -fno-builtin -I. -Iinclude -I$(LIBC_INC) -g3 -m32
 
 
 # --- Rules ---

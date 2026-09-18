@@ -7,6 +7,7 @@ static void _vprint_e(void *ctx, char c)
 	putchar(c);
 }
 
+[[gnu::format(printf, 1, 0)]]
 int vprintf(const char *restrict fmt, va_list ap)
 {
 	out_target_t target = { .emit = _vprint_e, .ctx = NULL, .count = 0 };

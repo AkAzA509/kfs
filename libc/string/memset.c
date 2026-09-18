@@ -1,6 +1,6 @@
 #include <stddef.h>
 
-void *memset(void *ptr, int c, size_t len)
+[[gnu::nonnull(1)]] void *memset(void *ptr, int c, size_t len)
 {
 	unsigned char *p = (unsigned char *)ptr;
 

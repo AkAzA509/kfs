@@ -27,6 +27,11 @@ static struct s_gdt_addr gdt_addr;
 
 extern void update_gdt(u32_t gdt);
 
+void print_gdt(void)
+{
+	printf("gdt addr: %p\n", gdt);
+}
+
 // flags = CF = 1100 1111
 //		& F0  = 1100 0000
 
@@ -64,7 +69,7 @@ static void create_gdt_entry(u8_t idx, u32_t base, u32_t limit, u8_t access,
 	gdt[idx].access = access;
 }
 
-void init_gdt()
+void init_gdt(void)
 {
 	set_term_color(make_color(COLOR_BLUE, COLOR_BLACK));
 	printf(BOOT_TEST "loading gdt ...\n");

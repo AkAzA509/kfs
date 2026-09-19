@@ -80,7 +80,7 @@ static void handle_screen_switch(u8_t code)
 
 // Fake exit, to modify when the kernel has memory
 [[noreturn]]
-void handle_exit(void)
+static void handle_exit(void)
 {
 	printf("Shuting down ...\n");
 	SHUTDOWN;

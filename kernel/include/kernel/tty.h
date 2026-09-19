@@ -15,4 +15,8 @@ void editor_start(void);
 void editor_switch(int new_id);
 void move_cursor(e_editor_move editor_move);
 
+#ifdef DEBUG
+void debug_editor(void);
+#endif //DEBUG
+
 #endif // TTY_H

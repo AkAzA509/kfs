@@ -1,3 +1,4 @@
+#include <kernel/log.h>
 #include <kernel/io.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -69,7 +70,7 @@ static int kvprintf(const char *restrict fmt, va_list ap)
 	return ret;
 }
 
-void panic_print(char *str)
+void panic_print(const char *str)
 {
 	char *vga = (char *)0xB8000;
 	for (int i = 0; str[i]; i++) {

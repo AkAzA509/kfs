@@ -21,7 +21,7 @@
 
 #define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
 
-void kmain(void)
+static void kmain(void)
 {
 	// #ifdef DEBUG
 	// 	debug_screen();

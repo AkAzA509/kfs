@@ -1,3 +1,4 @@
+#include <stdlib.h>
 
 long labs(long x) [[reproducible]]
 {

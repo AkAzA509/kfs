@@ -18,6 +18,6 @@ void serial_print_hex(u32_t val);
 void serial_print(char val);
 
 // log directly into the vga memory for display drivers error or early setup
-void panic_print(char *str);
+void panic_print(const char *str);
 
 #endif // LOG_H

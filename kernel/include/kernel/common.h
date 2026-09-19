@@ -32,4 +32,6 @@ _________________________\n");
 	outb(0x64, 0xFE);         \
 	__asm__ volatile("hlt");
 
+void __kstart(unsigned long magic, unsigned long addr);
+
 #endif // COMMON_H

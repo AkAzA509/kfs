@@ -14,19 +14,19 @@ enum {
 	cmos_data = 0x71,
 };
 
-int get_update_in_progress_flag()
+static int get_update_in_progress_flag()
 {
 	outb(cmos_address, 0x0A);
 	return (inb(cmos_data) & 0x80);
 }
 
-unsigned char get_RTC_register(int reg)
+static unsigned char get_RTC_register(int reg)
 {
 	outb(cmos_address, reg);
 	return inb(cmos_data);
 }
 
-void read_rtc()
+static void read_rtc()
 {
 	int century_register = 0x00;
 	unsigned char century = 0;
@@ -124,9 +124,11 @@ static void cmd_print_stack(void)
 {
 	log_stack(0);
 }
+[[noreturn]]
 static void cmd_shutdown(void)
 {
 	SHUTDOWN;
+	HALT_ERROR;
 }
 static void cmd_date(void)
 {

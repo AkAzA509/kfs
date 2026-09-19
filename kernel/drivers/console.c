@@ -190,31 +190,30 @@ void screen_clear(t_screen_data *s)
 	display_d->cursor_update();
 }
 
-static int vterm_putchar(char c, int screen)
+static int vterm_putchar(char c, t_screen_data *sc)
 {
-	t_screen_data *s = &g_screens[screen];
-	u32_t idx = (s->head % SCROLLBACK_LINES) * SCREEN_COLS + s->col;
+	u32_t idx = (sc->head % SCROLLBACK_LINES) * SCREEN_COLS + sc->col;
 
 	if (c == '\n') {
-		screen_newline(s);
+		screen_newline(sc);
 		return 1;
 	}
 	if (c == '\t') {
-		u16_t next = (s->col + 8) & ~7U;
-		while (s->col < next && s->col < g_screen.total_cols) {
-			s->text_buf[idx] = ' ';
-			s->color_buf[idx] = s->color;
-			s->col++;
+		u16_t next = (sc->col + 8) & ~7U;
+		while (sc->col < next && sc->col < g_screen.total_cols) {
+			sc->text_buf[idx] = ' ';
+			sc->color_buf[idx] = sc->color;
+			sc->col++;
 			idx++;
 		}
 		return 1;
 	}
 
-	s->text_buf[idx] = c;
-	s->color_buf[idx] = s->color;
-	s->col++;
-	if (s->col >= g_screen.total_cols)
-		screen_newline(s);
+	sc->text_buf[idx] = c;
+	sc->color_buf[idx] = sc->color;
+	sc->col++;
+	if (sc->col >= g_screen.total_cols)
+		screen_newline(sc);
 	return 1;
 }
 
@@ -227,8 +226,10 @@ int screen_puts(const char *s, size_t count)
 
 int screen_fputs(const char *s, int screen, size_t count)
 {
+	t_screen_data *sc = &g_screens[screen];
+
 	for (size_t i = 0; i < count; ++i, s++)
-		vterm_putchar(*s, screen);
+		vterm_putchar(*s, sc);
 	return (int)count;
 }
 

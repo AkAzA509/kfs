@@ -30,9 +30,7 @@ void init_vfs(void)
 	add_fd_entry(1, FD_TYPE_CONSOLE, O_WRONLY); // stdout
 	add_fd_entry(2, FD_TYPE_SERIAL, O_WRONLY); // stderr
 
-	// this are to remove or do into another maner
-	add_fd_entry(3, FD_TYPE_CONSOLE, O_WRONLY); // 1st vterm
-	add_fd_entry(4, FD_TYPE_CONSOLE, O_WRONLY); // 2nd vterm
-	add_fd_entry(5, FD_TYPE_CONSOLE, O_WRONLY); // 3rd vterm
-	add_fd_entry(6, FD_TYPE_CONSOLE, O_WRONLY); // 4th vterm
+	for (u8_t i = 0; i < MAX_SCREENS; ++i) {
+		add_fd_entry(i, FD_TYPE_CONSOLE, O_WRONLY);
+	}
 }

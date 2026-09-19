@@ -9,6 +9,10 @@
 #define O_WRONLY 0x02
 #define O_RDWR (O_RDONLY | O_WRONLY)
 
+#define IS_O_RDONLY(x) ((x) & 1 << 1)
+#define IS_O_WRONLY(x) ((x) & 1 << 2)
+#define IS_O_RDWR(x) IS_O_RDONLY((x)) | IS_O_WRONLY((x))
+
 #define EBADF 1
 
 typedef enum {

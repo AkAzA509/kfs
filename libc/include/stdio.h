@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-#define BUFSIZE 1024
+#define BUFSIZE 512
 
 #define _IOFBF 0 // Full buffering
 #define _IOLBF 1 // Line buffering
@@ -18,13 +18,9 @@ typedef struct _IO_FILE {
 	int mode; // _IO*BF
 } FILE;
 
-extern FILE *stdout; // same as vterm1
+extern FILE *stdout;
 extern FILE *stdin;
 extern FILE *stderr;
-extern FILE *vterm1; // same as stdout
-extern FILE *vterm2;
-extern FILE *vterm3;
-extern FILE *vterm4;
 
 // fputc() writes the character c, cast to an unsigned char,
 // to stream.

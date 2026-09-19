@@ -6,6 +6,13 @@ ENTRY(_start)
    kernel image. */
 SECTIONS
 {
+	/* Fixed low-memory structures (below the 1 MiB boundary, well below
+	   where the kernel image itself is loaded at 2M). */
+	.gdt 0x800 : ALIGN(8)
+	{
+		*(.gdt)
+	}
+
 	/* It used to be universally recommended to use 1M as a start offset,
 	   as it was effectively guaranteed to be available under BIOS systems.
 	   However, UEFI has made things more complicated, and experimental data

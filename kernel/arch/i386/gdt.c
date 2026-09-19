@@ -20,10 +20,17 @@ struct [[gnu::packed]] s_gdt_addr {
 static_assert(sizeof(struct s_gdt_entry) == 8);
 static_assert(sizeof(struct s_gdt_addr) == 6);
 
-#define GDT_ENTRIES 7
-#define GDT_ADDR 0x00000800
+// #define GDT_ENTRIES 7
+// #define GDT_ADDR 0x00000800
 
-static struct s_gdt_entry *const gdt = (struct s_gdt_entry *)GDT_ADDR;
+// typedef struct s_gdt_entry t_gdt_table[GDT_ENTRIES];
+
+// static t_gdt_table *const gdt = (t_gdt_table *)GDT_ADDR;
+// static struct s_gdt_addr gdt_addr;
+
+#define GDT_ENTRIES 7
+
+[[gnu::section(".gdt")]] static struct s_gdt_entry gdt[GDT_ENTRIES];
 static struct s_gdt_addr gdt_addr;
 
 extern void update_gdt(u32_t gdt);

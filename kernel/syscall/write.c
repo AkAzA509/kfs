@@ -1,4 +1,5 @@
 #include <drivers/console.h>
+#include <syscall/syscall.h>
 #include <kernel/log.h>
 #include <fs/vfs.h>
 #include <stddef.h>

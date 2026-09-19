@@ -2,6 +2,7 @@
 #define VFS_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define MAX_FD 32
 
@@ -9,9 +10,9 @@
 #define O_WRONLY 0x02
 #define O_RDWR (O_RDONLY | O_WRONLY)
 
-#define IS_O_RDONLY(x) ((x) & 1 << 1)
-#define IS_O_WRONLY(x) ((x) & 1 << 2)
-#define IS_O_RDWR(x) IS_O_RDONLY((x)) | IS_O_WRONLY((x))
+#define IS_O_RDONLY(x) ((x) & O_RDONLY)
+#define IS_O_WRONLY(x) ((x) & O_WRONLY)
+#define IS_O_RDWR(x) (((x) & O_RDWR) == O_RDWR)
 
 #define EBADF 1
 
@@ -33,5 +34,6 @@ typedef struct {
 extern kfile_t kfile_table[MAX_FD];
 
 void init_vfs(void);
+void add_fd_entry(u8_t idx, fd_type_t type, int flags);
 
 #endif // VFS_H

@@ -64,7 +64,7 @@ grub.cfg         # GRUB boot configuration
 - Custom PSF1/PSF2 font parser with a normalized font abstraction
 
 **Input & terminal**
-- Keyboard driver (curretly polling)
+- Keyboard driver (currently polling)
 - Up to 10 virtual terminals (configurable at compilation -DMAX_SCREENS=), switch with F1-F10,
   exit with Escape
 - Small tty and keybinds (escape, arrows, Page Up/Down, Home/End,

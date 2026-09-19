@@ -45,7 +45,7 @@ grub.cfg         # GRUB boot configuration
 | GDT (ring 0 / ring 3 segments) | ✅ Done |
 | Keyboard driver, virtual terminals | ✅ Done |
 | ACPI / QEMU shutdown | ✅ Done |
-| IDT / interrupt handling | ⬜ In progress |
+| IDT / interrupt handling | ⬜ Planned |
 | Physical & virtual memory management | ⬜ Planned |
 | filesystem | ⬜ Planned |
 | Userspace / syscalls | ⬜ Planned |
@@ -64,10 +64,10 @@ grub.cfg         # GRUB boot configuration
 - Custom PSF1/PSF2 font parser with a normalized font abstraction
 
 **Input & terminal**
-- Keyboard driver (IRQ-based)
-- Up to 4 virtual terminals (configurable in `init.h`), switch with F1-F4,
+- Keyboard driver (curretly polling)
+- Up to 10 virtual terminals (configurable at compilation -DMAX_SCREENS=), switch with F1-F10,
   exit with Escape
-- Small tty with input history and keybinds (arrows, Page Up/Down, Home/End,
+- Small tty and keybinds (escape, arrows, Page Up/Down, Home/End,
   Ctrl+A, Ctrl+L)
 - Basic shell with utility and debug functions (reboot, halt, pstack, help ...)
 
@@ -78,6 +78,7 @@ grub.cfg         # GRUB boot configuration
 
 ## Requirements
 - An i386 cross-compiler toolchain — see [`docs/toolchain.md`](docs/toolchain.md)
+- `gcc` v15+
 - `nasm`
 - `ld` (with `elf_i386` support)
 - `grub-mkrescue` and `grub-file`
@@ -88,7 +89,7 @@ grub.cfg         # GRUB boot configuration
 make                   # build the kernel binary (bin/kernel)
 make up                # build the ISO and run it in QEMU
 make dev               # run the raw kernel binary directly in QEMU (no ISO)
-make debug             # build a debug ISO (-DDEBUG=1) and run it in QEMU with serial output
+make debug-up          # build a debug ISO (-DDEBUG=1) and run it in QEMU with serial output
 make clean             # remove object files
 make fclean            # remove all build artifacts (binaries, ISOs)
 make re                # fclean + all

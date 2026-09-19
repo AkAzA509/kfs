@@ -1,16 +1,56 @@
 #ifndef IO_H
 #define IO_H
 
-#include "stddef.h"
 #include <stdint.h>
 
-void outb(u16_t port, u8_t val);
-void outw(u16_t port, u16_t val);
-void outl(u16_t port, u32_t val);
-u8_t inb(u16_t port);
-u16_t inw(u16_t port);
-u32_t inl(u16_t port);
+// ===== In io function ===== //
 
-ssize_t sys_write(int fd, const void *buf, size_t count);
+// "=a"(ret): the '=' means that it is an output (the result of the instruction)
+// stored in register a (AL/AX/EAX depending on the size of ret)
+
+// read a long (32bits, 4 bytes) from the io port
+static inline u32_t inl(u16_t port)
+{
+	u32_t ret;
+	__asm__ volatile("inl %1, %0" : "=a"(ret) : "Nd"(port));
+	return ret;
+}
+
+// read a word (16bits, 2 bytes) from the io port
+static inline u16_t inw(u16_t port)
+{
+	u16_t ret;
+	__asm__ volatile("inw %1, %0" : "=a"(ret) : "Nd"(port));
+	return ret;
+}
+
+// read a byte (8bits) from the io port
+static inline u8_t inb(u16_t port)
+{
+	u8_t ret;
+	__asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
+	return ret;
+}
+
+// ===== Out io function ===== //
+
+// write a long (32bits, 4 bytes) into the io port
+static inline void outl(u16_t port, u32_t val)
+{
+	__asm__ volatile("outl %0, %1" : : "a"(val), "Nd"(port));
+}
+
+// write a word (16bits, 2 bytes) into the io port
+static inline void outw(u16_t port, u16_t val)
+{
+	__asm__ volatile("outw %0, %1" : : "a"(val), "Nd"(port));
+}
+
+// write a byte (8bits) into the io port
+// place the input val into 'a', send to 'Nd'=port
+static inline void outb(u16_t port, u8_t val)
+{
+	__asm__ volatile("outb %0, %1" : : "a"(val), "Nd"(port));
+}
 
 #endif // IO_H

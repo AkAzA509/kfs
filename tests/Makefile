@@ -4,17 +4,17 @@ LIBC_DIR		:= ../libc
 LIBC_INC		:= $(LIBC_DIR)/include
 BUILD_DIR		:= objs
 
-STUB_SRCS		:= $(wildcard stubs/*.c)
+STUB_SRCS		:= $(wildcard stubs/*.c) common.c
 STUB_OBJS		:= $(patsubst stubs/%.c,$(BUILD_DIR)/stubs/%.o,$(STUB_SRCS))
 
 LIBC_SRCS		:= $(wildcard $(LIBC_DIR)/stdio/*.c) \
 				   $(wildcard $(LIBC_DIR)/string/*.c) \
-				   # $(wildcard $(LIBC_DIR)/stdlib/*.c) \
+				   $(wildcard $(LIBC_DIR)/stdlib/*.c) \
 				   # $(wildcard $(LIBC_DIR)/unistd/*.c)
 
 LIBC_OBJS		:= $(patsubst $(LIBC_DIR)/%.c,$(BUILD_DIR)/libc/%.o,$(LIBC_SRCS))
 
-TEST_SRCS		:= test_stdio.c
+TEST_SRCS		:= test_stdlib.c test_string.c test_stdio.c
 TEST_BINS		:= $(patsubst %.c,$(BUILD_DIR)/%,$(TEST_SRCS))
 
 CXX				:= gcc

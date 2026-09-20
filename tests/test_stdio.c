@@ -5,30 +5,6 @@
 static int g_pass = 0;
 static int g_fail = 0;
 
-void t_print(const char *s)
-{
-	real_write(s, strlen(s));
-}
-
-static void t_print_int(int n)
-{
-	char buf[12];
-	int i = 0;
-	int neg = (n < 0);
-	unsigned int u = neg ? (unsigned int)(-(n + 1)) + 1 : (unsigned int)n;
-
-	if (u == 0)
-		buf[i++] = '0';
-	while (u > 0) {
-		buf[i++] = '0' + (u % 10);
-		u /= 10;
-	}
-	if (neg)
-		buf[i++] = '-';
-	while (i > 0)
-		real_write(&buf[--i], 1);
-}
-
 static void checker(const char *fmt, const char *expected, const char *result,
 		    int ret, int expct_ret)
 {
@@ -209,12 +185,9 @@ static void test_dynamic(test_runner_t run)
 	run("42      ", "%-*d", 8, 42);
 }
 
-static void run_suite(test_runner_t runner, const char *suite_name)
+static void run_suite(test_runner_t runner, const char *func_name)
 {
-	t_print("\n========================================\n");
-	t_print(" RUNNING SUITE: ");
-	t_print(suite_name);
-	t_print("\n========================================\n");
+	print_func_name(func_name);
 
 	test_signed(runner);
 	test_unsigned_and_hex(runner);
@@ -223,16 +196,9 @@ static void run_suite(test_runner_t runner, const char *suite_name)
 	test_dynamic(runner);
 }
 
-#define GREEN "\033[92m"
-#define BLUE "\033[94m"
-#define RED "\033[91m"
-#define RESET "\033[0m"
-
-void test_printf()
+static void test_printf()
 {
-	t_print(BLUE "========================================\n");
-	t_print(" PRINTF TEST SUITE\n");
-	t_print("========================================\n" RESET);
+	print_suite_name("PRINTF");
 
 	run_suite(run_printf, "printf");
 	run_suite(run_fprintf, "fprintf");
@@ -240,14 +206,7 @@ void test_printf()
 	run_suite(run_sprintf, "sprintf");
 	run_suite(run_snprintf, "snprintf");
 
-	t_print(g_fail > 0 ? RED : GREEN);
-	t_print("\n========================================\n");
-	t_print("TOTAL PASS: ");
-	t_print_int(g_pass);
-	t_print("   TOTAL FAIL: ");
-	t_print_int(g_fail);
-	t_print("\n========================================\n" RESET);
-	// t_print(RESET);
+	print_result(g_pass, g_fail);
 }
 
 int main(void)

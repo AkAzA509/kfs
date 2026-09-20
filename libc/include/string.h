@@ -13,11 +13,12 @@
 
 // The strncmp() function compares the two strings s1 and s2,
 // except it compares only the first (at most) n bytes of s1 and s2.
-[[gnu::nonnull(1, 2)]] int strncmp(const char *s1, const char *s2, size_t n);
+[[gnu::nonnull(1, 2), nodiscard]] int strncmp(const char *s1, const char *s2,
+					      size_t n);
 
 // The strcmp() function compares the two strings s1 and s2,
 // the comparison is done using unsigned characters.
-[[gnu::nonnull(1, 2)]] int strcmp(const char *s1, const char *s2);
+[[gnu::nonnull(1, 2), nodiscard]] int strcmp(const char *s1, const char *s2);
 
 // The memset() function fills the first len bytes of the memory area
 // pointed to by ptr with the constant byte c.

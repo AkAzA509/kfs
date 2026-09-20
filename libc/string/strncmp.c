@@ -1,7 +1,8 @@
 #include <stddef.h>
 #include <string.h>
 
-[[gnu::nonnull(1, 2)]] int strncmp(const char *s1, const char *s2, size_t n)
+[[gnu::nonnull(1, 2), nodiscard]] int strncmp(const char *s1, const char *s2,
+					      size_t n)
 {
 	while (n > 0 && (IS_ALIGN_PTR(s1) || IS_ALIGN_PTR(s2))) {
 		unsigned char c1 = (unsigned char)*s1;

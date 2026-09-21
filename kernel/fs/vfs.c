@@ -1,6 +1,7 @@
 #include <drivers/console.h>
-#include <kernel/log.h>
+#include <core/log.h>
 #include <fs/vfs.h>
+
 #include <stdint.h>
 
 kfile_t kfile_table[MAX_FD] = { 0 };

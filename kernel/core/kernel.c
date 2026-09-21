@@ -1,12 +1,12 @@
-#include <kernel/multiboot.h>
 #include <drivers/keyboard.h>
 #include <drivers/console.h>
-#include <kernel/common.h>
-#include <kernel/shell.h>
-#include <kernel/init.h>
-#include <kernel/tty.h>
-#include <kernel/log.h>
-#include <fs/vfs.h>
+#include <core/multiboot.h>
+#include <core/common.h>
+#include <core/shell.h>
+#include <core/init.h>
+#include <core/tty.h>
+#include <core/log.h>
+
 #include <stdio.h>
 
 /* Check if the compiler thinks you are targeting the wrong operating system. */

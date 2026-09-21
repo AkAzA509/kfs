@@ -1,6 +1,7 @@
 #include <drivers/framebuffer.h>
 #include <drivers/console.h>
-#include <kernel/log.h>
+#include <core/log.h>
+
 #include <string.h>
 
 // Copy the back buffer into the front buffer, to avoid flickering

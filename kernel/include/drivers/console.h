@@ -1,7 +1,7 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#include <kernel/init.h>
+#include <core/init.h>
 #include <stdint.h>
 #include <stddef.h>
 

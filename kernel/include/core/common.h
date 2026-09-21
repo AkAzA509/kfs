@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <kernel/io.h>
+#include <core/io.h>
 
 // #define ASCII_LOGO 	printf(" _____    _     ___      \n");
 // 	printf("|_   _|__| | __/ _ \\ ___ \n");

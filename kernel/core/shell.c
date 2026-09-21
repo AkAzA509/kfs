@@ -1,9 +1,10 @@
 #include <drivers/console.h>
 #include <arch/i386/gdt.h>
-#include <kernel/common.h>
-#include <kernel/shell.h>
-#include <kernel/log.h>
-#include <kernel/io.h>
+#include <core/common.h>
+#include <core/shell.h>
+#include <core/log.h>
+#include <core/io.h>
+
 #include <string.h>
 #include <stdio.h>
 

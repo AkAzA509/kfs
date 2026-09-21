@@ -1,8 +1,9 @@
 #include <drivers/framebuffer.h>
 #include <drivers/console.h>
-#include <kernel/shell.h>
-#include <kernel/tty.h>
-#include <kernel/log.h>
+#include <core/shell.h>
+#include <core/tty.h>
+#include <core/log.h>
+
 #include <stddef.h>
 #include <string.h>
 

@@ -1,7 +1,8 @@
 #include <drivers/console.h>
 #include <syscall/syscall.h>
-#include <kernel/log.h>
+#include <core/log.h>
 #include <fs/vfs.h>
+
 #include <stddef.h>
 
 static int console_write(kfile_t *file, int fd, const void *buf, size_t count)

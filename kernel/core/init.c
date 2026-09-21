@@ -1,13 +1,14 @@
 #include <drivers/framebuffer.h>
-#include <kernel/multiboot.h>
 #include <drivers/console.h>
-#include <kernel/common.h>
+#include <core/multiboot.h>
+#include <core/common.h>
 #include <drivers/vga.h>
-#include <kernel/init.h>
-#include <kernel/log.h>
+#include <core/init.h>
+#include <core/log.h>
+#include <fs/vfs.h>
+
 #include <stdint.h>
 #include <string.h>
-#include <fs/vfs.h>
 #include <stdio.h>
 
 int current_screen = 0;

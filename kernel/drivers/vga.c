@@ -1,6 +1,7 @@
 #include <drivers/console.h>
 #include <drivers/vga.h>
-#include <kernel/io.h>
+#include <core/io.h>
+
 #include <string.h>
 
 // pack a char with is color (fg, bg)

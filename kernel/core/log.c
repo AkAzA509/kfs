@@ -1,5 +1,6 @@
-#include <kernel/log.h>
-#include <kernel/io.h>
+#include <core/log.h>
+#include <core/io.h>
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>

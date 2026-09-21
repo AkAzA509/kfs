@@ -1,10 +1,11 @@
 #include <drivers/keyboard.h>
 #include <drivers/console.h>
-#include <kernel/common.h>
-#include <kernel/shell.h>
-#include <kernel/log.h>
-#include <kernel/tty.h>
-#include <kernel/io.h>
+#include <core/common.h>
+#include <core/shell.h>
+#include <core/log.h>
+#include <core/tty.h>
+#include <core/io.h>
+
 #include <stdio.h>
 
 // Single scancode

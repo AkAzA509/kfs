@@ -55,7 +55,7 @@ static void clear_line(t_screen_data *s, u32_t line)
 
 static void screen_redraw(t_screen_data *s)
 {
-	display_d->clear();
+	g_screen.display.clear();
 
 	for (u16_t r = 0; r < g_screen.total_rows; r++) {
 		u32_t line = s->view_offset + r;
@@ -66,13 +66,14 @@ static void screen_redraw(t_screen_data *s)
 		for (u16_t c = 0; c < g_screen.total_cols; c++) {
 			if (s->text_buf[idx + c] == '\0')
 				continue;
-			display_d->putchar_at(s->text_buf[idx + c],
-					      s->color_buf[idx + c], c, r);
+			g_screen.display.putchar_at(s->text_buf[idx + c],
+						    s->color_buf[idx + c], c,
+						    r);
 		}
 	}
 
-	display_d->flush_screen();
-	display_d->cursor_update();
+	g_screen.display.flush_screen();
+	g_screen.display.cursor_update();
 }
 
 void screen_snap(t_screen_data *s)
@@ -104,7 +105,7 @@ static void screen_newline(t_screen_data *s)
 	s->col = 0;
 
 	if (was_pinned) {
-		display_d->scroll();
+		g_screen.display.scroll();
 		s->view_offset++;
 		g_screen.cursor_col = g_screen.cursor_row = -1;
 	} else if (s->view_offset != old_offset)
@@ -144,14 +145,15 @@ static void partial_shift(t_screen_data *s, int delta)
 		u32_t idx = (line % SCROLLBACK_LINES) * SCREEN_COLS;
 		for (u16_t c = 0; c < g_screen.total_cols; c++) {
 			char ch = s->text_buf[idx + c];
-			display_d->putchar_at((char)(ch ? ch : ' '),
-					      s->color_buf[idx + c], c, r);
+			g_screen.display.putchar_at((char)(ch ? ch : ' '),
+						    s->color_buf[idx + c], c,
+						    r);
 		}
 	}
-	display_d->flush_screen();
+	g_screen.display.flush_screen();
 	g_screen.cursor_col = g_screen.cursor_row = -1;
 	if (line_visible(s, s->head))
-		display_d->cursor_update();
+		g_screen.display.cursor_update();
 }
 
 void screen_scroll(int step, t_screen_data *s)
@@ -187,8 +189,8 @@ void screen_clear(t_screen_data *s)
 	memset(s->text_buf, ' ', sizeof(s->text_buf));
 	memset(s->color_buf, s->color, sizeof(s->color_buf));
 	s->head = s->view_offset = s->col = 0;
-	display_d->clear();
-	display_d->cursor_update();
+	g_screen.display.clear();
+	g_screen.display.cursor_update();
 }
 
 static int vterm_putchar(char c, t_screen_data *sc)
@@ -240,7 +242,7 @@ int screen_putchar(char c)
 
 	if (c == '\n') {
 		screen_newline(s);
-		display_d->cursor_update();
+		g_screen.display.cursor_update();
 		return 1;
 	}
 	if (c == '\t') {
@@ -256,20 +258,21 @@ int screen_putchar(char c)
 	s->color_buf[idx] = s->color;
 
 	if (line_visible(s, s->head)) {
-		display_d->putchar_at(c, s->color, s->col,
-				      s->head - s->view_offset);
+		g_screen.display.putchar_at(c, s->color, s->col,
+					    s->head - s->view_offset);
 
 		u16_t row = s->head - s->view_offset;
-		display_d->flush_partial(s->col * font_info.width,
-					 row * font_info.height,
-					 font_info.width, font_info.height);
+		g_screen.display.flush_partial(s->col * font_info.width,
+					       row * font_info.height,
+					       font_info.width,
+					       font_info.height);
 	}
 
 	s->col++;
 	if (s->col >= g_screen.total_cols)
 		screen_newline(s);
 
-	display_d->cursor_update();
+	g_screen.display.cursor_update();
 	return 1;
 }
 
@@ -286,7 +289,7 @@ void move_cursor_to(size_t col)
 	t_screen_data *s = &g_screens[current_screen];
 
 	s->col = col;
-	display_d->cursor_update();
+	g_screen.display.cursor_update();
 }
 
 void overwrite_at(u32_t col, char c)
@@ -297,12 +300,13 @@ void overwrite_at(u32_t col, char c)
 	s->text_buf[idx] = c;
 	s->color_buf[idx] = s->color;
 	if (line_visible(s, s->head)) {
-		display_d->putchar_at(c, s->color, col,
-				      s->head - s->view_offset);
+		g_screen.display.putchar_at(c, s->color, col,
+					    s->head - s->view_offset);
 
 		u16_t row = s->head - s->view_offset;
-		display_d->flush_partial(col * font_info.width,
-					 row * font_info.height,
-					 font_info.width, font_info.height);
+		g_screen.display.flush_partial(col * font_info.width,
+					       row * font_info.height,
+					       font_info.width,
+					       font_info.height);
 	}
 }

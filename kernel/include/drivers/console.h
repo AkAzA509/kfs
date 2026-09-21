@@ -73,8 +73,8 @@ typedef struct s_screen_data {
 	t_line_editor editor;
 } t_screen_data;
 
-// screen struct
-// contain all display and screen info, the back buffer ...
+// screen struct :
+// contain display and screen infos, the back buffer, the callback func ...
 typedef struct s_screen {
 	void *buf;
 	u32_t *back_buf;
@@ -87,21 +87,19 @@ typedef struct s_screen {
 	u16_t total_cols;
 	u8_t bpp;
 	u8_t mode; // 0 = framebuffer, 1 = vga
+	// vtable: struct of pointer to function (methode for the display management)
+	struct {
+		void (*putchar_at)(char c, u8_t color, size_t x, size_t y);
+		void (*scroll)(void);
+		void (*clear)(void);
+		void (*flush_screen)(void);
+		void (*flush_partial)(u32_t x, u32_t y, u32_t w, u32_t h);
+		void (*cursor_update)(void);
+	} display;
 } t_screen;
-
-// vtable: struct of pointer to function (methode for the display management)
-typedef struct s_display_driver {
-	void (*putchar_at)(char c, u8_t color, size_t x, size_t y);
-	void (*scroll)(void);
-	void (*clear)(void);
-	void (*flush_screen)(void);
-	void (*flush_partial)(u32_t x, u32_t y, u32_t w, u32_t h);
-	void (*cursor_update)(void);
-} t_display_driver;
 
 extern t_screen g_screen;
 extern t_screen_data g_screens[MAX_SCREENS];
-extern t_display_driver *display_d;
 
 void set_term_color(u8_t color);
 u8_t make_color(t_color fg, t_color bg);

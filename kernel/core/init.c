@@ -55,8 +55,8 @@ void debug_font(void)
 
 static void init_vga_console(void)
 {
-	display_d->clear();
-	display_d->cursor_update();
+	g_screen.display.clear();
+	g_screen.display.cursor_update();
 	g_screen.total_cols = g_screen.width;
 	g_screen.total_rows = g_screen.height;
 }
@@ -124,8 +124,8 @@ static bool init_frambuffer_console(void)
 	if (g_screen.width > FB_MAX_WIDTH || g_screen.height > FB_MAX_HEIGHT)
 		return false;
 
-	display_d->clear();
-	display_d->cursor_update();
+	g_screen.display.clear();
+	g_screen.display.cursor_update();
 
 	set_term_color(make_color(COLOR_BLUE, COLOR_BLACK));
 	printf(BOOT_TEST "loading font ...\n");
@@ -152,26 +152,6 @@ bool init_term(void)
 	return true;
 }
 
-t_display_driver *display_d;
-
-t_display_driver vga_driver = {
-	.putchar_at = putpixel_vga,
-	.scroll = scroll_physical_vga,
-	.clear = clear_physical_vga,
-	.cursor_update = update_cursor_vga,
-	.flush_partial = flush_rect_vga,
-	.flush_screen = flush_screen_vga,
-};
-
-t_display_driver fb_driver = {
-	.putchar_at = render_glyph_fb,
-	.scroll = scroll_physical_fb,
-	.clear = clear_physical_fb,
-	.cursor_update = update_cursor_fb,
-	.flush_partial = flush_rect_fb,
-	.flush_screen = flush_screen_fb,
-};
-
 static void init_fb_struct(multiboot_info *mbi)
 {
 	g_screen.mode = 0;
@@ -181,6 +161,12 @@ static void init_fb_struct(multiboot_info *mbi)
 	g_screen.height = mbi->framebuffer_height;
 	g_screen.pitch = mbi->framebuffer_pitch;
 	g_screen.bpp = mbi->framebuffer_bpp;
+	g_screen.display.putchar_at = render_glyph_fb;
+	g_screen.display.scroll = scroll_physical_fb;
+	g_screen.display.clear = clear_physical_fb;
+	g_screen.display.cursor_update = update_cursor_fb;
+	g_screen.display.flush_partial = flush_rect_fb;
+	g_screen.display.flush_screen = flush_screen_fb;
 }
 
 static void init_vga_struct(void)
@@ -192,18 +178,21 @@ static void init_vga_struct(void)
 	g_screen.height = 25;
 	g_screen.bpp = 16;
 	g_screen.pitch = 80 * 2;
+	g_screen.display.putchar_at = putpixel_vga;
+	g_screen.display.scroll = scroll_physical_vga;
+	g_screen.display.clear = clear_physical_vga;
+	g_screen.display.cursor_update = update_cursor_vga;
+	g_screen.display.flush_partial = flush_rect_vga;
+	g_screen.display.flush_screen = flush_screen_vga;
 }
 
 void init_display(multiboot_info *mbi)
 {
 	if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO &&
-	    mbi->framebuffer_type == 1) {
+	    mbi->framebuffer_type == 1)
 		init_fb_struct(mbi);
-		display_d = &fb_driver;
-	} else {
+	else
 		init_vga_struct();
-		display_d = &vga_driver;
-	}
 
 	g_screen.cursor_col = -1;
 	g_screen.cursor_row = -1;

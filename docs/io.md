@@ -1,4 +1,4 @@
-# I/O Ports ([io.c](../kernel/core/io.c))
+# I/O Ports ([io.h](../kernel/include/core/io.h))
 
 ## Overview
 

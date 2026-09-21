@@ -18,7 +18,7 @@ The choice between the two is made **at runtime**, during boot, based on
 what GRUB actually managed to set up.
 
 ```
-kputchar / printf                 (console.c, generic orchestration: scrollback,
+    printf                        (console.c, generic orchestration: scrollback,
       │                             view offset, multi-screen, cursor math)
       ▼
 t_display_driver (vtable)         (display_d: this document)

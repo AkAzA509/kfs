@@ -76,7 +76,7 @@ future writes on the current screen.
 
 ## Core data structure: `t_screen_data`
 
-One instance per virtual screen (`g_screens[MAX_SCREENS]`, `MAX_SCREENS = 4`).
+One instance per virtual screen (`g_screens[MAX_SCREENS]`).
 This, not `g_screen`, is where a virtual screen's actual content and
 cursor state live, whether or not that screen is currently displayed.
 
@@ -257,34 +257,6 @@ replace this note rather than sit silently contradicted by it. Flagging
 here rather than silently documenting the regression as if it were
 intended.
 
-## Clearing: `clear` vs `^L` (design intent)
-
-Both must be **non-destructive**, clearing the visible screen should
-push its content into scrollback, never erase history, exactly like a
-real terminal's `clear`/`tput clear`. The mechanism already exists:
-reusing `screen_newline()` in a loop for `total_rows` iterations pushes
-the current screen up into history with zero special-cased memory
-handling.
-
-The two differ only in what happens *after* the screen is pushed:
-
-- **`clear` (shell command)**, runs after Enter was pressed, the input
-  line has already been submitted. Nothing else needed; the shell's
-  normal loop prints the next prompt.
-- **`^L`**, intercepted mid-edit, the current input line was never
-  submitted. After clearing, the prompt and whatever the user had
-  already typed must be explicitly redrawn from the line editor's own
-  buffer. The line editor described in [tty.md](tty.md) now exists and
-  keeps its buffer independent of screen content for exactly this
-  reason, but nothing currently calls it in response to `^L`, the key
-  itself isn't wired up yet. Still future work.
-
-**Current status:** `screen_clear()` as implemented still does a direct
-`memset` over the visible area rather than reusing `screen_newline()`, so
-the clear path remains destructive: history is not preserved and the
-current view is wiped instead of being pushed back into scrollback.
-Flagged in [Future work](#future-work).
-
 ## Multi-screen management
 
 **`g_screen` (singular, in display.md) and `g_screens[]` (plural, here)
@@ -318,8 +290,5 @@ logical state.
 ## Future work
 
 - Resolve the `'\0'`/`' '` sentinel regression above.
-- Make `screen_clear()` non-destructive by reusing `screen_newline()`,
-  per the design intent described above.
-- Wire `^L` to the line editor's redraw path (tty.md).
 
 See [TODO.md](TODO.md) for the rest of the current list.

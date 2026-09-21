@@ -5,12 +5,12 @@ corresponding `<module>.md` file for context on why each item matters.
 
 ## Display
 
-- [ ] Switch the color model to true 24-bit RGB (framebuffer currently capped at the 16-color VGA-compatible palette). VGA backend would approximate down to its 16 colors via nearest-color match instead of the other way around. Change is isolated to `console.h`/`console.c`.
-- [ ] Dynamic screen allocation (`g_screens`, and eventually `back_buf`) once a physical frame allocator exists, currently fixed-size, statically allocated in `.bss` (`MAX_SCREENS = 4`).
 - [x] Handle the backspace key in the keyboard driver (improve the driver overall)
 - [x] Add a psf2 font handler to be capable of rendering both psf1 and psf2 fonts
-- [ ] Handle the unicode lookup table if the font support it
 - [x] Due to the fd implementation (FILE, vfs) printf does work well, and the prompt if write with printf, display one the enter press (work with sys write but not optimal)
+- [ ] Switch the color model to true 24-bit RGB (framebuffer currently capped at the 16-color VGA-compatible palette). VGA backend would approximate down to its 16 colors via nearest-color match instead of the other way around. Change is isolated to `console.h`/`console.c`.
+- [ ] Dynamic screen allocation (`g_screens`, and eventually `back_buf`) once a physical frame allocator exists, currently fixed-size, statically allocated in `.bss`.
+- [ ] Handle the unicode lookup table if the font support it
 
 ## Memory
 

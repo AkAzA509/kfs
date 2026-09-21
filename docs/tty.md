@@ -140,11 +140,8 @@ receives a finished line (`buffer`, `len`) from `editor_putchar` on
 matching handler with `strncmp` + an explicit `'\0'` check to reject
 prefix matches (`"hal"` must not match `"halt"`).
 
-Commands currently table-driven: `reboot`, `halt`, `print logo`,
-`print stack`, `shutdown`. Unknown input is silently ignored (the error
-path is commented out); this is probably deliberate for now, but it is
-worth revisiting before this ships, because a silent no-op on typos is a
-rougher UX than the rest of this layer.
+Commands currently table-driven: `reboot`, `halt`, `plogo`, `pstack`, `shutdown`,
+	`date`, `help`, `clear`, `pgdt`.
 
 `print_prompt()` also lives here rather than in tty.c proper, since the
 prompt string itself (`"Tekos/root > "`) is shell-identity, not
@@ -153,30 +150,17 @@ this text" step and otherwise knows nothing about what it says.
 
 ## Known limitations
 
-- **One line editor, not one per virtual screen.** `t_screen_data` is
-  per-screen (`g_screens[MAX_SCREENS]`), but `g_line_editor` is a single
-  global. Switching virtual screens mid-edit (if that's ever exposed to
-  the user) would leave the editor's `input_boundary_col` pointing at a
-  column on whatever screen was active when `editor_start()` last ran,
-  not the newly active one.
 - **No line-wrap handling.** `MAX_LINE` is `100`, independent of
   `g_screen.total_cols`. If a screen is narrower than 100 columns, an
   input line can exceed the visible row without the editor or
   `overwrite_at`/`move_cursor_to` doing anything about wrapping or
   scrolling; both of those functions operate on the current line only
   and have no fallback if a column falls outside `0..total_cols`.
-- **`^L` isn't wired up yet.** The buffer/boundary split exists
-  specifically to support it (see [Why a separate buffer](#why-a-separate-buffer-instead-of-reading-the-screen-back)),
-  but no keyboard handler currently calls into a clear-and-redraw path.
 
 ## Future work
 
 - Decide whether `move_cursor`'s right-edge bound should be `len`
   instead of `g_screen.total_cols`.
-- Wire `^L` to clear the screen (via `console.c`) and replay
-  `print_prompt()` + `g_line_editor.buffer` through `overwrite_at`.
-- Decide whether unknown commands in `shell_execute` should report an
-  error rather than silently doing nothing.
 - Consider whether line wrapping is worth supporting before `MAX_LINE`
   or screen widths change enough to make it likely to matter in practice.
 

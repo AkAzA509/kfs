@@ -189,7 +189,7 @@ A few details worth calling out:
 
 ## What this file deliberately does *not* do
 
-- No paging, no GDT/IDT setup yet, the
+- No paging, no IDT setup yet, the
   comments in the file are explicit about this being intentional. Those
   belong to later kernel initialization stages in C (or later asm files),
   not to the Multiboot entry point itself.

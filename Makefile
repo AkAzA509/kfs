@@ -57,6 +57,42 @@ KERNEL_OBJS		:= $(patsubst kernel/%.c,$(BUILD_DIR)/kernel/%.o,$(KERNEL_SRCS_C)) 
 ALL_OBJS		:= $(LIBC_OBJS) $(KERNEL_OBJS)
 DEPS			:= $(ALL_OBJS:.o=.d)
 
+# --- Help ---
+.PHONY: help
+
+WHITE			:= \033[1;97m
+GREEN			:= \033[1;32m
+RESET			:= \33[0m
+
+help:
+	@printf "$(WHITE)Here is a list of all the make command available with this project:\n\n \
+	$(GREEN)\n --- Release --- \n$(WHITE) \
+	all                compile and link the project\n \
+	libc               compile the libc sources\n \
+	kernel             compile the kernel sources\n \
+	$(GREEN)\n --- Exec / Utility --- \n$(WHITE) \
+	compile_commands   call \`make re\` with bear to generate a compile_command.json for the lsp\n \
+	up                 equivalent to \`make\` + bootstrap the iso and launch with qemu\n \
+	dev                equivalent to \`make\` and launch with qemu\n \
+	help               display this help list\n \
+	$(GREEN)\n --- Debug rule --- \n$(WHITE) \
+	gdb                compile and bootstrap the iso in debug mode, launch qemu and start gdb a session\n \
+	debug              compile and link in debug mode the project\n \
+	debug-libc         compile in debug mode the libc sources\n \
+	debug-kernel       compile in debug mode the kernel sources\n \
+	debug-iso          equivalent to \`make debug\` + add debug in the iso's name\n \
+	debug-up           call \`make debug-iso\` and launch it with qemu and debug params\n \
+	debug-re           call \`make fclean \` + \`make debug-up\`\n \
+	$(GREEN)\n --- Formatting / Linting --- \n$(WHITE) \
+	format             apply the clang-formater at all the sources files\n \
+	lint               use the clang-tidy linter for debugging purpose\n \
+	$(GREEN)\n --- Testing --- \n$(WHITE) \
+	test               compile and launch the test suite\n \
+	$(GREEN)\n --- Cleaning --- \n$(WHITE) \
+	clean              delete the objects file\n \
+	fclean             call \`make clean\` + delete the binaries\n \
+	re                 call \`make fclean\` + \`make all\`\n$(RESET)"
+
 # --- Targets ---
 .PHONY: all libc kernel
 

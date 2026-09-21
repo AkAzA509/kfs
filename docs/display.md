@@ -18,10 +18,10 @@ The choice between the two is made **at runtime**, during boot, based on
 what GRUB actually managed to set up.
 
 ```
-    printf                        (console.c, generic orchestration: scrollback,
+screen_putchar                    (console.c, generic orchestration: scrollback,
       │                             view offset, multi-screen, cursor math)
       ▼
-t_display_driver (vtable)         (display_d: this document)
+   display(vtable)                (g_screen.display: this document)
    /            \
 vga.c        framebuffer.c        (hardware-specific implementations,
                                     know nothing about each other, nothing
@@ -74,21 +74,24 @@ in `console.c`'s domain, keeping them here caused several desync bugs where
 the physical struct and the logical one disagreed about the cursor
 position after a screen switch.
 
-### `t_display_driver`, the vtable
+### `display`, the vtable
 
 ```c
-typedef struct s_display_driver {
-	void (*putchar_at)(char c, u8_t color, size_t col, size_t row);
-	void (*scroll)(void);          // physical scroll by one row, pinned-bottom case
-	void (*clear)(void);           // wipe the physical/back buffer
-	void (*cursor_update)(void);
-	void (*flush_partial)(u32_t x, u32_t y, u32_t w, u32_t h); // nullable, FB only
-	void (*flush_screen)(void);    // nullable, FB only
-} t_display_driver;
+	...
+	u8_t bpp;
+	u8_t mode;
+	struct {
+		void (*putchar_at)(char c, u8_t color, size_t col, size_t row);
+		void (*scroll)(void);          // physical scroll by one row, pinned-bottom case
+		void (*clear)(void);           // wipe the physical/back buffer
+		void (*cursor_update)(void);
+		void (*flush_partial)(u32_t x, u32_t y, u32_t w, u32_t h); // nullable, FB only
+		void (*flush_screen)(void);    // nullable, FB only
+	} display;
+} t_screen;
 ```
 
-`display_d` points to either `vga_driver` or `fb_driver`, selected once in
-`init_display()`.
+`display` points to either vga driver or fb driver's functions, selected once in `init_display()`.
 
 **`flush_partial`/`flush_screen` are empty for VGA on purpose**. VGA
 writes straight to `0xB8000`, there's no back buffer to synchronize.
@@ -183,13 +186,10 @@ a CRTC hardware register (`set_cursor`, via `outb` to ports `0x3D4`/
 `init_display(multiboot_info *mbi)`:
 
 ```c
-if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type == 1) {
+if (mbi->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO && mbi->framebuffer_type == 1)
 	init_fb(mbi);
-	display_d = &fb_driver;
-} else {
+else
 	init_vga();
-	display_d = &vga_driver;
-}
 g_screen.cursor_col = -1;
 g_screen.cursor_row = -1;
 ```

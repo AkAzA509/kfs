@@ -90,7 +90,7 @@ column computed some other way.
   character. This is the same "many small physical writes, no early
   flush per cell" pattern the framebuffer backend uses, except here the
   flush-per-cell already happens inside `overwrite_at`
-  (`display_d->flush_partial` per character, see console.md); there's no
+  (`g_screen.display.flush_partial` per character, see console.md); there's no
   batching across the redrawn tail. Fine at interactive typing speed and
   `MAX_LINE = 100`, but worth knowing if `MAX_LINE` ever grows much
   larger and inserts near the start of a long line start feeling laggy.

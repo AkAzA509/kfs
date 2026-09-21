@@ -5,8 +5,8 @@
 This layer owns the **logical model** of what a terminal contains:
 scrollback history, which portion of it is currently visible, and where
 the write cursor is, entirely independent of how any of that gets turned
-into pixels or VGA cells. It sits directly on top of the backend vtable
-(`display_d`, see [display.md](display.md)) and is the only code allowed
+into pixels or VGA cells. It sits directly on top of the backend vtable in `g_screen`
+(`display`, see [display.md](display.md)) and is the only code allowed
 to call into it.
 
 ```
@@ -23,7 +23,7 @@ screen_putchar(c)                 (public entry point, everything funnels
 console.c                         (this document: scrollback buffer,
       │                            view offset, cursor math, multi-screen)
       ▼
-t_display_driver (display_d)      (display.md: dumb physical drawing)
+driver (`g_screen.driver.*()`)      (display.md: dumb physical drawing)
 ```
 
 The backend never sees a logical line number. This layer never touches a
@@ -54,7 +54,7 @@ overflow, and disturb characters typed after the edit point). Two extra
 entry points exist specifically for this:
 
 - **`move_cursor_to(col)`** sets `s->col` directly and calls
-  `display_d->cursor_update()`. It writes no character and does not
+  `g_screen.display.cursor_update()`. It writes no character and does not
   touch `head`. It is how the line editor moves the visual cursor after
   an insert, delete, or arrow-key press.
 - **`overwrite_at(col, c)`** writes a single character into `text_buf`/
@@ -136,7 +136,7 @@ inline bool pinned_to_bottom(t_screen_data *s)
 Every write checks `line_visible()` before touching the backend at all,
 if the user has scrolled away from the bottom, new output still updates
 `text_buf`/`color_buf` (so it's there when they scroll back down) but
-never calls into `display_d`, since nothing about the visible screen
+never calls into `g_screen.display`, since nothing about the visible screen
 actually changed.
 
 ## Writing a character: `screen_putchar`
@@ -146,7 +146,7 @@ int screen_putchar(char c)
 {
 	t_screen_data *s = &g_screens[current_screen];
 
-	if (c == '\n') { screen_newline(s); display_d->cursor_update(); return 1; }
+	if (c == '\n') { screen_newline(s); g_screen.display.cursor_update(); return 1; }
 	if (c == '\t') { /* expand to next multiple of 8 via repeated screen_putchar(' ') */ }
 
 	// always write into the logical buffer, regardless of visibility
@@ -156,15 +156,15 @@ int screen_putchar(char c)
 
 	// only touch the physical layer if this line is actually on screen
 	if (line_visible(s, s->head)) {
-		display_d->putchar_at(c, s->color, s->col, s->head - s->view_offset);
-		display_d->flush_partial(s->col * font_info.width,
+		g_screen.display.putchar_at(c, s->color, s->col, s->head - s->view_offset);
+		g_screen.display.flush_partial(s->col * font_info.width,
 			(s->head - s->view_offset) * font_info.height,
 			font_info.width, font_info.height);
 	}
 
 	if (++s->col >= g_screen.total_cols)
 		screen_newline(s);
-	display_d->cursor_update();
+	g_screen.display.cursor_update();
 	return 1;
 }
 ```
@@ -190,7 +190,7 @@ static void screen_newline(t_screen_data *s)
 	s->col = 0;
 
 	if (was_pinned) {
-		display_d->scroll();
+		g_screen.display.scroll();
 		s->view_offset++;
 		g_screen.cursor_col = g_screen.cursor_row = -1; // cache invalidated
 	}

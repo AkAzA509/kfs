@@ -104,14 +104,14 @@ static void handle_tab(void)
 void editor_putchar(char c)
 {
 	t_line_editor *le = &g_screens[current_screen].editor;
-	if (le->len >= MAX_LINE - 1)
-		return;
 	if (c == '\n') {
 		screen_putchar(c);
 		shell_execute(le->buffer, le->len);
 		editor_start();
 		return;
 	}
+	if (le->len >= (size_t)(g_screen.total_cols - le->input_boundary_col))
+		return;
 	if (c == '\t') {
 		handle_tab();
 		return;

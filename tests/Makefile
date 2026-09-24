@@ -14,7 +14,7 @@ LIBC_SRCS		:= $(wildcard $(LIBC_DIR)/stdio/*.c) \
 
 LIBC_OBJS		:= $(patsubst $(LIBC_DIR)/%.c,$(BUILD_DIR)/libc/%.o,$(LIBC_SRCS))
 
-TEST_SRCS		:= test_stdlib.c test_string.c test_stdio.c
+TEST_SRCS		:= test_string.c test_stdlib.c test_stdio.c
 TEST_BINS		:= $(patsubst %.c,$(BUILD_DIR)/%,$(TEST_SRCS))
 
 CXX				:= gcc

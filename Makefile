@@ -28,7 +28,7 @@ CPPFLAGS		:= -Ilibc/include -Ikernel/include -MMD -MP
 
 CFLAGS			:= -std=gnu23 -ffreestanding -fno-builtin \
 				   -fno-stack-protector -nostdlib -nodefaultlibs \
-				   -Wall -Wextra -Werror -DMAX_SCREENS=10 -O2
+				   -Wall -Wextra -Werror -DMAX_SCREENS=3 -O2
 
 ASMFLAGS		:= -f elf32 -I.
 

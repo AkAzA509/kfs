@@ -2,18 +2,18 @@
 #include "../libc/include/string.h"
 #include "include/test_common.h"
 
-static int g_pass = 0;
-static int g_fail = 0;
+static int string_pass;
+static int string_failed;
 
 static void check_results(const char *s, size_t ret, size_t expected)
 {
 	if (ret == expected) {
-		g_pass++;
+		string_pass++;
 		t_print("[OK]   ");
 		t_print(s);
 		t_print("\n");
 	} else {
-		g_fail++;
+		string_failed++;
 		t_print("[FAIL] ");
 		t_print(s);
 		t_print("  expected=");
@@ -27,12 +27,12 @@ static void check_results(const char *s, size_t ret, size_t expected)
 static void check_condition(const char *s, int condition)
 {
 	if (condition) {
-		g_pass++;
+		string_pass++;
 		t_print("[OK]   ");
 		t_print(s);
 		t_print("\n");
 	} else {
-		g_fail++;
+		string_failed++;
 		t_print("[FAIL] ");
 		t_print(s);
 		t_print("\n");
@@ -338,7 +338,7 @@ static void check_trim(const char *orig, const char *ret, const char *expected)
 {
 	for (int i = 0; expected[i]; ++i) {
 		if (expected[i] != ret[i]) {
-			g_fail++;
+			string_failed++;
 			t_print("[FAIL] ");
 			t_print(orig);
 			t_print("  expected=");
@@ -350,7 +350,7 @@ static void check_trim(const char *orig, const char *ret, const char *expected)
 		}
 	}
 
-	g_pass++;
+	string_pass++;
 	t_print("[OK]   ");
 	t_print(orig);
 	t_print("\n");
@@ -417,13 +417,20 @@ static void test_mem()
 	run_memcmp();
 }
 
-int main()
+void get_string_score(int *pass, int *fail, int *total)
 {
-	g_pass = 0;
-	g_fail = 0;
+	*pass = string_pass;
+	*fail = string_failed;
+	*total = string_pass + string_failed;
+}
+
+void test_string()
+{
+	string_pass = 0;
+	string_failed = 0;
 
 	test_str();
 	test_mem();
-	print_result(g_pass, g_fail);
-	return g_fail != 0;
+	g_pass += string_pass;
+	g_fail += string_failed;
 }

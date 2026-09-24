@@ -2,14 +2,14 @@
 #include "../libc/include/string.h"
 #include "include/test_common.h"
 
-static int g_pass = 0;
-static int g_fail = 0;
+static int stdio_pass = 0;
+static int stdio_fail = 0;
 
 static void checker(const char *fmt, const char *expected, const char *result,
 		    int ret, int expct_ret)
 {
 	if (strcmp(expected, result) || ret != expct_ret) {
-		g_fail++;
+		stdio_fail++;
 		t_print("[FAIL] ");
 		t_print(fmt);
 		t_print("  expect=");
@@ -23,7 +23,7 @@ static void checker(const char *fmt, const char *expected, const char *result,
 		t_print("\"\n");
 		return;
 	}
-	g_pass++;
+	stdio_pass++;
 	t_print("[OK]   ");
 	t_print(fmt);
 	t_print("\n");
@@ -196,8 +196,11 @@ static void run_suite(test_runner_t runner, const char *func_name)
 	test_dynamic(runner);
 }
 
-static void test_printf()
+void test_stdio()
 {
+	stdio_pass = 0;
+	stdio_fail = 0;
+
 	print_suite_name("PRINTF");
 
 	run_suite(run_printf, "printf");
@@ -205,16 +208,11 @@ static void test_printf()
 	run_suite(run_dprintf, "dprintf");
 	run_suite(run_sprintf, "sprintf");
 	run_suite(run_snprintf, "snprintf");
-
-	print_result(g_pass, g_fail);
 }
 
-int main(void)
+void get_stdio_score(int *pass, int *fail, int *total)
 {
-	g_pass = 0;
-	g_fail = 0;
-
-	test_printf();
-
-	return g_fail != 0;
+	*pass = stdio_pass;
+	*fail = stdio_fail;
+	*total = stdio_pass + stdio_fail;
 }

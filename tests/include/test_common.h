@@ -10,6 +10,9 @@
 #define RED "\033[91m"
 #define RESET "\033[0m"
 
+extern int g_pass;
+extern int g_fail;
+
 long write(int fd, const void *buf, size_t count);
 const char *stub_get_written_data(void);
 void stub_clear(void);
@@ -20,5 +23,18 @@ void print_suite_name(const char *suite);
 void print_func_name(const char *func);
 void t_print(const char *s);
 void t_print_int(int n);
+
+// tester entrypoint
+void test_string();
+void get_string_score(int *pass, int *fail, int *total);
+
+void test_stdio();
+void get_stdio_score(int *pass, int *fail, int *total);
+
+void test_stdlib();
+void get_stdlib_score(int *pass, int *fail, int *total);
+
+void test_ctype();
+void get_ctype_score(int *pass, int *fail, int *total);
 
 #endif // TEST_COMMON_H

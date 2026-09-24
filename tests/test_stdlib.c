@@ -2,18 +2,18 @@
 #include "../libc/include/limits.h"
 #include "include/test_common.h"
 
-static int g_pass = 0;
-static int g_fail = 0;
+static int stdlib_pass = 0;
+static int stdlib_fail = 0;
 
 static void checker_int(int val, int ret, int expected)
 {
 	if (ret == expected) {
-		g_pass++;
+		stdlib_pass++;
 		t_print("[OK]   ");
 		t_print_int(val);
 		t_print("\n");
 	} else {
-		g_fail++;
+		stdlib_fail++;
 		t_print("[FAIL] ");
 		t_print_int(val);
 		t_print("  expected=");
@@ -27,12 +27,12 @@ static void checker_int(int val, int ret, int expected)
 static void checker_long(long val, long ret, long expected)
 {
 	if (ret == expected) {
-		g_pass++;
+		stdlib_pass++;
 		t_print("[OK]   ");
 		t_print_int(val);
 		t_print("\n");
 	} else {
-		g_fail++;
+		stdlib_fail++;
 		t_print("[FAIL] ");
 		t_print_int(val);
 		t_print("  expected=");
@@ -119,21 +119,20 @@ static void run_labs()
 	checker_long(val, labs(val), 42);
 }
 
-static void test_abs()
+void test_stdlib()
 {
+	stdlib_pass = 0;
+	stdlib_fail = 0;
+
 	print_suite_name("ABS");
 
 	run_abs();
 	run_labs();
-
-	print_result(g_pass, g_fail);
 }
 
-int main()
+void get_stdlib_score(int *pass, int *fail, int *total)
 {
-	g_pass = 0;
-	g_fail = 0;
-
-	test_abs();
-	return g_fail != 0;
+	*pass = stdlib_pass;
+	*fail = stdlib_fail;
+	*total = stdlib_pass + stdlib_fail;
 }

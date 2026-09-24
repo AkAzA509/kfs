@@ -334,17 +334,87 @@ static void run_strncmp()
 	check_results(s1, ret, -40);
 }
 
+static void check_trim(const char *orig, const char *ret, const char *expected)
+{
+	for (int i = 0; expected[i]; ++i) {
+		if (expected[i] != ret[i]) {
+			g_fail++;
+			t_print("[FAIL] ");
+			t_print(orig);
+			t_print("  expected=");
+			t_print(expected);
+			t_print(" res=");
+			t_print(ret);
+			t_print("\n");
+			return;
+		}
+	}
+
+	g_pass++;
+	t_print("[OK]   ");
+	t_print(orig);
+	t_print("\n");
+}
+
+static void run_trim()
+{
+	print_func_name("trim");
+
+	char s1[] = "Hello world!";
+	char *ret = trim(s1);
+	check_trim(s1, ret, "Hello world!");
+
+	char s2[] = "\n\n\nHello world!";
+	ret = trim(s2);
+	check_trim(s2, ret, "Hello world!");
+
+	char s3[] = "Hello world!\n\n\n";
+	ret = trim(s3);
+	check_trim(s3, ret, "Hello world!");
+
+	char s4[] = "\n\n\nHello\n\nworld!\n\n\n";
+	ret = trim(s4);
+	check_trim(s4, ret, "Hello\n\nworld!");
+
+	char s5[] = "\n\t\v\f ";
+	ret = trim(s5);
+	check_trim(s5, ret, "");
+
+	char s6[] = "efknwrelj\v";
+	ret = trim(s6);
+	check_trim(s6, ret, "efknwrelj");
+
+	char s7[] = "\t\t\t\t\t\e ";
+	ret = trim(s7);
+	check_trim(s7, ret, "\e");
+
+	char s8[] = "\t \t\f\nqwertyuiop         ";
+	ret = trim(s8);
+	check_trim(s8, ret, "qwertyuiop");
+
+	char s9[] = "\t \t\f\nqwertyuiop\t\t\t\easdfghjkl;";
+	ret = trim(s9);
+	check_trim(s9, ret, "qwertyuiop\t\t\t\easdfghjkl;");
+}
+
 static void test_str()
 {
+	print_suite_name("STR FUNC");
+
+	run_strlen();
+	run_strcmp();
+	run_strncmp();
+	run_trim();
+}
+
+static void test_mem()
+{
+	print_suite_name("MEM FUNC");
+
 	run_memset();
 	run_memcpy();
 	run_memmove();
 	run_memcmp();
-	run_strlen();
-	run_strcmp();
-	run_strncmp();
-
-	print_result(g_pass, g_fail);
 }
 
 int main()
@@ -352,8 +422,8 @@ int main()
 	g_pass = 0;
 	g_fail = 0;
 
-	print_suite_name("STRING");
 	test_str();
-
+	test_mem();
+	print_result(g_pass, g_fail);
 	return g_fail != 0;
 }

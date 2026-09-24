@@ -40,4 +40,7 @@
 // unsigned char) of the memory areas s1 and s2.
 [[gnu::nonnull(1, 2)]] int memcmp(const void *s1, const void *s2, size_t len);
 
+// The trim() function remove start and end's trailling whitespaces.
+[[gnu::nonnull(1)]] char *trim(char *);
+
 #endif // STRING_H

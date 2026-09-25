@@ -106,7 +106,8 @@ void editor_putchar(char c)
 	t_line_editor *le = &g_screens[current_screen].editor;
 	if (c == '\n') {
 		screen_putchar(c);
-		shell_execute(le->buffer, le->len);
+		le->buffer[le->len] = '\0';
+		shell_execute(le->buffer);
 		editor_start();
 		return;
 	}

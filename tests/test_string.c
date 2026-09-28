@@ -395,6 +395,10 @@ static void run_trim()
 	char s9[] = "\t \t\f\nqwertyuiop\t\t\t\easdfghjkl;";
 	ret = trim(s9);
 	check_trim(s9, ret, "qwertyuiop\t\t\t\easdfghjkl;");
+
+	char s10[] = "          ";
+	ret = trim(s10);
+	check_trim(s10, ret, "");
 }
 
 static void test_str()

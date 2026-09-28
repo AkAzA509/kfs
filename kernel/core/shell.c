@@ -5,6 +5,7 @@
 #include <core/log.h>
 #include <core/io.h>
 
+#include <stddef.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -169,19 +170,20 @@ static const cmd_handler_t cmd_handlers[] = {
 	cmd_date,   cmd_help, cmd_clear,      cmd_print_gdt,
 };
 
-void shell_execute(const char *input, size_t len)
+void shell_execute(char *input)
 {
+	const char *trim_input = trim(input);
+	size_t len = strlen(trim_input);
 	if (len <= 0)
 		return;
-
 	for (u16_t i = 0; cmd_table[i]; i++) {
-		if (strncmp(input, cmd_table[i], len) == 0 &&
+		if (strncmp(trim_input, cmd_table[i], len) == 0 &&
 		    strlen(cmd_table[i]) == len) {
 			cmd_handlers[i]();
 			return;
 		}
 	}
-	printf("commande not found: %.*s\n", (int)len, input);
+	printf("commande not found: %.*s\n", (int)len, trim_input);
 }
 
 void print_prompt(void)

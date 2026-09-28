@@ -26,9 +26,9 @@ corresponding `<module>.md` file for context on why each item matters.
 
 ## GDT
 
+- [x] Complete the asm update_gdt() function
 - [ ] TSS descriptor + `ltr`, needed once ring 3 code and an IDT exist, so the CPU knows which kernel stack (`SS0`/`ESP0`) to switch to on interrupt from ring 3.
 - [ ] `iret`-based jump into ring 3, once there is user code to jump to.
-- [x] Complete the asm update_gdt() function
 - [ ] move the gst setup in the bootloader
 
 ## Misc

@@ -331,10 +331,11 @@ static void conv_string(format_spec_t *spec, va_list *ap, out_target_t *target)
 	if (str == NULL)
 		str = "(null)";
 
-	int len = (int)strlen(str);
-
-	if (spec->precision != -1 && spec->precision < len)
+	int len = 0;
+	if (spec->precision != -1)
 		len = spec->precision;
+	else
+		len = (int)strlen(str);
 
 	int pad_len = (spec->width > len) ? spec->width - len : 0;
 

@@ -151,6 +151,8 @@ static void test_string_and_char(test_runner_t run)
 	run("    Z", "%5c", 'Z');
 	run("0x12345678", "%p", (void *)0x12345678);
 	run("(nil)", "%p", (void *)NULL);
+	char stat_buf[10] = { 'h', 'e', 'l', 'l', 'o' };
+	run("hello", "%s", stat_buf);
 }
 
 static void test_float(test_runner_t run)
@@ -183,6 +185,10 @@ static void test_dynamic(test_runner_t run)
 	run("42      ", "%*d", -8, 42);
 	run("00042", "%.*d", 5, 42);
 	run("42      ", "%-*d", 8, 42);
+	char *buf = "coucou";
+	run("coucou", "%.*s", 6, buf);
+	run("coucou", "%.*s", 10, buf);
+	run("cou", "%.*s", 3, buf);
 }
 
 static void run_suite(test_runner_t runner, const char *func_name)

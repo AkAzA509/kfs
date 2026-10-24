@@ -60,3 +60,9 @@ corresponding `<module>.md` file for context on why each item matters.
 
 - [x] when the tty prompt has been implemented add a end/^a for deplacement in the command, and add arrow left/right cursor deplacement for modification 
 - [ ] IRQ-driven keyboard input (ring buffer) to decouple scancode capture from character rendering. Currently polling `0x60` in a busy loop; fast typing can outrun the 8042 hardware buffer and drop/delay scancodes.
+
+## Libc
+
+- [ ] Printf: Error on lenght return when a variadic precision is greater than the string passed e.g:
+`` char *buf = "coucou";
+   printf("%.*s", 10, buf); `` return 10 instead of 6

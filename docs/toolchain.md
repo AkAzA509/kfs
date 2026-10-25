@@ -20,7 +20,7 @@ This project has been built and tested against:
 - **GCC**: `15.3.0`
 
 Other versions may work, but Binutils/GCC compatibility isn't guaranteed
-across every combination — if you hit build errors, try matching these
+across every combination, if you hit build errors, try matching these
 versions first before assuming your code is at fault.
 
 ## Install system dependencies

@@ -255,6 +255,34 @@ static void emit_prefixed_number(out_target_t *target, char *prefix,
 			out_char(target, ' ');
 }
 
+/*
+ * Divide *n (64-bit) by base (32-bit): *n becomes the quotient and the
+ * function returns the remainder.
+ *
+ * Inspired by do_div() from the Linux kernel
+ * (arch/x86/include/asm/div64.h).
+ *
+ * divl can only divide edx:eax by a 32-bit value, and faults (#DE) if the
+ * quotient doesn't fit in 32 bits. So we first divide the high half alone,
+ * then feed its remainder into edx: since r_hi < base, the quotient of the
+ * second divl always fits in 32 bits.
+ */
+static u32_t div64_32(u64_t *n, u32_t base)
+{
+	u32_t hi = (u32_t)(*n >> 32);
+	u32_t lo = (u32_t)*n;
+	u32_t q_hi = hi / base;
+	u32_t r_hi = hi % base;
+	u32_t rem;
+
+	__asm__("divl %2"
+		: "=a"(lo), "=d"(rem)
+		: "r"(base), "0"(lo), "1"(r_hi));
+
+	*n = ((u64_t)q_hi << 32) | lo;
+	return rem;
+}
+
 static char *uint_to_str(unsigned long long val, char *buf_end, int base,
 			 bool uppercase)
 {
@@ -266,10 +294,8 @@ static char *uint_to_str(unsigned long long val, char *buf_end, int base,
 	if (val == 0)
 		*(--p) = '0';
 	else {
-		while (val > 0) {
-			*(--p) = digits[val % base];
-			val /= base;
-		}
+		while (val > 0)
+			*(--p) = digits[div64_32(&val, base)];
 	}
 	return p;
 }

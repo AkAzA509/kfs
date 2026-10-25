@@ -32,8 +32,8 @@ CFLAGS			:= -std=gnu23 -ffreestanding -fno-builtin \
 
 ASMFLAGS		:= -f elf32 -I.
 
-LDFLAGS			:= -T $(LINKER_SCRIPT) -Wl,--start-group \
-				   $(KERNEL_A) $(LIBC_A) -Wl,--end-group -lgcc
+LD				:= ld.lld
+LDFLAGS			:= -m elf_i386 -T $(LINKER_SCRIPT) $(KERNEL_A) $(LIBC_A)
 
 ifeq ($(DEBUG),1)
 	CPPFLAGS	+= -DDEBUG=1
@@ -128,7 +128,7 @@ $(KERNEL_A): $(KERNEL_OBJS)
 
 $(BIN_NAME): $(KERNEL_A) $(LIBC_A) $(LINKER_SCRIPT)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@
+	$(LD) $(LDFLAGS) -o $@
 	@if grub-file --is-x86-multiboot $@; then \
 		echo "\033[92mmultiboot confirmed\033[0m"; \
 	else \

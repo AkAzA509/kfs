@@ -34,22 +34,6 @@ docs/            # technical & developer documentation
 grub.cfg         # GRUB boot configuration
 ```
 
-## Status
-
-| Subsystem | State |
-|---|---|
-| Bootloader (GRUB / Multiboot) | ✅ Done |
-| VGA / linear framebuffer, double buffering | ✅ Done |
-| PSF font rendering (PSF1 / PSF2) | ✅ Done |
-| `printf` family (custom `vprint_core`) | ✅ Done |
-| GDT (ring 0 / ring 3 segments) | ✅ Done |
-| Keyboard driver, virtual terminals | ✅ Done |
-| ACPI / QEMU shutdown | ✅ Done |
-| IDT / interrupt handling | ⬜ Planned |
-| Physical & virtual memory management | ⬜ Planned |
-| filesystem | ⬜ Planned |
-| Userspace / syscalls | ⬜ Planned |
-
 ## Features
 
 **Boot & architecture**
@@ -61,7 +45,7 @@ grub.cfg         # GRUB boot configuration
 - Text output through VGA text mode or a linear framebuffer, depending on
   what GRUB provides
 - Double-buffered rendering
-- Custom PSF1/PSF2 font parser with a normalized font abstraction
+- PSF1/PSF2 font support
 
 **Input & terminal**
 - Keyboard driver (currently polling)
@@ -72,21 +56,25 @@ grub.cfg         # GRUB boot configuration
 - Basic shell with utility and debug functions (reboot, halt, pstack, help ...)
 
 **Core libc**
-- `printf` family reimplemented from scratch, including bit-exact IEEE 754
-  float formatting done in pure integer arithmetic
-- Validated against host libc as ground truth (see `tests/`)
+
+Currently the libc reimplementation serve has the kernel library, because it does not have a userland for now (that's planned). When the time come, the kernel will build the libc (let's say libk) for him with specials flags, and the user will have the normal one.
+
+- Reimplementation of common standard libc header: `ctype`, `stdio`, `stdlib`, `string`, `unistd`, `stdarg`, `stdint`, `stddef`
+- An almost complete reimplementation of `printf` family from scratch, including, buffering, flags, precision, length modifier, bit-exact IEEE 754 float formatting
+- Most functions are validated against host libc (see `tests/`)
 
 ## Requirements
-- An i386 cross-compiler toolchain — see [`docs/toolchain.md`](docs/toolchain.md)
+- An i386 cross-compiler toolchain, see [`docs/toolchain.md`](docs/toolchain.md)
 - `gcc` v15+
 - `nasm`
-- `ld` (with `elf_i386` support)
+- `lld` or `ld` (with `elf_i386` support, see [`docs/toolchain.md`](docs/toolchain.md))
 - `grub-mkrescue` and `grub-file`
 - `qemu-system-i386`
 
 ## Build & run
 ```sh
 make                   # build the kernel binary (bin/kernel)
+make help              # display all the available commands
 make up                # build the ISO and run it in QEMU
 make dev               # run the raw kernel binary directly in QEMU (no ISO)
 make debug-up          # build a debug ISO (-DDEBUG=1) and run it in QEMU with serial output
@@ -107,5 +95,5 @@ Intel SDM, reference kernels, books) is available in
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 — see
+This project is licensed under the GNU General Public License v3.0 - see
 [`LICENSE`](./LICENSE).

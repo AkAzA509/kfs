@@ -8,18 +8,11 @@ static void check_is_func(const char *orig, bool ret, bool expected)
 {
 	if (ret == expected) {
 		ctype_pass++;
-		t_print("[OK]   ");
-		t_print(orig);
-		t_print("\n");
+		real_printf("  [OK]   %s\n", orig);
 	} else {
 		ctype_fail++;
-		t_print("[FAIL] ");
-		t_print(orig);
-		t_print("  expected=");
-		t_print_int(expected);
-		t_print(" res=");
-		t_print_int(ret);
-		t_print("\n");
+		real_printf("  [FAIL] %s  expected=%d res=%d\n", orig, expected,
+			    ret);
 	}
 }
 

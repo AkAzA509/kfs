@@ -372,7 +372,7 @@ static void conv_string(format_spec_t *spec, va_list *ap, out_target_t *target)
 		while (pad_len-- > 0)
 			out_char(target, ' ');
 
-	for (int i = 0; i < len; i++)
+	for (int i = 0; i < len && str[i]; i++)
 		out_char(target, str[i]);
 
 	if (spec->minus)

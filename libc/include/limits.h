@@ -7,5 +7,7 @@
 #define LONG_MAX __LONG_MAX__
 #define LONG_MIN (-__LONG_MAX__ - 1L)
 
-// #define ULONG_MAX 2000
+#define LLONG_MAX __LONG_LONG_MAX__
+#define LLONG_MIN (-__LONG_LONG_MAX__ - 1LL)
+
 #endif // LIMITS_H

@@ -1,10 +1,12 @@
 #include "vprint_core.h"
+
 #include <limits.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
+#include <stdio.h>
+#include <ctype.h>
 
 typedef struct {
 	// flags
@@ -69,7 +71,7 @@ static const char *parse_width(const char *restrict fmt, format_spec_t *spec,
 		fmt++;
 	} else if (*fmt >= '1' && *fmt <= '9') {
 		int w = 0;
-		while (*fmt >= '0' && *fmt <= '9') {
+		while (isdigit(*fmt)) {
 			w = w * 10 + (*fmt - '0');
 			fmt++;
 		}
@@ -92,7 +94,7 @@ static const char *parse_precision(const char *restrict fmt,
 		fmt++;
 	} else {
 		int p = 0;
-		while (*fmt >= '0' && *fmt <= '9') {
+		while (isdigit(*fmt)) {
 			p = p * 10 + (*fmt - '0');
 			fmt++;
 		}

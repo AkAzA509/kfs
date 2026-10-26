@@ -183,6 +183,7 @@ debug-re: fclean debug-up
 
 format:
 	clang-format -i $(KERNEL_SRCS_C) $(LIBC_SRCS_C)
+	$(MAKE) -C tests format
 
 lint:
 	clang-tidy -p . $(KERNEL_SRCS_C) $(LIBC_SRCS_C)

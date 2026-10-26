@@ -630,7 +630,7 @@ static void execute_conversion(format_spec_t *spec, va_list *ap,
 		conv_float(spec, ap, target);
 		break;
 	default:
-		// conversion inconnue : comportement défensif
+		// unknown convertion
 		out_char(target, '%');
 		if (spec->conv)
 			out_char(target, spec->conv);

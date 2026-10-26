@@ -41,14 +41,3 @@ void print_func_name(const char *func)
 	t_print(func);
 	t_print("\n========================================\n");
 }
-
-void print_result(int pass, int fail)
-{
-	t_print(fail > 0 ? RED : GREEN);
-	t_print("\n========================================\n");
-	t_print("TOTAL PASS: ");
-	t_print_int(pass);
-	t_print("   TOTAL FAIL: ");
-	t_print_int(fail);
-	t_print("\n========================================\n" RESET);
-}

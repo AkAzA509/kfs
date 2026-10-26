@@ -19,7 +19,6 @@ void stub_clear(void);
 void real_write(const char *str, size_t len);
 int real_printf(const char *restrict fmt, ...);
 
-void print_result(int pass, int fail);
 void print_suite_name(const char *suite);
 void print_func_name(const char *func);
 void t_print(const char *s);

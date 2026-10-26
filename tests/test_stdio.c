@@ -10,7 +10,7 @@ static void checker(const char *fmt, const char *expected, const char *result,
 {
 	if (strcmp(expected, result) || ret != expct_ret) {
 		stdio_fail++;
-		t_print("[FAIL] ");
+		t_print("  [FAIL] ");
 		t_print(fmt);
 		t_print("  expect=");
 		t_print(expected);
@@ -24,7 +24,7 @@ static void checker(const char *fmt, const char *expected, const char *result,
 		return;
 	}
 	stdio_pass++;
-	t_print("[OK]   ");
+	t_print("  [OK]   ");
 	t_print(fmt);
 	t_print("\n");
 }
@@ -100,7 +100,7 @@ static void run_printf(const char *expected, const char *fmt, ...)
 
 static void test_signed(test_runner_t run)
 {
-	t_print("\n--- %d / %i ---\n");
+	t_print("\n --- %d / %i ---\n");
 	run("0", "%d", 0);
 	run("42", "%d", 42);
 	run("-42", "%d", -42);
@@ -128,7 +128,7 @@ static void test_signed(test_runner_t run)
 
 static void test_unsigned_and_hex(test_runner_t run)
 {
-	t_print("\n--- %u / %x / %X / %o ---\n");
+	t_print("\n --- %u / %x / %X / %o ---\n");
 	run("0", "%u", 0u);
 	run("4294967295", "%u", 4294967295u);
 	run("ff", "%x", 255);
@@ -142,7 +142,7 @@ static void test_unsigned_and_hex(test_runner_t run)
 
 static void test_string_and_char(test_runner_t run)
 {
-	t_print("\n--- %s / %c / %p ---\n");
+	t_print("\n --- %s / %c / %p ---\n");
 	run("hello KFS", "%s", "hello KFS");
 	run("        hi", "%10s", "hi");
 	run("hi        ", "%-10s", "hi");
@@ -157,7 +157,7 @@ static void test_string_and_char(test_runner_t run)
 
 static void test_float(test_runner_t run)
 {
-	t_print("\n--- %f ---\n");
+	t_print("\n --- %f ---\n");
 	run("0.000000", "%f", 0.0);
 	run("1.500000", "%f", 1.5);
 	run("-1.500000", "%f", -1.5);
@@ -180,7 +180,7 @@ static void test_float(test_runner_t run)
 
 static void test_dynamic(test_runner_t run)
 {
-	t_print("\n--- Dynamic Width & Precision (*)---\n");
+	t_print("\n --- Dynamic Width & Precision (*)---\n");
 	run("      42", "%*d", 8, 42);
 	run("42      ", "%*d", -8, 42);
 	run("00042", "%.*d", 5, 42);

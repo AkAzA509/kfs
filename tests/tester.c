@@ -9,27 +9,16 @@ static void print_suite_summarize(const char *name,
 {
 	int fail = 0, pass = 0, total = 0;
 
-	t_print(" - ");
-	t_print(name);
-	t_print(":\t ");
+	real_printf(" - %s:\t ", name);
+
 	f(&pass, &fail, &total);
 	*all_pass += pass;
 	*all_fail += fail;
-	if (fail != 0) {
-		t_print(RED);
-		t_print_int(fail);
-		t_print(" / ");
-		t_print_int(total);
-		t_print("  ");
-	}
-	if (pass != 0) {
-		t_print(GREEN);
-		t_print_int(pass);
-		t_print(" / ");
-		t_print_int(total);
-	}
-	t_print(RESET);
-	t_print("\n");
+	if (fail != 0)
+		real_printf(RED "%d / %d  ", fail, total);
+	if (pass != 0)
+		real_printf(GREEN "%d / %d", pass, total);
+	real_printf("\n" RESET);
 }
 
 static int print_resume(void)
@@ -37,8 +26,8 @@ static int print_resume(void)
 	int total_pass = 0;
 	int total_fail = 0;
 
-	t_print("\n========================================\n");
-	t_print("Finale summarize: \n");
+	real_printf("\n ========================================\n");
+	real_printf(" Finale summarize: \n");
 	print_suite_summarize("string", get_string_score, &total_pass,
 			      &total_fail);
 	print_suite_summarize("ctype", get_ctype_score, &total_pass,
@@ -47,12 +36,8 @@ static int print_resume(void)
 			      &total_fail);
 	print_suite_summarize("stdlib", get_stdlib_score, &total_pass,
 			      &total_fail);
-	t_print("\nTotal: ");
-	t_print_int(total_pass);
-	t_print(" passed, ");
-	t_print_int(total_fail);
-	t_print(" failed\n");
-	t_print("\n========================================\n" RESET);
+	real_printf("\n Total: %d passed, %d failed\n", total_pass, total_fail);
+	real_printf("\n ========================================\n" RESET);
 
 	return total_fail != 0;
 }

@@ -9,18 +9,11 @@ static void check_results(const char *s, size_t ret, size_t expected)
 {
 	if (ret == expected) {
 		string_pass++;
-		t_print("[OK]   ");
-		t_print(s);
-		t_print("\n");
+		real_printf("  [OK]   %s\n", s);
 	} else {
 		string_failed++;
-		t_print("[FAIL] ");
-		t_print(s);
-		t_print("  expected=");
-		t_print_int(expected);
-		t_print(" res=");
-		t_print_int(ret);
-		t_print("\n");
+		real_printf("  [FAIL] %s  expected=%zu res=%zu\n", s, expected,
+			    ret);
 	}
 }
 
@@ -28,14 +21,10 @@ static void check_condition(const char *s, int condition)
 {
 	if (condition) {
 		string_pass++;
-		t_print("[OK]   ");
-		t_print(s);
-		t_print("\n");
+		real_printf("  [OK]   %s\n", s);
 	} else {
 		string_failed++;
-		t_print("[FAIL] ");
-		t_print(s);
-		t_print("\n");
+		real_printf("  [FAIL] %s\n", s);
 	}
 }
 
@@ -196,8 +185,6 @@ static void run_memcmp()
 			       sizeof(large_first)) == -1);
 }
 
-// typedef void (*test_runner_t)(size_t expected, const char *s);
-
 static void run_strlen()
 {
 	print_func_name("strlen");
@@ -339,21 +326,14 @@ static void check_trim(const char *orig, const char *ret, const char *expected)
 	for (int i = 0; expected[i]; ++i) {
 		if (expected[i] != ret[i]) {
 			string_failed++;
-			t_print("[FAIL] ");
-			t_print(orig);
-			t_print("  expected=");
-			t_print(expected);
-			t_print(" res=");
-			t_print(ret);
-			t_print("\n");
+			real_printf("  [FAIL] %s  expected=%s res=%s\n", orig,
+				    expected, ret);
 			return;
 		}
 	}
 
 	string_pass++;
-	t_print("[OK]   ");
-	t_print(orig);
-	t_print("\n");
+	real_printf("  [OK]   %s\n", orig);
 }
 
 static void run_trim()

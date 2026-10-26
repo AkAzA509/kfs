@@ -189,6 +189,7 @@ static void test_dynamic(test_runner_t run)
 	run("coucou", "%.*s", 6, buf);
 	run("coucou", "%.*s", 10, buf);
 	run("cou", "%.*s", 3, buf);
+	run("", "%.*s", 0, buf);
 }
 
 static void run_suite(test_runner_t runner, const char *func_name)

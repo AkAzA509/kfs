@@ -1,5 +1,6 @@
 #include "vprint_core.h"
 #include <limits.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -194,11 +195,11 @@ static void get_sign_and_abs(long long val, char *sign,
 {
 	if (val < 0) {
 		*sign = '-';
-		*abs_val =
-			-(unsigned long long)
-				val; // to protect the var overflow if val is LLONG_MIN
+
+		// to protect the var overflow if val is LLONG_MIN
+		*abs_val = ullabs(val);
 	} else {
-		*abs_val = (unsigned long long)val;
+		*abs_val = ullabs(val);
 		if (spec->plus)
 			*sign = '+';
 		else if (spec->space)

@@ -1,5 +1,6 @@
 #include "../libc/include/stdlib.h"
 #include "../libc/include/limits.h"
+#include "../libc/include/stdio.h"
 #include "include/test_common.h"
 
 static int stdlib_pass = 0;
@@ -40,6 +41,19 @@ static void checker_long(long val, long ret, long expected)
 		t_print(" res=");
 		t_print_int(ret);
 		t_print("\n");
+	}
+}
+
+static void checker_ullong(long long val, unsigned long long ret,
+			   unsigned long long expected)
+{
+	if (ret == expected) {
+		stdlib_pass++;
+		real_printf("  [OK]   %lld\n", val);
+	} else {
+		stdlib_fail++;
+		real_printf("  [FAIL] %lld  expected=%llu res=%llu\n", val,
+			    expected, ret);
 	}
 }
 
@@ -119,6 +133,44 @@ static void run_labs()
 	checker_long(val, labs(val), 42);
 }
 
+static void run_ullabs()
+{
+	print_func_name("ullabs");
+
+	long long val = 0;
+	checker_ullong(val, ullabs(val), 0);
+
+	val = -0;
+	checker_ullong(val, ullabs(val), 0);
+
+	val = 1;
+	checker_ullong(val, ullabs(val), 1);
+
+	val = -1;
+	checker_ullong(val, ullabs(val), 1);
+
+	val = LONG_MIN;
+	checker_ullong(val, ullabs(val), 2147483648);
+
+	val = LONG_MAX;
+	checker_ullong(val, ullabs(val), 2147483647);
+
+	long long val2 = LLONG_MAX + 10;
+	checker_ullong(val2, ullabs(val2), 9223372036854775799);
+
+	val2 = LLONG_MIN - 10;
+	checker_ullong(val2, ullabs(val2), 9223372036854775798);
+
+	val = -123456789;
+	checker_ullong(val, ullabs(val), 123456789);
+
+	val = 987654321;
+	checker_ullong(val, ullabs(val), 987654321);
+
+	val = 42;
+	checker_ullong(val, ullabs(val), 42);
+}
+
 void test_stdlib()
 {
 	stdlib_pass = 0;
@@ -128,6 +180,7 @@ void test_stdlib()
 
 	run_abs();
 	run_labs();
+	run_ullabs();
 }
 
 void get_stdlib_score(int *pass, int *fail, int *total)

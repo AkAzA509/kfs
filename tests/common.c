@@ -36,8 +36,7 @@ void print_suite_name(const char *suite)
 
 void print_func_name(const char *func)
 {
-	t_print("\n========================================\n");
-	t_print(" RUNNING TEST: ");
+	t_print("\n RUNNING TEST: ");
 	t_print(func);
-	t_print("\n========================================\n");
+	t_print("\n ========================================\n");
 }

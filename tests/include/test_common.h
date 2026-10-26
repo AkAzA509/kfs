@@ -17,6 +17,7 @@ long write(int fd, const void *buf, size_t count);
 const char *stub_get_written_data(void);
 void stub_clear(void);
 void real_write(const char *str, size_t len);
+int real_printf(const char *restrict fmt, ...);
 
 void print_result(int pass, int fail);
 void print_suite_name(const char *suite);

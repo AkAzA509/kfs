@@ -23,7 +23,7 @@ CXXFLAGS		:= -std=gnu23 -Wall -Wextra -fno-builtin -I. -Iinclude -I$(LIBC_INC) -
 
 
 # --- Rules ---
-.PHONY: all test clean
+.PHONY: all test clean format
 
 all: test
 
@@ -45,5 +45,8 @@ $(TEST_BIN): $(TEST_SRCS) $(STUB_OBJS) $(LIBC_OBJS)
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+format:
+	clang-format -i $(STUB_SRCS) $(TEST_SRCS)
+	
 clean:
 	$(RM) -r $(BUILD_DIR)

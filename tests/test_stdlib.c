@@ -10,18 +10,11 @@ static void checker_int(int val, int ret, int expected)
 {
 	if (ret == expected) {
 		stdlib_pass++;
-		t_print("[OK]   ");
-		t_print_int(val);
-		t_print("\n");
+		real_printf("  [OK]   %d\n", val);
 	} else {
 		stdlib_fail++;
-		t_print("[FAIL] ");
-		t_print_int(val);
-		t_print("  expected=");
-		t_print_int(expected);
-		t_print(" res=");
-		t_print_int(ret);
-		t_print("\n");
+		real_printf("  [FAIL] %d  expected=%d res=%d\n", val, expected,
+			    ret);
 	}
 }
 
@@ -29,18 +22,11 @@ static void checker_long(long val, long ret, long expected)
 {
 	if (ret == expected) {
 		stdlib_pass++;
-		t_print("[OK]   ");
-		t_print_int(val);
-		t_print("\n");
+		real_printf("  [OK]   %ld\n", val);
 	} else {
 		stdlib_fail++;
-		t_print("[FAIL] ");
-		t_print_int(val);
-		t_print("  expected=");
-		t_print_int(expected);
-		t_print(" res=");
-		t_print_int(ret);
-		t_print("\n");
+		real_printf("  [FAIL] %ld  expected=%ld res=%ld\n", val,
+			    expected, ret);
 	}
 }
 

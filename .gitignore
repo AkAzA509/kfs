@@ -70,3 +70,4 @@ compile_commands.json
 
 .cache
 .zed
+test.c

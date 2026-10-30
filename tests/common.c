@@ -1,5 +1,5 @@
-#include "include/test_common.h"
 #include "../../libc/include/string.h"
+#include "include/test_common.h"
 
 void t_print(const char *s)
 {

@@ -1,6 +1,6 @@
-#include <drivers/framebuffer.h>
-#include <drivers/console.h>
 #include <core/log.h>
+#include <drivers/console.h>
+#include <drivers/framebuffer.h>
 
 #include <string.h>
 

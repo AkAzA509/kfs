@@ -1,4 +1,5 @@
 #include "vprint_core.h"
+
 #include <stdio.h>
 
 static void _vprint_e(void *ctx, char c)

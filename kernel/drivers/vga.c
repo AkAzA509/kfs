@@ -1,6 +1,6 @@
+#include <core/io.h>
 #include <drivers/console.h>
 #include <drivers/vga.h>
-#include <core/io.h>
 
 #include <string.h>
 

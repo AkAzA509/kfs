@@ -1,6 +1,5 @@
-#include "../libc/include/stdlib.h"
 #include "../libc/include/limits.h"
-#include "../libc/include/stdio.h"
+#include "../libc/include/stdlib.h"
 #include "include/test_common.h"
 
 static int stdlib_pass = 0;

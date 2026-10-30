@@ -1,7 +1,7 @@
-#include <drivers/framebuffer.h>
-#include <drivers/console.h>
-#include <drivers/vga.h>
 #include <core/init.h>
+#include <drivers/console.h>
+#include <drivers/framebuffer.h>
+#include <drivers/vga.h>
 
 #include <stddef.h>
 #include <stdint.h>

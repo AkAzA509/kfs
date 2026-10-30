@@ -1,6 +1,7 @@
+#include "vprint_core.h"
+
 #include <stdio.h>
 #include <unistd.h>
-#include "vprint_core.h"
 
 typedef struct {
 	FILE *stream;

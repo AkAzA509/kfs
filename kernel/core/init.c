@@ -1,15 +1,15 @@
-#include <drivers/framebuffer.h>
-#include <drivers/console.h>
-#include <core/multiboot.h>
 #include <core/common.h>
-#include <drivers/vga.h>
 #include <core/init.h>
 #include <core/log.h>
+#include <core/multiboot.h>
+#include <drivers/console.h>
+#include <drivers/framebuffer.h>
+#include <drivers/vga.h>
 #include <fs/vfs.h>
 
 #include <stdint.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 int current_screen = 0;
 t_screen g_screen;

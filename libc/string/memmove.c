@@ -1,6 +1,6 @@
-#include <string.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 [[gnu::nonnull(1, 2)]]
 void *memmove(void *dst, const void *src, size_t len)

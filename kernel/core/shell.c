@@ -1,13 +1,13 @@
-#include <drivers/console.h>
 #include <arch/i386/gdt.h>
 #include <core/common.h>
-#include <core/shell.h>
-#include <core/log.h>
 #include <core/io.h>
+#include <core/log.h>
+#include <core/shell.h>
+#include <drivers/console.h>
 
 #include <stddef.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #define CURRENT_YEAR 2026
 

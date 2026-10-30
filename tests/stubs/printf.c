@@ -1,6 +1,6 @@
-#include "../../libc/stdio/vprint_core.h"
 #include "../../libc/include/stdarg.h"
 #include "../../libc/include/stdio.h"
+#include "../../libc/stdio/vprint_core.h"
 #include "../include/test_common.h"
 
 typedef struct {

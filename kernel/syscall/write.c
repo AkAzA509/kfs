@@ -1,7 +1,7 @@
-#include <drivers/console.h>
-#include <syscall/syscall.h>
 #include <core/log.h>
+#include <drivers/console.h>
 #include <fs/vfs.h>
+#include <syscall/syscall.h>
 
 #include <stddef.h>
 

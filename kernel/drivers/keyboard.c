@@ -1,10 +1,10 @@
-#include <drivers/keyboard.h>
-#include <drivers/console.h>
 #include <core/common.h>
-#include <core/shell.h>
-#include <core/log.h>
-#include <core/tty.h>
 #include <core/io.h>
+#include <core/log.h>
+#include <core/shell.h>
+#include <core/tty.h>
+#include <drivers/console.h>
+#include <drivers/keyboard.h>
 
 #include <stdio.h>
 

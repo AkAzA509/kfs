@@ -1,11 +1,11 @@
-#include <drivers/keyboard.h>
-#include <drivers/console.h>
-#include <core/multiboot.h>
 #include <core/common.h>
-#include <core/shell.h>
 #include <core/init.h>
-#include <core/tty.h>
 #include <core/log.h>
+#include <core/multiboot.h>
+#include <core/shell.h>
+#include <core/tty.h>
+#include <drivers/console.h>
+#include <drivers/keyboard.h>
 
 #include <stdio.h>
 

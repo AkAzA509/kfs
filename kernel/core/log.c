@@ -1,8 +1,8 @@
-#include <core/log.h>
 #include <core/io.h>
+#include <core/log.h>
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 
 static inline u32_t get_esp(void)

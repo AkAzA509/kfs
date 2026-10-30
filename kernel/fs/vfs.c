@@ -1,5 +1,5 @@
-#include <drivers/console.h>
 #include <core/log.h>
+#include <drivers/console.h>
 #include <fs/vfs.h>
 
 #include <stdint.h>

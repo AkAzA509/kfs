@@ -1,6 +1,6 @@
+#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <stddef.h>
 
 [[gnu::nonnull(1)]] size_t strlen(const char *str) [[reproducible]]
 {

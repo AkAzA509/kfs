@@ -61,7 +61,7 @@ static int kvprintf(const char *restrict fmt, va_list ap)
 	return ret;
 }
 
-[[gnu::format(printf, 1, 2)]] int klog(const char *restrict fmt, ...)
+int klog(const char *restrict fmt, ...)
 {
 	va_list ap;
 

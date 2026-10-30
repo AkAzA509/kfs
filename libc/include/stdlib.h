@@ -1,24 +1,25 @@
 #ifndef STDLIB_H
 #define STDLIB_H
 
+#include <_attrs.h>
 #include <stddef.h>
 
 // The labs() function compute the absolute value of
 // the argument x of the appropriate long type for the function.
-long labs(long x) [[reproducible]];
+__PURE long labs(long x);
 
 // The abs() function compute the absolute value of
 // the argument x of the appropriate int type for the function.
-int abs(int x) [[reproducible]];
+__PURE int abs(int x);
 
 // The ullabs() function compute the absolute value of
 // the argument x of the appropriate unsigned long long type for the function.
-unsigned long long ullabs(long long x) [[reproducible]];
+__PURE unsigned long long ullabs(long long x);
 
 // The malloc() function allocates size bytes and returns a pointer to
 // the allocated memory. The memory is not initialized. If size is 0,
 // then malloc() returns NULL.
-[[gnu::malloc, nodiscard]] void *malloc(size_t size);
+__NODISCARD void *malloc(size_t size);
 
 // The free() function frees the memory space pointed to by ptr, which
 // must have been returned by a previous call to malloc() or related

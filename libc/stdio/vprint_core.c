@@ -1,5 +1,6 @@
 #include "vprint_core.h"
 
+#include <_attrs.h>
 #include <ctype.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -138,7 +139,7 @@ static long long get_int_arg(format_spec_t *spec, va_list *ap)
 	case LEN_H:
 		return (short)va_arg(*ap, int);
 	case LEN_Z:
-		[[fallthrough]];
+		__FALLTHROUGH;
 	case LEN_L:
 		return va_arg(*ap, long);
 	case LEN_LL:
@@ -156,7 +157,7 @@ static unsigned long long get_uint_arg(format_spec_t *spec, va_list *ap)
 	case LEN_H:
 		return (unsigned short)va_arg(*ap, int);
 	case LEN_Z:
-		[[fallthrough]];
+		__FALLTHROUGH;
 	case LEN_L:
 		return va_arg(*ap, unsigned long);
 	case LEN_LL:

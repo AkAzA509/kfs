@@ -17,7 +17,6 @@ static void _vsnprintf_e(void *ctx, char c)
 	sc->pos++;
 }
 
-[[gnu::format(printf, 3, 0)]]
 int vsnprintf(char *restrict str, size_t size, const char *restrict fmt,
 	      va_list ap)
 {

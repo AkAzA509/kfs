@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-[[gnu::nonnull(2)]]
 int fputc(int c, FILE *stream)
 {
 	if (stream->mode == _IONBF) {

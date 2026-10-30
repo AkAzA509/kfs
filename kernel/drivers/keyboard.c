@@ -6,6 +6,7 @@
 #include <drivers/console.h>
 #include <drivers/keyboard.h>
 
+#include <_attrs.h>
 #include <stdio.h>
 
 // Single scancode
@@ -80,7 +81,7 @@ static void handle_screen_switch(u8_t code)
 }
 
 // Fake exit, to modify when the kernel has memory
-[[noreturn]]
+__NORETURN
 static void handle_exit(void)
 {
 	printf("Shuting down ...\n");

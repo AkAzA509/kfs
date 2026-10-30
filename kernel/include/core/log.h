@@ -1,6 +1,7 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include <_attrs.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -9,7 +10,7 @@
 void log_stack(size_t len);
 
 // klog() is a printf function who log on the serial port
-[[gnu::format(printf, 1, 2)]] int klog(const char *restrict fmt, ...);
+__FORMAT(printf, 1, 2) int klog(const char *restrict fmt, ...);
 
 // serial_print_hex() write on the serial port in hexadecimal format
 void serial_print_hex(u32_t val);

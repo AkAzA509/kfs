@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-[[gnu::nonnull(1)]]
 int fflush(FILE *stream)
 {
 	if (stream->buf_pos > 0) {

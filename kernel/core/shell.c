@@ -5,6 +5,7 @@
 #include <core/shell.h>
 #include <drivers/console.h>
 
+#include <_attrs.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -126,7 +127,8 @@ static void cmd_print_stack(void)
 {
 	log_stack(0);
 }
-[[noreturn]]
+
+__NORETURN
 static void cmd_shutdown(void)
 {
 	SHUTDOWN;

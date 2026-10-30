@@ -35,6 +35,10 @@ ASMFLAGS		:= -f elf32 -I.
 LD				:= ld.lld
 LDFLAGS			:= -m elf_i386 -T $(LINKER_SCRIPT) $(KERNEL_A) $(LIBC_A)
 
+ifeq ($(CC),clang)
+	CFLAGS		+= --target=i686-elf
+endif
+
 ifeq ($(DEBUG),1)
 	CPPFLAGS	+= -DDEBUG=1
 	CFLAGS		+= -g3 -O0

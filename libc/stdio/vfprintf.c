@@ -5,21 +5,24 @@
 
 typedef struct {
 	FILE *stream;
+	int failed;
 } fd_ctx_t;
 
 static void _vfprint_e(void *ctx, char c)
 {
 	fd_ctx_t *fdctx = (fd_ctx_t *)ctx;
-	fputc(c, fdctx->stream);
+	if (fputc(c, fdctx->stream) < 0)
+		fdctx->failed = 1;
 }
 
 int vfprintf(FILE *restrict stream, const char *restrict fmt, va_list ap)
 {
-	fd_ctx_t fd = { .stream = stream };
+	fd_ctx_t fd = { .stream = stream, .failed = 0 };
 	out_target_t target = { .count = 0, .ctx = &fd, .emit = _vfprint_e };
 
 	int ret = vprint_core(fmt, &ap, &target);
 
-	fflush(stream);
+	if (fflush(stream) < 0 || fd.failed)
+		return -1;
 	return ret;
 }

@@ -2,17 +2,23 @@
 
 #include <stdio.h>
 
+typedef struct {
+	int failed;
+} vprintf_ctx_t;
+
 static void _vprint_e(void *ctx, char c)
 {
-	(void)ctx;
-	putchar(c);
+	vprintf_ctx_t *vctx = ctx;
+	if (putchar(c) < 0)
+		vctx->failed = 1;
 }
 
 int vprintf(const char *restrict fmt, va_list ap)
 {
-	out_target_t target = { .emit = _vprint_e, .ctx = NULL, .count = 0 };
+	vprintf_ctx_t vctx = { .failed = 0 };
+	out_target_t target = { .emit = _vprint_e, .ctx = &vctx, .count = 0 };
 
 	int ret = vprint_core(fmt, &ap, &target);
 
-	return ret;
+	return vctx.failed ? -1 : ret;
 }

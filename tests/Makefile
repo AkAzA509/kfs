@@ -16,7 +16,7 @@ ifeq ($(KERNEL_CC),clang)
 	KERNEL_CFLAGS += --target=i686-elf
 endif
 
-KERNEL_TESTS			:= qemu gdt multiboot fpu stack layout vga tty framebuffer vfs sys-write
+KERNEL_TESTS			:= qemu gdt multiboot fpu stack layout vga tty framebuffer console vfs sys-write
 
 TEST_SOURCE_qemu		:= test_kernel.c
 TEST_SOURCE_gdt			:= test_gdt.c
@@ -27,6 +27,7 @@ TEST_SOURCE_layout		:= test_layout.c
 TEST_SOURCE_vga			:= test_vga.c
 TEST_SOURCE_tty			:= test_tty.c
 TEST_SOURCE_framebuffer	:= test_framebuffer.c
+TEST_SOURCE_console		:= test_console.c
 TEST_SOURCE_vfs			:= test_vfs.c
 TEST_SOURCE_sys-write	:= test_sys_write.c
 
@@ -39,6 +40,7 @@ TEST_EXTRA_layout		:=
 TEST_EXTRA_vga			:= vga.o memmove.o
 TEST_EXTRA_tty			:= tty.o memmove.o
 TEST_EXTRA_framebuffer	:= framebuffer.o memcpy.o memmove.o memset.o
+TEST_EXTRA_console		:= console.o memmove.o memset.o labs.o
 TEST_EXTRA_vfs			:= vfs.o
 TEST_EXTRA_sys-write	:= vfs.o write.o
 
@@ -127,6 +129,10 @@ $(BUILD_DIR)/%-test/framebuffer.o: ../kernel/drivers/framebuffer.c
 	@mkdir -p $(dir $@)
 	$(KERNEL_CC) $(KERNEL_CPPFLAGS) $(KERNEL_CFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/%-test/console.o: ../kernel/drivers/console.c
+	@mkdir -p $(dir $@)
+	$(KERNEL_CC) $(KERNEL_CPPFLAGS) $(KERNEL_CFLAGS) -c $< -o $@
+
 $(BUILD_DIR)/%-test/vfs.o: ../kernel/fs/vfs.c
 	@mkdir -p $(dir $@)
 	$(KERNEL_CC) $(KERNEL_CPPFLAGS) $(KERNEL_CFLAGS) -c $< -o $@
@@ -144,6 +150,10 @@ $(BUILD_DIR)/%-test/memmove.o: ../libc/string/memmove.c
 	$(KERNEL_CC) $(KERNEL_CPPFLAGS) $(KERNEL_CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%-test/memset.o: ../libc/string/memset.c
+	@mkdir -p $(dir $@)
+	$(KERNEL_CC) $(KERNEL_CPPFLAGS) $(KERNEL_CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/%-test/labs.o: ../libc/stdlib/labs.c
 	@mkdir -p $(dir $@)
 	$(KERNEL_CC) $(KERNEL_CPPFLAGS) $(KERNEL_CFLAGS) -c $< -o $@
 

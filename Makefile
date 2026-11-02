@@ -48,9 +48,7 @@ endif
 MAKEFLAGS		+= --no-print-directory
 
 # --- Sources & Objects ---
-# LIBC_SRCS_C		:= $(shell find libc -type f -name '*.c' 2>/dev/null)
-LIBC_SRCS_C		:= $(filter-out libc/stdlib/%, $(shell find libc -type f -name '*.c' 2>/dev/null)) \
-				libc/stdlib/labs.c
+LIBC_SRCS_C		:= $(shell find libc -type f -name '*.c' 2>/dev/null)
 KERNEL_SRCS_C	:= $(shell find kernel -type f -name '*.c' 2>/dev/null)
 KERNEL_SRCS_S	:= $(shell find kernel -type f -name '*.s' 2>/dev/null)
 

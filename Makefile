@@ -67,7 +67,7 @@ GREEN			:= \033[1;32m
 RESET			:= \33[0m
 
 help:
-	@printf "$(WHITE)Here is a list of all the make command available with this project:\n\n \
+	@printf "$(WHITE)Here is a list of all the make command available with this project:\n \
 	$(GREEN)\n --- Release --- \n$(WHITE) \
 	all                compile and link the project\n \
 	libc               compile the libc sources\n \
@@ -90,6 +90,8 @@ help:
 	lint               use the clang-tidy linter for debugging purpose\n \
 	$(GREEN)\n --- Testing --- \n$(WHITE) \
 	test               compile and launch the test suite\n \
+	test-libc          compile and launch the libc test suite\n \
+	test-kernel        compile and launch the kernel test suite\n \
 	$(GREEN)\n --- Cleaning --- \n$(WHITE) \
 	clean              delete the objects file\n \
 	fclean             call \`make clean\` + delete the binaries\n \
@@ -191,16 +193,22 @@ lint:
 	clang-tidy -p . $(KERNEL_SRCS_C) $(LIBC_SRCS_C)
 
 # --- Tests ---
-.PHONY: test
+.PHONY: test test-libc test-kernel
 
 test:
-	@if [ -d tests ]; then $(MAKE) -C tests; fi
+	$(MAKE) -C tests
+
+test-libc:
+	$(MAKE) -C tests libc
+
+test-kernel:
+	$(MAKE) -C tests test-kernel
 
 # --- Cleaning ---
 .PHONY: clean fclean re
 
 clean:
-	@if [ -d tests ]; then $(MAKE) -C tests clean; fi
+	@$(MAKE) -C tests clean
 	$(RM) objs objs_debug
 
 fclean: clean

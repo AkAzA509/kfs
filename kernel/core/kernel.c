@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 
+#ifndef TEST
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
 #error "You are not using a cross-compiler, you will most certainly run into trouble"
@@ -18,6 +19,7 @@
 #if !defined(__i386__)
 #error "This code needs to be compiled with a ix86-elf compiler"
 #endif
+#endif // TEST
 
 #define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
 

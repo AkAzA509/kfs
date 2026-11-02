@@ -202,7 +202,7 @@ test-libc:
 	$(MAKE) -C tests libc
 
 test-kernel:
-	$(MAKE) -C tests test-kernel
+	$(MAKE) -C tests kernel
 
 # --- Cleaning ---
 .PHONY: clean fclean re

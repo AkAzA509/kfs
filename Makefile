@@ -75,7 +75,7 @@ help:
 	libc               compile the libc sources\n \
 	kernel             compile the kernel sources\n \
 	$(GREEN)\n --- Exec / Utility --- \n$(WHITE) \
-	compile_commands   call \`make re\` with bear to generate a compile_command.json for the lsp\n \
+	compile-commands   call \`make re\` with bear to generate a compile_command.json for the lsp\n \
 	up                 equivalent to \`make\` + bootstrap the iso and launch with qemu\n \
 	dev                equivalent to \`make\` and launch with qemu\n \
 	help               display this help list\n \
@@ -147,9 +147,9 @@ $(ISO_NAME): $(BIN_NAME) $(GRUB_CFG)
 	@grub-mkrescue -o $@ $(ISO_DIR)
 
 # --- Execution & Utility ---
-.PHONY: up dev compile_commands
+.PHONY: up dev compile-commands
 
-compile_commands:
+compile-commands:
 	bear -- $(MAKE) re
 
 up: $(ISO_NAME)

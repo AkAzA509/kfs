@@ -21,5 +21,11 @@ jobs:
              sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 100
              sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-15 100
 
-      - name: Run tests
-        run: make test
+      - name: Install kernel test dependencies
+        run: sudo apt install -y clang lld nasm grub-pc-bin grub-common xorriso qemu-system-x86
+
+      - name: Run libc tests
+        run: make test-libc
+
+      - name: Run kernel tests
+        run: make KERNEL_CC=clang test-kernel

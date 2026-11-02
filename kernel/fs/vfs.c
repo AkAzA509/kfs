@@ -32,6 +32,6 @@ void init_vfs(void)
 	add_fd_entry(2, FD_TYPE_SERIAL, O_WRONLY); // stderr
 
 	for (u8_t i = 0; i < MAX_SCREENS; ++i) {
-		add_fd_entry(i, FD_TYPE_CONSOLE, O_WRONLY);
+		add_fd_entry(i + 3, FD_TYPE_CONSOLE, O_WRONLY);
 	}
 }

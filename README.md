@@ -13,7 +13,8 @@
 (GDT, framebuffer, drivers, memory management, ...) of a kernel, part by part.
 
 <p align="center">
-  <img src="asset/homescreen.png" alt="home_screenshot" width=auto>
+	<img src="asset/homescreen.png" alt="home_screenshot" width=auto>
+  <img src="asset/pstack_command.png" alt="home_screenshot" width=auto>
 </p>
 
 ## Project structure

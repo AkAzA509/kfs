@@ -22,7 +22,7 @@ jobs:
              sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-15 100
 
       - name: Install kernel test dependencies
-        run: sudo apt install -y clang lld nasm grub-pc-bin grub-common xorriso qemu-system-x86
+        run: sudo apt install -y clang lld nasm mtools grub-pc-bin grub-common xorriso qemu-system-x86
 
       - name: Run libc tests
         run: make test-libc

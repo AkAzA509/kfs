@@ -9,4 +9,4 @@ void test_serial_init(void);
 void test_serial_puts(const char *value);
 __attribute__((noreturn)) void test_exit(u8_t code);
 
-#endif
+#endif // TEST_SUPPORT_H

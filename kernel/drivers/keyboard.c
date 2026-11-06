@@ -223,7 +223,7 @@ static void read_scancode(u8_t scancode)
 {
 #ifdef DEBUG
 	// serial_print_hex(scancode);
-#endif
+#endif // DEBUG
 	if (scancode == EXTEND_CODE || scancode == LEFT_CTRL) {
 		extended_pending = true;
 		return;

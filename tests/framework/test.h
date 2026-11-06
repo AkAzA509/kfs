@@ -77,4 +77,4 @@ int test_run(const struct test_case *tests, size_t count);
 		}                                                    \
 	} while (0)
 
-#endif
+#endif // TEST_H

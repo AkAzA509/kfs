@@ -171,13 +171,15 @@ typedef struct t_multiboot_info {
 	u8_t framebuffer_bpp;
 #define MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED 0
 #define MULTIBOOT_FRAMEBUFFER_TYPE_RGB 1
-#define MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT 2
+#define MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT 2 // like vga
 	u8_t framebuffer_type;
 	union {
+		// Indexed mode
 		struct {
 			u32_t framebuffer_palette_addr;
 			u16_t framebuffer_palette_num_colors;
 		};
+		// RGB mode
 		struct {
 			u8_t framebuffer_red_field_position;
 			u8_t framebuffer_red_mask_size;
@@ -189,6 +191,7 @@ typedef struct t_multiboot_info {
 	};
 } multiboot_info;
 
+// Only if the framebuffer is set to indexed mode: MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED
 struct multiboot_color {
 	u8_t red;
 	u8_t green;

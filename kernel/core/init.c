@@ -17,7 +17,7 @@ t_screen_data g_screens[MAX_SCREENS];
 static u32_t g_fb_back_buffer[FB_MAX_WIDTH * FB_MAX_HEIGHT];
 
 // #define DEBUG
-#ifdef DEBUG
+// #ifdef DEBUG
 void debug_current_screen(void)
 {
 	klog("current_screen debug:\n");
@@ -39,6 +39,17 @@ void debug_screen(void)
 	klog("\tbpp      : %d\n", g_screen.bpp);
 	klog("\ttotal_row: %d\n", g_screen.total_rows);
 	klog("\ttotal_col: %d\n", g_screen.total_cols);
+
+	printf("g_screen debug:\n");
+	printf("\tmode     : %s\n", g_screen.mode == 1 ? "vga" : "framebuffer");
+	printf("\tbuf addr : %p\n", g_screen.buf);
+	printf("\tback addr: %p\n", g_screen.back_buf);
+	printf("\twidth    : %d\n", g_screen.width);
+	printf("\theight   : %d\n", g_screen.height);
+	printf("\tpitch    : %d\n", g_screen.pitch);
+	printf("\tbpp      : %d\n", g_screen.bpp);
+	printf("\ttotal_row: %d\n", g_screen.total_rows);
+	printf("\ttotal_col: %d\n", g_screen.total_cols);
 }
 
 void debug_font(void)
@@ -51,7 +62,7 @@ void debug_font(void)
 	klog("\tunicode    : %s\n", font_info.unicode ? "true" : "false");
 	klog("\twidth      : %d\n", font_info.width);
 }
-#endif // DEBUG
+// #endif // DEBUG
 
 static void init_vga_console(void)
 {

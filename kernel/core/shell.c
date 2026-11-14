@@ -1,5 +1,6 @@
 #include <arch/i386/gdt.h>
 #include <core/common.h>
+#include <core/init.h>
 #include <core/io.h>
 #include <core/log.h>
 #include <core/shell.h>
@@ -146,6 +147,11 @@ static void cmd_print_gdt(void)
 {
 	print_gdt();
 }
+
+static void cmd_print_screen(void)
+{
+	debug_screen();
+}
 static void cmd_help(void)
 {
 	printf("here is a list of the command available on this shell\n\n");
@@ -154,6 +160,7 @@ static void cmd_help(void)
 	printf("halt               halt the cpu and lock it (for now)\n");
 	printf("plogo              print the kernel boot logo\n");
 	printf("pgdt               print the gdt base address\n");
+	printf("pscreen            print the g_screen info\n");
 	printf("pstack <val>       print the kernel stack, by default all the stack is displayed\n");
 	printf("                   add a positive val to chose the number of element displayed\n");
 	printf("date               display the current date in UTC+2 format\n");
@@ -162,14 +169,14 @@ static void cmd_help(void)
 }
 
 static const char *cmd_table[] = {
-	"reboot", "halt", "plogo", "pstack", "shutdown",
-	"date",	  "help", "clear", "pgdt",   NULL,
+	"reboot", "halt",  "plogo", "pstack",  "shutdown", "date",
+	"help",	  "clear", "pgdt",  "pscreen", NULL,
 };
 
 typedef void (*cmd_handler_t)(void);
 static const cmd_handler_t cmd_handlers[] = {
 	cmd_reboot, cmd_halt, cmd_print_logo, cmd_print_stack, cmd_shutdown,
-	cmd_date,   cmd_help, cmd_clear,      cmd_print_gdt,
+	cmd_date,   cmd_help, cmd_clear,      cmd_print_gdt,   cmd_print_screen,
 };
 
 void shell_execute(char *input)

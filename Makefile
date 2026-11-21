@@ -186,7 +186,7 @@ debug-re: fclean debug-up
 .PHONY: format lint
 
 format:
-	clang-format -i $(KERNEL_SRCS_C) $(LIBC_SRCS_C)
+	clang-format -i $(KERNEL_SRCS_C) $(LIBC_SRCS_C) $(shell find libc -type f -name '*.h' 2>/dev/null) $(shell find kernel -type f -name '*.h' 2>/dev/null)
 	$(MAKE) -C tests format
 
 lint:

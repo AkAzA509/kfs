@@ -59,8 +59,8 @@ __NONNULL(1) int fprintf(FILE *restrict stream, const char *restrict fmt, ...);
 // called with a va_list instance instead of a variable number of
 // arguments.
 __FORMAT(printf, 2, 0)
-__NONNULL(1) int vfprintf(FILE *restrict stream, const char *restrict fmt,
-			  va_list ap);
+__NONNULL(1)
+int vfprintf(FILE *restrict stream, const char *restrict fmt, va_list ap);
 
 // The dprintf() function produces output according to format, writing
 // directly to the file descriptor fd instead of a buffered FILE stream.
@@ -84,8 +84,8 @@ __NONNULL(1) int sprintf(char *restrict str, const char *restrict fmt, ...);
 // called with a va_list instance instead of a variable number of
 // arguments.
 __FORMAT(printf, 2, 0)
-__NONNULL(1) int vsprintf(char *restrict str, const char *restrict fmt,
-			  va_list ap);
+__NONNULL(1)
+int vsprintf(char *restrict str, const char *restrict fmt, va_list ap);
 
 // The snprintf() function produces output according to format, writing at
 // most size - 1 characters into str, followed by a terminating null byte.

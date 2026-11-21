@@ -2,8 +2,8 @@
 #define CONSOLE_H
 
 #include <core/init.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 // typedef enum e_color t_color;
 

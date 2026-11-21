@@ -1,16 +1,6 @@
-#include <arch/i386/gdt.h>
-#include <core/common.h>
-#include <core/init.h>
 #include <core/io.h>
-#include <core/log.h>
-#include <core/shell.h>
-#include <drivers/console.h>
-#include <drivers/keyboard.h>
 
-#include <_attrs.h>
-#include <stddef.h>
 #include <stdio.h>
-#include <string.h>
 
 #define CURRENT_YEAR 2026
 
@@ -112,98 +102,12 @@ static void read_rtc()
 	       (hour + 2) % 24, minute);
 }
 
-static void cmd_reboot(void)
+int date(int argc, char **argv)
 {
-	REBOOT
-}
-static void cmd_halt(void)
-{
-	__asm__ volatile("cli");
-	HALT_ERROR;
-}
-static void cmd_print_logo(void)
-{
-	ASCII_LOGO;
-}
-static void cmd_print_stack(void)
-{
-	log_stack(0);
-}
+	(void)argc;
+	(void)argv;
 
-__NORETURN
-static void cmd_shutdown(void)
-{
-	SHUTDOWN;
-	HALT_ERROR;
-}
-static void cmd_date(void)
-{
 	read_rtc();
-}
-static void cmd_clear(void)
-{
-	screen_clear(&g_screens[current_screen]);
-}
-static void cmd_print_gdt(void)
-{
-	print_gdt();
-}
 
-static void cmd_print_screen(void)
-{
-	debug_screen();
-}
-
-static void cmd_change_lay(void)
-{
-	change_layout("azerty");
-}
-
-static void cmd_help(void)
-{
-	printf("here is a list of the command available on this shell\n\n");
-	printf("reboot             reboot the os\n");
-	printf("shutdown           shutdown the os\n");
-	printf("halt               halt the cpu and lock it (for now)\n");
-	printf("plogo              print the kernel boot logo\n");
-	printf("pgdt               print the gdt base address\n");
-	printf("pscreen            print the g_screen info\n");
-	printf("pstack <val>       print the kernel stack, by default all the stack is displayed\n");
-	printf("                   add a positive val to chose the number of element displayed\n");
-	printf("date               display the current date in UTC+2 format\n");
-	printf("help               display this informations\n");
-	printf("clear              clear the current screen\n");
-}
-
-static const char *cmd_table[] = {
-	"reboot", "halt",  "plogo", "pstack",  "shutdown",   "date",
-	"help",	  "clear", "pgdt",  "pscreen", "change_lay", NULL,
-};
-
-typedef void (*cmd_handler_t)(void);
-static const cmd_handler_t cmd_handlers[] = {
-	cmd_reboot,    cmd_halt,	 cmd_print_logo, cmd_print_stack,
-	cmd_shutdown,  cmd_date,	 cmd_help,	 cmd_clear,
-	cmd_print_gdt, cmd_print_screen, cmd_change_lay,
-};
-
-void shell_execute(char *input)
-{
-	const char *trim_input = trim(input);
-	size_t len = strlen(trim_input);
-	if (len <= 0)
-		return;
-	for (u16_t i = 0; cmd_table[i]; i++) {
-		if (strncmp(trim_input, cmd_table[i], len) == 0 &&
-		    strlen(cmd_table[i]) == len) {
-			cmd_handlers[i]();
-			return;
-		}
-	}
-	printf("commande not found: %.*s\n", (int)len, trim_input);
-}
-
-void print_prompt(void)
-{
-	printf("Tekos/root > ");
+	return 0;
 }

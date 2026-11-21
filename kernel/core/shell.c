@@ -5,6 +5,7 @@
 #include <core/log.h>
 #include <core/shell.h>
 #include <drivers/console.h>
+#include <drivers/keyboard.h>
 
 #include <_attrs.h>
 #include <stddef.h>
@@ -152,6 +153,12 @@ static void cmd_print_screen(void)
 {
 	debug_screen();
 }
+
+static void cmd_change_lay(void)
+{
+	change_layout("azerty");
+}
+
 static void cmd_help(void)
 {
 	printf("here is a list of the command available on this shell\n\n");
@@ -169,14 +176,15 @@ static void cmd_help(void)
 }
 
 static const char *cmd_table[] = {
-	"reboot", "halt",  "plogo", "pstack",  "shutdown", "date",
-	"help",	  "clear", "pgdt",  "pscreen", NULL,
+	"reboot", "halt",  "plogo", "pstack",  "shutdown",   "date",
+	"help",	  "clear", "pgdt",  "pscreen", "change_lay", NULL,
 };
 
 typedef void (*cmd_handler_t)(void);
 static const cmd_handler_t cmd_handlers[] = {
-	cmd_reboot, cmd_halt, cmd_print_logo, cmd_print_stack, cmd_shutdown,
-	cmd_date,   cmd_help, cmd_clear,      cmd_print_gdt,   cmd_print_screen,
+	cmd_reboot,    cmd_halt,	 cmd_print_logo, cmd_print_stack,
+	cmd_shutdown,  cmd_date,	 cmd_help,	 cmd_clear,
+	cmd_print_gdt, cmd_print_screen, cmd_change_lay,
 };
 
 void shell_execute(char *input)

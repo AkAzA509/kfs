@@ -16,6 +16,10 @@ __PURE int abs(int x);
 // the argument x of the appropriate unsigned long long type for the function.
 __PURE unsigned long long ullabs(long long x);
 
+// The atoi() function converts the initial portion of the string pointed
+// to by str to int.
+int atoi(const char *str);
+
 // The malloc() function allocates size bytes and returns a pointer to
 // the allocated memory. The memory is not initialized. If size is 0,
 // then malloc() returns NULL.

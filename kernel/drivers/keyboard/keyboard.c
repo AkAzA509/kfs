@@ -9,6 +9,8 @@
 #include <_attrs.h>
 #include <stdio.h>
 
+#include "_keyboard.h"
+
 // Single scancode
 #define LEFT_SHIFT 0x2A
 #define RIGHT_SHIFT 0x36
@@ -33,28 +35,6 @@
 
 #define PAGE_UP 0x49
 #define PAGE_DOWN 0x51
-
-// clang-format off
-static const char keycode[] = {
-	0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',	// 0x00-0x0E (0x01 = escape)
-	'\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',	// 0x0F-0x1C
-	0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',			// 0x1D-0x29
-	0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0,			// 0x2A-0x36
-	'*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,							// 0x37-0x44 (* numpad, left alt, space, capslock, f1 to f10)
-	0, 0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.',	// 0x45-53 (number lock, scrolllock)
-	0, 0, 0, 0, 0															// 0x54 to 0x56 empty 0x57-0x58 (f11, f12)
-};
-
-static const char keycode_shift[] = {
-	0, 0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',	// 0x00-0x0E
-	'\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',	// 0x0F-0x1C
-	0, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~',			// 0x1D-0x29
-	0, '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', 0,			// 0x2A-0x36
-	'*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,							// 0x37-0x44 (* numpad, left alt, space, capslock, f1 to f10)
-	0, 0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.',	// 0x45-53 (number lock, scrolllock)
-	0, 0, 0, 0, 0															// 0x54 to 0x56 empty 0x57-0x58 (f11, f12)
-};
-// clang-format on
 
 static bool shift = false;
 static bool caps_lock = false;
@@ -204,14 +184,14 @@ static bool handle_single_key(u8_t code, bool is_release)
 
 static void print_code(u8_t code)
 {
-	char val = keycode[code];
+	char val = layout_lower[code];
 	if (!val)
 		return;
 
 	if ((caps_lock && shift && (val < 'a' || val > 'z')) ||
 	    (caps_lock && !shift && val >= 'a' && val <= 'z') ||
 	    (shift && !caps_lock))
-		val = keycode_shift[code];
+		val = layout_upper[code];
 
 	t_screen_data *s = &g_screens[current_screen];
 	if (!line_visible(s, s->head))
